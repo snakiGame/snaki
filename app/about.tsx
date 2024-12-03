@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, Image, ScrollView } from 'react-native';
 import React from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
+import { Colors } from '@/src/styles/colors';
 
 export default function About() {
   return (
@@ -8,6 +10,8 @@ export default function About() {
       colors={['#f0f0f0', '#ffffff']} // Soft white gradient for a clean, modern look
       style={styles.container}
     >
+
+        <StatusBar barStyle="dark-content" backgroundColor="#000" />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Profile and Title Section */}
         <View style={styles.profileContainer}>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -21,11 +21,11 @@ const HomePage: React.FC = () => {
         <Text style={styles.title}>Welcome to Snaki!</Text>
         <Text style={styles.subtitle}>The Classic Snake Game Reimagined</Text>
         
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/play')}>
-          <Text style={styles.buttonText}>Play Now</Text>
+        <TouchableOpacity style={styles.playButton} onPress={() => router.push('/play')}>
+          <Text style={styles.playButtonText}>Play Now</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={() => router.push('/about')}>
-          <Text style={styles.buttonText}>Credits</Text>
+        <TouchableOpacity style={styles.creditsButton} onPress={() => router.push('/about')}>
+          <Text style={styles.creditsButtonText}>Credits</Text>
         </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
@@ -66,21 +66,38 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     letterSpacing: 1, // Consistent with the title
   },
-  button: {
-    backgroundColor: '#000000', // Black button
-    paddingVertical: 18,
-    paddingHorizontal: 50,
-    borderRadius: 25,
+  playButton: {
+    backgroundColor: '#1a1a1a', // Darker button for play
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 0,
+    marginBottom: 20,
     shadowColor: '#000', // Add shadow for better visual depth
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8, // For Android shadow
-    marginTop: 20,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 10, // For Android shadow
   },
-  buttonText: {
+  playButtonText: {
     fontSize: 20,
     color: '#ffffff', // White text for contrast
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  creditsButton: {
+    backgroundColor: '#a9b8a9', // Bright color for credits
+    paddingVertical: 16,
+    paddingHorizontal: 60,
+    borderRadius: 0,
+    shadowColor: '#000', // Add shadow for better visual depth
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 10, // For Android shadow
+  },
+  creditsButtonText: {
+    fontSize: 20,
+    color: '#000000', // Black text for contrast
     fontWeight: 'bold',
     textAlign: 'center',
   },

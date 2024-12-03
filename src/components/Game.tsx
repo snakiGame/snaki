@@ -24,7 +24,7 @@ const GAME_BOUNDS = {
   yMax: 63 
 };
 const MOVE_INTERVAL = 50;
-const SCORE_INCREMENT = 5;
+const SCORE_INCREMENT = 2;
 
 export default function Game(): JSX.Element {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
@@ -35,11 +35,18 @@ export default function Game(): JSX.Element {
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [ sound , setSound ] = useState<Audio.Sound | null>(null)
 
+  const [currentBgMusic, setCurrentBgMusic ] = useState("bg-music1.mp3")
+  const bgMusics = [
+    "../../assets/music/bg-music1.mp3",
+    "../../assets/music/bg-music2.mp3",
+    "../../assets/music/stranger-things.mp3",
+  ]
+
 
   useEffect(() => {
     if (!isGameOver) {
       const intervalId = setInterval(() => {
-        // playSound()
+        // backgroundMusic()
         !isPaused && moveSnake();
       }, MOVE_INTERVAL);
       return () => clearInterval(intervalId);
@@ -47,18 +54,34 @@ export default function Game(): JSX.Element {
   }, [snake, isGameOver, isPaused]);
 
   useEffect(()=>{
-    playSound()
+    let rand_bg_music_index = Math.floor(Math.random() * bgMusics.length)
+    setCurrentBgMusic(bgMusics[rand_bg_music_index])
+    backgroundMusic()
   },[])
 
-  const playSound = async () =>{
+  const backgroundMusic = async () =>{
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/music/stranger-things.mp3'), 
+      require("../../assets/music/bg-music1.mp3"), 
+      //bg-music1.mp3
+      //bg-music2.mp3
       { shouldPlay: true, isLooping: true }
     );
     setSound(sound);
     // Playing the sound
     await sound.setVolumeAsync(0.25);
     await sound.playAsync();
+
+  }
+  const pickSound = async ()=>{
+    Vibration.vibrate(30)
+    // const { sound } = await Audio.Sound.createAsync(
+    //   require('../../assets/music/pick.mp3'), 
+    //   { shouldPlay: true, isLooping: true }
+    // );
+    // setSound(sound);
+    // // Playing the sound
+    // await sound.setVolumeAsync(0.5);
+    // await sound.playAsync();
 
   }
   useEffect(() => {
@@ -112,6 +135,7 @@ export default function Game(): JSX.Element {
     if (checkEatsFood(newHead, food, 2)) {
       setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
       setSnake([newHead, ...snake]);
+      pickSound()
       setScore(score + SCORE_INCREMENT);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
