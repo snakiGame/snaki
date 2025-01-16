@@ -7,7 +7,7 @@ import { Colors } from '@/src/styles/colors';
 export default function About() {
   return (
     <LinearGradient
-      colors={['#f0f0f0', '#ffffff']} // Soft white gradient for a clean, modern look
+      colors={['#f0f0f0', '#ffffff']} 
       style={styles.container}
     >
 

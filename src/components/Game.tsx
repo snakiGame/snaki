@@ -11,8 +11,6 @@ import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
 import Snake from "./Snake";
-// import EkiliRelay from "ekilirelay";
-// import ekilirelay from '../utils/ekilirelay';
 
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
@@ -207,8 +205,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: Colors.primary,
     borderWidth: 12,
-    borderBottomLeftRadius: 25,
-    borderBottomRightRadius: 25,
+    borderRadius: 25,
     backgroundColor: Colors.background,
   },
 });
