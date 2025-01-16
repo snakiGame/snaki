@@ -48,56 +48,56 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     marginBottom: 30,
-    resizeMode: 'contain', // Keep the logo aspect ratio
+    resizeMode: 'contain', 
   },
   title: {
     fontSize: 38,
-    color: '#000000', // Black text for high contrast
+    color: '#000000',
     fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 10,
-    letterSpacing: 1.5, // Add some spacing for elegance
+    letterSpacing: 1.5,
   },
   subtitle: {
     fontSize: 20,
-    color: '#555555', // Gray text for subtle contrast
+    color: '#555555',
     textAlign: 'center',
     marginBottom: 40,
     fontWeight: '300',
-    letterSpacing: 1, // Consistent with the title
+    letterSpacing: 1,
   },
   playButton: {
-    backgroundColor: '#1a1a1a', // Darker button for play
+    backgroundColor: '#1a1a1a',
     paddingVertical: 16,
     paddingHorizontal: 60,
     borderRadius: 0,
     marginBottom: 20,
-    shadowColor: '#000', // Add shadow for better visual depth
+    shadowColor: '#000', 
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
-    elevation: 10, // For Android shadow
+    elevation: 10, 
   },
   playButtonText: {
     fontSize: 20,
-    color: '#ffffff', // White text for contrast
+    color: '#ffffff', 
     fontWeight: 'bold',
     textAlign: 'center',
   },
   creditsButton: {
-    backgroundColor: '#a9b8a9', // Bright color for credits
+    backgroundColor: '#a9b8a9', 
     paddingVertical: 16,
     paddingHorizontal: 60,
     borderRadius: 0,
-    shadowColor: '#000', // Add shadow for better visual depth
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
     shadowRadius: 10,
-    elevation: 10, // For Android shadow
+    elevation: 10, 
   },
   creditsButtonText: {
     fontSize: 20,
-    color: '#000000', // Black text for contrast
+    color: '#000000', 
     fontWeight: 'bold',
     textAlign: 'center',
   },
