@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'r
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Colors } from '@/src/styles/colors'; // Assuming this is your custom color file
+import { Colors } from '@/src/styles/colors'; 
 
 const HomePage: React.FC = () => {
   const router = useRouter();
 
   return (
     <LinearGradient
-      colors={['#ffffff', '#f0f0f0']} // Light gradient background for depth
+      colors={['#ffffff', '#f0f0f0']} 
       style={styles.container}
     >
       <SafeAreaView style={styles.content}>
