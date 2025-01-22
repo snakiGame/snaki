@@ -19,7 +19,7 @@ const GAME_BOUNDS = {
   xMin: 0, 
   xMax: 35, 
   yMin: 0, 
-  yMax: 63 
+  yMax: 62 
 };
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 2;
@@ -94,7 +94,7 @@ export default function Game(): JSX.Element {
 
   const moveSnake = () => {
     const snakeHead = snake[0];
-    const newHead = { ...snakeHead }; // create a new head object to avoid mutating the original head
+    const newHead = { ...snakeHead }; // creating a new head object to avoid mutating the original head
 
     //playing the sound
     // GAME OVER
