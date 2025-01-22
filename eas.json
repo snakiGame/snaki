@@ -2,6 +2,7 @@
     "build": {
       "preview": {
         "android": {
+          "pnpm":"9.15.2",
           "buildType": "apk"
         }
       },
