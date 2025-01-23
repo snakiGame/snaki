@@ -19,6 +19,9 @@ export default function Header({
   return (
     <View style={styles.container}>
       <View style={styles.controls}>
+        <TouchableOpacity onPress={reloadGame} style={styles.settings}>
+          <Ionicons name="settings-sharp" size={35} color={Colors.primary} />
+        </TouchableOpacity>
         <TouchableOpacity onPress={reloadGame}>
           <Ionicons name="reload-circle" size={35} color={Colors.primary} />
         </TouchableOpacity>
@@ -56,5 +59,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap:6
+  },
+  settings:{
+    backgroundColor:Colors.accents,
+    borderRadius:10,
+    padding:2
   }
 });
