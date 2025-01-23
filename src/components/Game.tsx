@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { SafeAreaView, StyleSheet, View, StatusBar, Alert, BackHandler, Vibration } from "react-native";
+import {
+  SafeAreaView,
+  StyleSheet,
+  View,
+  StatusBar,
+  Alert,
+  BackHandler,
+  Vibration,
+} from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
 import { Direction, Coordinate, GestureEventType } from "../types/types";
@@ -11,16 +19,15 @@ import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
 import Snake from "./Snake";
-import { settings_backgroundMusic } from "@/lib/settings";
-
+import { settings_Vibration, settings_backgroundMusic } from "@/lib/settings";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
-const GAME_BOUNDS = { 
-  xMin: 0, 
-  xMax: 35, 
-  yMin: 0, 
-  yMax: 63 
+const GAME_BOUNDS = {
+  xMin: 0,
+  xMax: 35,
+  yMin: 0,
+  yMax: 63,
 };
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 2;
@@ -32,15 +39,14 @@ export default function Game(): JSX.Element {
   const [score, setScore] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [ sound , setSound ] = useState<Audio.Sound | null>(null)
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
 
-  const [currentBgMusic, setCurrentBgMusic ] = useState("bg-music1.mp3")
+  const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
     "../../assets/music/bg-music1.mp3",
     "../../assets/music/bg-music2.mp3",
     "../../assets/music/stranger-things.mp3",
-  ]
-
+  ];
 
   useEffect(() => {
     if (!isGameOver) {
@@ -52,40 +58,33 @@ export default function Game(): JSX.Element {
     }
   }, [snake, isGameOver, isPaused]);
 
-  useEffect(()=>{
-    let rand_bg_music_index = Math.floor(Math.random() * bgMusics.length)
-    setCurrentBgMusic(bgMusics[rand_bg_music_index])
-    backgroundMusic()
-  },[])
+  useEffect(() => {
+    let rand_bg_music_index = Math.floor(Math.random() * bgMusics.length);
+    setCurrentBgMusic(bgMusics[rand_bg_music_index]);
+    backgroundMusic();
+  }, []);
 
-  const backgroundMusic = async () =>{
-    if(!settings_backgroundMusic()){
-      return
+  const backgroundMusic = async () => {
+    if (!settings_backgroundMusic()) {
+      return;
     }
     const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/music/bg-music1.mp3"), 
+      require("../../assets/music/bg-music1.mp3"),
       //bg-music1.mp3
       //bg-music2.mp3
-      { shouldPlay: true, isLooping: true }
+      { shouldPlay: true, isLooping: true },
     );
     setSound(sound);
     // Playing the sound
     await sound.setVolumeAsync(0.25);
     await sound.playAsync();
-
-  }
-  const pickSound = async ()=>{
-    Vibration.vibrate(30)
-    // const { sound } = await Audio.Sound.createAsync(
-    //   require('../../assets/music/pick.mp3'), 
-    //   { shouldPlay: true, isLooping: true }
-    // );
-    // setSound(sound);
-    // // Playing the sound
-    // await sound.setVolumeAsync(0.5);
-    // await sound.playAsync();
-
-  }
+  };
+  const vibrate = async (length: number) => {
+    if(!settings_Vibration()){
+      return
+    }
+    Vibration.vibrate(length);
+  };
   useEffect(() => {
     // Clean up the sound on unmount
     return sound
@@ -95,7 +94,6 @@ export default function Game(): JSX.Element {
       : undefined;
   }, [sound]);
 
-
   const moveSnake = () => {
     const snakeHead = snake[0];
     const newHead = { ...snakeHead }; // creating a new head object to avoid mutating the original head
@@ -103,17 +101,12 @@ export default function Game(): JSX.Element {
     //playing the sound
     // GAME OVER
     if (checkGameOver(snakeHead, GAME_BOUNDS)) {
-      
       setIsGameOver((prev) => !prev);
-      Vibration.vibrate(300)
-      Alert.alert(
-        "Game Over",
-        "You have hit a wall",
-        [
-          { text: 'exit', style: 'cancel', onPress: () => BackHandler.exitApp() },
-          { text: 'Play again', onPress: () => reloadGame() }
-        ]
-      )
+      vibrate(300);
+      Alert.alert("Game Over", "You have hit a wall", [
+        { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
+        { text: "Play again", onPress: () => reloadGame() },
+      ]);
       return;
     }
 
@@ -137,7 +130,7 @@ export default function Game(): JSX.Element {
     if (checkEatsFood(newHead, food, 2)) {
       setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
       setSnake([newHead, ...snake]);
-      pickSound()
+      vibrate(30);
       setScore(score + SCORE_INCREMENT);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
@@ -171,7 +164,7 @@ export default function Game(): JSX.Element {
   };
 
   const pauseGame = () => {
-    console.log("Game paused")
+    console.log("Game paused");
     setIsPaused(!isPaused);
   };
 
@@ -181,8 +174,8 @@ export default function Game(): JSX.Element {
     <PanGestureHandler onGestureEvent={handleGesture}>
       <SafeAreaView style={styles.container}>
         <StatusBar
-        barStyle={"light-content"}
-        backgroundColor={Colors.primary}
+          barStyle={"light-content"}
+          backgroundColor={Colors.primary}
         />
         <Header
           reloadGame={reloadGame}
@@ -202,7 +195,7 @@ export default function Game(): JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop:12,
+    marginTop: 12,
     flex: 1,
     backgroundColor: Colors.primary,
   },
