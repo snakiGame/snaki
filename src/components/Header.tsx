@@ -21,8 +21,7 @@ export default function Header({
   
   const pauseGameThemPushToSettings = ()=>{//Pauses the game the pushs to settings page
     pauseGame()
-    
-    router.push("/settings")
+    router.replace("/settings")
   }
   
   return (

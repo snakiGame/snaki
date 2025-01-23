@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/icon_small.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.tach.snaki"
