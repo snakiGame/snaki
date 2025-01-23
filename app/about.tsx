@@ -11,6 +11,7 @@ import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons"; // Importing icons from Expo's icon library
+import { Colors } from "@/src/styles/colors";
 
 export default function About() {
   return (
@@ -50,7 +51,7 @@ export default function About() {
           <TouchableOpacity
             style={[styles.button, styles.coffeeButton]}
             onPress={() =>
-              Linking.openURL("https://www.buymeacoffee.com/your-profile")
+              Linking.openURL("https://buymeacoffee.com/xjwsjbtyfd")
             }
           >
             <Ionicons
@@ -161,7 +162,6 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   inspirationalContainer: {
-    marginTop: 30,
     paddingHorizontal: 15,
     borderLeftWidth: 4,
     borderColor: "#222222",
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   coffeeButton: {
-    backgroundColor: "#FF8C00",
+    backgroundColor: Colors.accents,
   },
   icon: {
     marginRight: 8,
