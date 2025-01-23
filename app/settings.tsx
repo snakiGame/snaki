@@ -19,9 +19,9 @@ export default function Settings() {
       <Text style={styles.sectionHeader}>Preferences</Text>
       <View style={styles.optionContainer}>
         <View style={styles.section}>
-          <Text style={styles.settingTitle}>Game Sound</Text>
+          <Text style={styles.settingTitle}>Background Music</Text>
           <View style={styles.settingRow}>
-            <Text style={styles.settingText}>Enable sound effects</Text>
+            <Text style={styles.settingText}>Enable background music</Text>
             <Switch
               value={soundEnabled}
               onValueChange={() => setSoundEnabled((prev) => !prev)}

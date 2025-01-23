@@ -167,6 +167,7 @@ export default function Game(): JSX.Element {
   };
 
   const pauseGame = () => {
+    console.log("Game paused")
     setIsPaused(!isPaused);
   };
 
