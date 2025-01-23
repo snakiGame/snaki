@@ -2,6 +2,7 @@ import { TouchableOpacity, StyleSheet, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../styles/colors";
 import { FontAwesome } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface HeaderProps {
   reloadGame: () => void;
@@ -16,10 +17,14 @@ export default function Header({
   pauseGame,
   isPaused,
 }: HeaderProps): JSX.Element {
+  const router = useRouter();
   return (
     <View style={styles.container}>
       <View style={styles.controls}>
-        <TouchableOpacity onPress={reloadGame} style={styles.settings}>
+        <TouchableOpacity
+          style={styles.settings}
+          onPress={() => router.push("/settings")}
+        >
           <Ionicons name="settings-sharp" size={35} color={Colors.primary} />
         </TouchableOpacity>
         <TouchableOpacity onPress={reloadGame}>
@@ -53,16 +58,16 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: Colors.background,
   },
-  controls:{
-    display:"flex",
+  controls: {
+    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap:6
+    gap: 6,
   },
-  settings:{
-    backgroundColor:Colors.accents,
-    borderRadius:10,
-    padding:2
-  }
+  settings: {
+    backgroundColor: Colors.accents,
+    borderRadius: 10,
+    padding: 2,
+  },
 });

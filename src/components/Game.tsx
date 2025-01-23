@@ -19,7 +19,7 @@ const GAME_BOUNDS = {
   xMin: 0, 
   xMax: 35, 
   yMin: 0, 
-  yMax: 62 
+  yMax: 63 
 };
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 2;
