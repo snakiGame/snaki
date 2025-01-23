@@ -47,7 +47,7 @@ export default function Settings() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>
-          © 2025 Snaki Inc. Slithering into your hearts, one game at a time.
+          © 2025 Snaki. Slithering into your hearts, one game at a time.
         </Text>
       </View>
     </ScrollView>

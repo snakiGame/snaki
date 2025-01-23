@@ -18,12 +18,18 @@ export default function Header({
   isPaused,
 }: HeaderProps): JSX.Element {
   const router = useRouter();
+  
+  const stopGameThemPushToSettings = ()=>{//Stops the game the pushs to a specific route
+    pauseGame()
+    router.push("/settings")
+  }
+  
   return (
     <View style={styles.container}>
       <View style={styles.controls}>
         <TouchableOpacity
           style={styles.settings}
-          onPress={() => router.push("/settings")}
+          onPress={() => stopGameThemPushToSettings()}
         >
           <Ionicons name="settings-sharp" size={35} color={Colors.primary} />
         </TouchableOpacity>
