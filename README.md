@@ -1,32 +1,47 @@
 # Snaki - The Classic Snake Game Reimagined
 
-## Introduction
-Snaki, created by Tachera Sasi, is a reimagined version of the classic snake game. It combines the nostalgia of the original game with the modern touch of React Native swipe gestures.
+## 🎮 Introduction
+Welcome to **Snaki**, a reimagined version of the classic snake game, created by **Tachera Sasi**. Snaki blends the nostalgic charm of the original game with modern swipe gestures powered by React Native, offering a fresh and fun experience. 
 
-## How to Play
-1. Swipe up, down, left, or right to control the movement of the snake.
-2. Guide the snake to eat the apples that randomly appear on the game board.
-3. Each time the snake eats an apple, it grows longer by one segment.
-4. Avoid colliding with the walls or the snake's own body, as this will end the game.
-5. Aim to achieve the highest score by eating as many apples as possible!
+Get ready to guide your snake, eat apples, and grow as long as possible without hitting walls or your own tail. It's addictive, competitive, and perfect for passing the time!
 
-## Features
-- Classic gameplay with a modern twist using React Native swipe gestures.
-- Randomly generated apples for an unpredictable challenge.
-- Smooth controls for precise movement.
-- Increasing difficulty as the snake grows longer.
-- High score tracking to compete with friends.
+![Index Page](docs/images/img1.jpeg)
 
-## Controls
-- Swipe up to move the snake upwards.
-- Swipe down to move the snake downwards.
-- Swipe left to move the snake to the left.
-- Swipe right to move the snake to the right.
+## 🚀 How to Play
+1. **Swipe up**, **down**, **left**, or **right** to control the snake’s movement.
+2. Eat the randomly appearing apples to grow your snake longer.
+3. **The more apples you eat, the longer the snake gets**, increasing the challenge!
+4. Avoid hitting the **walls** or your snake’s own body—do so, and it’s game over!
+5. **Aim for the highest score** by eating as many apples as you can before crashing.
 
-## Game Over
-- The game ends when the snake collides with a wall or its own body.
-- Your final score will be displayed on the screen.
-- Swipe any direction to restart the game and try again.
+![About Page](docs/images/img2.jpeg)
 
-## Have Fun!
-Enjoy playing Snaki and challenge yourself to beat your own high score. Let's see how long you can make the snake grow!
+## 🌟 Features
+- **Classic Snake gameplay** enhanced with swipe gestures for modern control.
+- **Randomly generated apples** for unpredictable challenges.
+- Smooth, responsive controls that make snake movement feel precise.
+- **Difficulty increases** as the snake grows longer.
+- **High score tracking** to challenge yourself and compete with friends.
+
+## 📱 Controls
+- **Swipe up** to move the snake upwards.
+- **Swipe down** to move the snake downwards.
+- **Swipe left** to move the snake to the left.
+- **Swipe right** to move the snake to the right.
+
+## ⚠️ Game Over
+- The game ends when the snake collides with a **wall** or its own body.
+- Your **final score** is displayed on the screen.
+- Don’t worry—**swipe any direction** to restart the game and try to beat your best score!
+
+## 🔧 Settings Page
+Want to tweak the game? Head to the **Settings** to customize your gameplay experience. Adjust the controls, change the game speed, and even set your own theme! 
+
+![Settings Page](docs/images/img3.jpeg)
+
+## 😄 Have Fun!
+Snaki isn’t just about playing a game—it’s about **challenging yourself**, seeing how long you can grow your snake, and having a blast while doing it! So, jump in, eat those apples, and **try to beat your high score**. The game is just a swipe away!
+
+---
+
+Happy gaming! 🎮🍏
