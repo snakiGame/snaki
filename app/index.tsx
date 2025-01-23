@@ -27,6 +27,9 @@ const HomePage: React.FC = () => {
         <TouchableOpacity style={styles.creditsButton} onPress={() => router.push('/about')}>
           <Text style={styles.creditsButtonText}>Credits</Text>
         </TouchableOpacity>
+        <TouchableOpacity style={styles.creditsButton} onPress={() => router.push('/settings')}>
+          <Text style={styles.creditsButtonText}>settings</Text>
+        </TouchableOpacity>
       </SafeAreaView>
     </LinearGradient>
   );

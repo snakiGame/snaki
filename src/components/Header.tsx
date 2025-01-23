@@ -18,17 +18,19 @@ export default function Header({
 }: HeaderProps): JSX.Element {
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={reloadGame}>
-        <Ionicons name="reload-circle" size={35} color={Colors.primary} />
-      </TouchableOpacity>
+      <View style={styles.controls}>
+        <TouchableOpacity onPress={reloadGame}>
+          <Ionicons name="reload-circle" size={35} color={Colors.primary} />
+        </TouchableOpacity>
 
-      <TouchableOpacity onPress={pauseGame}>
-        <FontAwesome
-          name={isPaused ? "play-circle" : "pause-circle"}
-          size={35}
-          color={Colors.primary}
-        />
-      </TouchableOpacity>
+        <TouchableOpacity onPress={pauseGame}>
+          <FontAwesome
+            name={isPaused ? "play-circle" : "pause-circle"}
+            size={35}
+            color={Colors.primary}
+          />
+        </TouchableOpacity>
+      </View>
       {children}
     </View>
   );
@@ -37,7 +39,7 @@ export default function Header({
 const styles = StyleSheet.create({
   container: {
     flex: 0.08,
-    marginTop:5,
+    marginTop: 5,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -48,4 +50,11 @@ const styles = StyleSheet.create({
     padding: 15,
     backgroundColor: Colors.background,
   },
+  controls:{
+    display:"flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap:6
+  }
 });

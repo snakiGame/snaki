@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet } from "react-native";
 import { View, Text, Switch, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Settings() {
   const [soundEnabled, setSoundEnabled] = useState(true);
@@ -8,10 +9,12 @@ export default function Settings() {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Settings</Text>
-        <Text style={styles.subtitle}>Make Snaki suit your every whim!</Text>
-      </View>
+      <SafeAreaView>
+        <View style={styles.header}>
+          <Text style={styles.title}>Settings</Text>
+          <Text style={styles.subtitle}>Make Snaki suit your every whim!</Text>
+        </View>
+      </SafeAreaView>
 
       <Text style={styles.sectionHeader}>Preferences</Text>
       <View style={styles.optionContainer}>
@@ -81,8 +84,8 @@ const styles = StyleSheet.create({
   optionContainer: {
     backgroundColor: "#f2f8f2",
     borderRadius: 12,
-    borderColor:"#d8e9d8",
-    borderWidth:1,
+    borderColor: "#d8e9d8",
+    borderWidth: 1,
     padding: 10,
     elevation: 2,
   },
