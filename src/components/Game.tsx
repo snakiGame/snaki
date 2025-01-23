@@ -19,7 +19,7 @@ import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
 import Snake from "./Snake";
-import { settings_Vibration, settings_backgroundMusic } from "@/lib/settings";
+import useSettingStore, { settings_Vibration, settings_backgroundMusic } from "@/lib/settings";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -40,6 +40,8 @@ export default function Game(): JSX.Element {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
+  
+  const { settings } = useSettingStore()
 
   const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
@@ -65,7 +67,7 @@ export default function Game(): JSX.Element {
   }, []);
 
   const backgroundMusic = async () => {
-    if (!settings_backgroundMusic()) {
+    if (!settings.backgroundMusic) {
       return;
     }
     const { sound } = await Audio.Sound.createAsync(
@@ -80,7 +82,7 @@ export default function Game(): JSX.Element {
     await sound.playAsync();
   };
   const vibrate = async (length: number) => {
-    if(!settings_Vibration()){
+    if(!settings.vibration){
       return
     }
     Vibration.vibrate(length);

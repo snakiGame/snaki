@@ -2,10 +2,12 @@ import { ScrollView, StyleSheet } from "react-native";
 import { View, Text, Switch, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import useSettingStore from "@/lib/settings";
 
 export default function Settings() {
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [vibrationEnabled, setVibrationEnabled] = useState(true);
+  const { settings, updateSetting } = useSettingStore();
+  const [soundEnabled, setSoundEnabled] = useState(settings.backgroundMusic);
+  const [vibrationEnabled, setVibrationEnabled] = useState(settings.vibration);
 
   return (
     <ScrollView style={styles.container}>
@@ -24,7 +26,13 @@ export default function Settings() {
             <Text style={styles.settingText}>Enable background music</Text>
             <Switch
               value={soundEnabled}
-              onValueChange={() => setSoundEnabled((prev) => !prev)}
+              onValueChange={async () => {
+                await updateSetting(
+                  "backgroundMusic",
+                  !settings.backgroundMusic,
+                );
+                setSoundEnabled((prev) => !prev);
+              }}
               thumbColor={soundEnabled ? "#a9b8a9" : "#f4f4f4"}
               trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
             />
@@ -37,7 +45,10 @@ export default function Settings() {
             <Text style={styles.settingText}>Enable vibrations</Text>
             <Switch
               value={vibrationEnabled}
-              onValueChange={() => setVibrationEnabled((prev) => !prev)}
+              onValueChange={async() => {
+                await updateSetting("vibration",!settings.vibration)
+                setVibrationEnabled((prev) => !prev);
+              }}
               thumbColor={vibrationEnabled ? "#a9b8a9" : "#f4f4f4"}
               trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
             />
