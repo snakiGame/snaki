@@ -11,6 +11,7 @@ import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
 import Snake from "./Snake";
+import { settings_backgroundMusic } from "@/lib/settings";
 
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
@@ -58,6 +59,9 @@ export default function Game(): JSX.Element {
   },[])
 
   const backgroundMusic = async () =>{
+    if(!settings_backgroundMusic()){
+      return
+    }
     const { sound } = await Audio.Sound.createAsync(
       require("../../assets/music/bg-music1.mp3"), 
       //bg-music1.mp3

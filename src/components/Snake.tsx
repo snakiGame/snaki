@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
   snake: {
     width: 15,
     height: 15,
-    backgroundColor: Colors.accents,
+    backgroundColor: Colors.primary,
     position: "absolute",
   },
 });
