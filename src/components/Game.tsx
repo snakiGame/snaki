@@ -26,6 +26,7 @@ import useSettingStore, {
   settings_backgroundMusic,
 } from "@/lib/settings";
 import ModalComponent from "@/components/Modal";
+import GameOverModal from "@/components/GameoverModal";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -117,7 +118,7 @@ export default function Game(): JSX.Element {
     if (checkGameOver(snakeHead, GAME_BOUNDS)) {
       setIsGameOver((prev) => !prev);
       vibrate(300);
-      setModalVisible(true)
+      setModalVisible(true);
       // Alert.alert("Game Over", "You have hit a wall", [
       //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
       //   { text: "Play again", onPress: () => reloadGame() },
@@ -203,14 +204,13 @@ export default function Game(): JSX.Element {
           <Snake snake={snake} />
           <Food x={food.x} y={food.y} />
         </View>
-        
-      {/* game over modal */}
-      <ModalComponent isModalVisible={isModalVisible}>
-        <View>
-          <Text>Hello! I am a modal!</Text>
-          <Button title="Hide Modal" onPress={toggleModal} />
-        </View>
-      </ModalComponent>
+
+        {/* game over modal */}
+        <GameOverModal
+          isModalVisible={isModalVisible}
+          toggleModal={toggleModal}
+          reloadGame={reloadGame}
+        />
       </SafeAreaView>
     </PanGestureHandler>
   );

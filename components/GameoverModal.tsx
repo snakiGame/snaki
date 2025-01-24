@@ -1,15 +1,21 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 
-const GameOverModal = ({ isModalVisible, toggleModal, reloadGame }) => {
+interface GameoverModalProps {
+  isModalVisible:boolean;
+  toggleModal:()=>void;
+  reloadGame:()=>void;
+}
+
+const GameOverModal = ({ isModalVisible, toggleModal, reloadGame }:GameoverModalProps) => {
   return (
     <Modal
       isVisible={isModalVisible}
-      onBackdropPress={toggleModal} // Close on backdrop press
-      animationIn="bounceIn"       // Stylish animation on entry
-      animationOut="fadeOut"       // Smooth fade-out
+      // onBackdropPress={toggleModal}
+      animationIn="bounceIn"
+      animationOut="fadeOut"
     >
       <LinearGradient
         colors={["#1a1a1a", "#000000"]}
@@ -19,7 +25,10 @@ const GameOverModal = ({ isModalVisible, toggleModal, reloadGame }) => {
         <Text style={styles.modalMessage}>You have hit a wall!</Text>
 
         <View style={styles.buttonsContainer}>
-          <TouchableOpacity style={styles.exitButton} onPress={() => BackHandler.exitApp()}>
+          <TouchableOpacity
+            style={styles.exitButton}
+            onPress={() => BackHandler.exitApp()}
+          >
             <Text style={styles.exitButtonText}>Exit</Text>
           </TouchableOpacity>
 
