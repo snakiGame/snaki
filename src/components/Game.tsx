@@ -28,6 +28,8 @@ import useSettingStore, {
 import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
+import { dbInit } from "@/lib/db";
+import * as SQLite from "expo-sqlite";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -40,7 +42,7 @@ const GAME_BOUNDS = {
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 2;
 
-export default function Game(): JSX.Element {
+export default async function Game(): Promise<JSX.Element> {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
   const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
@@ -54,8 +56,18 @@ export default function Game(): JSX.Element {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-
+  
   const { settings } = useSettingStore();
+  const db = await SQLite.openDatabaseAsync("snaki.db");
+  
+  const insertScore = async (score:number)=>{
+    try{
+      const date = new Date().toISOString();
+      const result = await db.runAsync('INSERT INTO scores (score, date) VALUES (?, ?)', score, date);
+    }catch(error){
+      console.error(error)
+    }
+  }
 
   const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
@@ -106,6 +118,7 @@ export default function Game(): JSX.Element {
       setIsGameOver((prev) => !prev);
       vibrate(300);
       setModalVisible(true);
+      insertScore(score)
       // Alert.alert("Game Over", "You have hit a wall", [
       //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
       //   { text: "Play again", onPress: () => reloadGame() },

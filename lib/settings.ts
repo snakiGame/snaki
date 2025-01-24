@@ -1,13 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 
-
 interface Settings {
   theme: string;
   vibration: boolean;
   backgroundMusic: boolean;
 }
-
 
 interface SettingStore {
   settings: Settings;
@@ -26,7 +24,6 @@ const defaultSettings = (): Settings => ({
 const useSettingStore = create<SettingStore>((set) => ({
   settings: defaultSettings(), 
 
-  
   settingsInit: async () => {
     try {
       const storedSettings = await AsyncStorage.getItem("settings");
