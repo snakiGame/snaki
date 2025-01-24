@@ -48,7 +48,7 @@ interface Score {
   date: string;
 }
 
-export default async function Game(): Promise<JSX.Element> {
+export default function Game(): JSX.Element {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
   const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
@@ -64,20 +64,29 @@ export default async function Game(): Promise<JSX.Element> {
   };
 
   const { settings } = useSettingStore();
-  const db = await SQLite.openDatabaseAsync("snaki.db");
 
-  const insertScore = async (score: number) => {
-    try {
-      const date = new Date().toISOString();
-      const result = await db.runAsync(
-        "INSERT INTO scores (score, date) VALUES (?, ?)",
-        score,
-        date,
-      );
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  // const insertScore = async (score: number) => {
+  //   const db = SQLite.openDatabase("snaki.db"); // No `await` here
+  //   try {
+  //     const date = new Date().toISOString();
+  //     db.transaction((tx) => {
+  //       tx.executeSql(
+  //         "INSERT INTO scores (score, date) VALUES (?, ?)",
+  //         [score, date],
+  //         () => {
+  //           console.log("Score inserted successfully.");
+  //         },
+  //         (txObj, error) => {
+  //           console.error("Error inserting score:", error);
+  //           return false;
+  //         }
+  //       );
+  //     });
+  //   } catch (error) {
+  //     console.error("Database error:", error);
+  //   }
+  // };
+
 
   // const getScores = async () => {
   //   const allRows = await db.getAllAsync("SELECT * FROM test");
@@ -137,7 +146,7 @@ export default async function Game(): Promise<JSX.Element> {
       setIsGameOver((prev) => !prev);
       vibrate(300);
       setModalVisible(true);
-      insertScore(score);
+      // insertScore(score);
       // Alert.alert("Game Over", "You have hit a wall", [
       //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
       //   { text: "Play again", onPress: () => reloadGame() },

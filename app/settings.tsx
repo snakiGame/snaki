@@ -3,6 +3,7 @@ import { View, Text, Switch, TouchableOpacity, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import useSettingStore from "@/lib/settings";
+import { stopBackgroundMusic } from "@/lib/utils";
 
 export default function Settings() {
   const { settings, updateSetting } = useSettingStore();
@@ -60,6 +61,7 @@ export default function Settings() {
               onValueChange={async () => {
                 await updateSetting("backgroundMusic", !settings.backgroundMusic);
                 setSoundEnabled((prev) => !prev);
+                stopBackgroundMusic()
               }}
               thumbColor={soundEnabled ? "#a9b8a9" : "#f4f4f4"}
               trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
