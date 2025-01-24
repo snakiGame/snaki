@@ -7,13 +7,13 @@ interface ModalProps {
   toggleModal: () => void;
 }
 
-export default function Modal() {
+export default function ModalComponent({children,isModalVisible}:ModalProps) {
   return (
     <Modal
       isVisible={isModalVisible}
-      onBackdropPress={toggleModal} // Close modal when tapping outside
-      animationIn="slideInUp" // Custom animation for showing the modal
-      animationOut="slideOutDown" // Custom animation for hiding the modal
+      // onBackdropPress={toggleModal} 
+      animationIn="slideInUp" 
+      animationOut="slideOutDown" 
     >
       {children}
     </Modal>

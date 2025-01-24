@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   creditsButton: {
-    backgroundColor: "#a9b8a9",
+    backgroundColor: Colors.accents,
     paddingVertical: 16,
     paddingHorizontal: 60,
     borderRadius: 0,

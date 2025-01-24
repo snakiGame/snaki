@@ -7,6 +7,8 @@ import {
   Alert,
   BackHandler,
   Vibration,
+  Text,
+  Button,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
@@ -19,7 +21,11 @@ import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
 import Snake from "./Snake";
-import useSettingStore, { settings_Vibration, settings_backgroundMusic } from "@/lib/settings";
+import useSettingStore, {
+  settings_Vibration,
+  settings_backgroundMusic,
+} from "@/lib/settings";
+import ModalComponent from "@/components/Modal";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -40,8 +46,14 @@ export default function Game(): JSX.Element {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-  
-  const { settings } = useSettingStore()
+
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
+  const { settings } = useSettingStore();
 
   const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
@@ -82,8 +94,8 @@ export default function Game(): JSX.Element {
     await sound.playAsync();
   };
   const vibrate = async (length: number) => {
-    if(!settings.vibration){
-      return
+    if (!settings.vibration) {
+      return;
     }
     Vibration.vibrate(length);
   };
@@ -105,10 +117,11 @@ export default function Game(): JSX.Element {
     if (checkGameOver(snakeHead, GAME_BOUNDS)) {
       setIsGameOver((prev) => !prev);
       vibrate(300);
-      Alert.alert("Game Over", "You have hit a wall", [
-        { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
-        { text: "Play again", onPress: () => reloadGame() },
-      ]);
+      setModalVisible(true)
+      // Alert.alert("Game Over", "You have hit a wall", [
+      //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
+      //   { text: "Play again", onPress: () => reloadGame() },
+      // ]);
       return;
     }
 
@@ -132,7 +145,7 @@ export default function Game(): JSX.Element {
     if (checkEatsFood(newHead, food, 2)) {
       setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
       setSnake([newHead, ...snake]);
-      vibrate(30);
+      vibrate(25);
       setScore(score + SCORE_INCREMENT);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
@@ -190,6 +203,14 @@ export default function Game(): JSX.Element {
           <Snake snake={snake} />
           <Food x={food.x} y={food.y} />
         </View>
+        
+      {/* game over modal */}
+      <ModalComponent isModalVisible={isModalVisible}>
+        <View>
+          <Text>Hello! I am a modal!</Text>
+          <Button title="Hide Modal" onPress={toggleModal} />
+        </View>
+      </ModalComponent>
       </SafeAreaView>
     </PanGestureHandler>
   );
