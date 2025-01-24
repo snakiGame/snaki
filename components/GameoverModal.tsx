@@ -6,10 +6,12 @@ import {
   TouchableOpacity,
   BackHandler,
   Image,
+  Vibration,
 } from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/src/styles/colors";
+import useSettingStore from "@/lib/settings";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
@@ -22,6 +24,7 @@ const GameOverModal = ({
   toggleModal,
   reloadGame,
 }: GameoverModalProps) => {
+  const { settings } = useSettingStore();
   return (
     <Modal
       isVisible={isModalVisible}
@@ -52,6 +55,10 @@ const GameOverModal = ({
           <TouchableOpacity
             style={styles.playAgainButton}
             onPress={() => {
+              if(settings.vibration){
+                //mounting a tiny vibration if enabled
+                Vibration.vibrate(15)
+              }
               toggleModal();
               reloadGame();
             }}

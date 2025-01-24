@@ -27,6 +27,7 @@ import useSettingStore, {
 } from "@/lib/settings";
 import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
+import { backgroundMusic } from "@/lib/utils";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -79,21 +80,7 @@ export default function Game(): JSX.Element {
     backgroundMusic();
   }, []);
 
-  const backgroundMusic = async () => {
-    if (!settings.backgroundMusic) {
-      return;
-    }
-    const { sound } = await Audio.Sound.createAsync(
-      require("../../assets/music/bg-music1.mp3"),
-      //bg-music1.mp3
-      //bg-music2.mp3
-      { shouldPlay: true, isLooping: true },
-    );
-    setSound(sound);
-    // Playing the sound
-    await sound.setVolumeAsync(0.25);
-    await sound.playAsync();
-  };
+
   const vibrate = async (length: number) => {
     if (!settings.vibration) {
       return;
@@ -226,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: Colors.primary,
     borderWidth: 12,
-    borderRadius: 25,
+    // borderRadius: 25,
     backgroundColor: Colors.background,
   },
 });
