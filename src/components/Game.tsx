@@ -42,6 +42,12 @@ const GAME_BOUNDS = {
 const MOVE_INTERVAL = 50;
 const SCORE_INCREMENT = 2;
 
+interface Score {
+  id: string;
+  score: string;
+  date: string;
+}
+
 export default async function Game(): Promise<JSX.Element> {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
@@ -56,18 +62,32 @@ export default async function Game(): Promise<JSX.Element> {
   const toggleModal = () => {
     setModalVisible(!isModalVisible);
   };
-  
+
   const { settings } = useSettingStore();
   const db = await SQLite.openDatabaseAsync("snaki.db");
-  
-  const insertScore = async (score:number)=>{
-    try{
+
+  const insertScore = async (score: number) => {
+    try {
       const date = new Date().toISOString();
-      const result = await db.runAsync('INSERT INTO scores (score, date) VALUES (?, ?)', score, date);
-    }catch(error){
-      console.error(error)
+      const result = await db.runAsync(
+        "INSERT INTO scores (score, date) VALUES (?, ?)",
+        score,
+        date,
+      );
+    } catch (error) {
+      console.error(error);
     }
-  }
+  };
+
+  // const getScores = async () => {
+  //   const allRows = await db.getAllAsync("SELECT * FROM test");
+  //   let scores
+  //   for (const row of allRows) {
+  //     let score:Score||Unknown = row
+  //     scores.push(score)
+  //     console.log(row.id, row.score, row.date);
+  //   }
+  // };
 
   const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
@@ -91,7 +111,6 @@ export default async function Game(): Promise<JSX.Element> {
     setCurrentBgMusic(bgMusics[rand_bg_music_index]);
     backgroundMusic();
   }, []);
-
 
   const vibrate = async (length: number) => {
     if (!settings.vibration) {
@@ -118,7 +137,7 @@ export default async function Game(): Promise<JSX.Element> {
       setIsGameOver((prev) => !prev);
       vibrate(300);
       setModalVisible(true);
-      insertScore(score)
+      insertScore(score);
       // Alert.alert("Game Over", "You have hit a wall", [
       //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
       //   { text: "Play again", onPress: () => reloadGame() },
