@@ -1,38 +1,61 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, BackHandler } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  BackHandler,
+  Image,
+} from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
+import { Colors } from "@/src/styles/colors";
 
 interface GameoverModalProps {
-  isModalVisible:boolean;
-  toggleModal:()=>void;
-  reloadGame:()=>void;
+  isModalVisible: boolean;
+  toggleModal: () => void;
+  reloadGame: () => void;
 }
 
-const GameOverModal = ({ isModalVisible, toggleModal, reloadGame }:GameoverModalProps) => {
+const GameOverModal = ({
+  isModalVisible,
+  toggleModal,
+  reloadGame,
+}: GameoverModalProps) => {
   return (
     <Modal
       isVisible={isModalVisible}
       // onBackdropPress={toggleModal}
-      animationIn="bounceIn"
-      animationOut="fadeOut"
+      animationIn="shake"
+      animationOut="wobble"
     >
       <LinearGradient
         colors={["#1a1a1a", "#000000"]}
         style={styles.modalContainer}
       >
+        {/* Game Over Title */}
         <Text style={styles.modalTitle}>Game Over</Text>
+
+        {/* Game Over Message */}
         <Text style={styles.modalMessage}>You have hit a wall!</Text>
 
-        <View style={styles.buttonsContainer}>
-          <TouchableOpacity
-            style={styles.exitButton}
-            onPress={() => BackHandler.exitApp()}
-          >
-            <Text style={styles.exitButtonText}>Exit</Text>
-          </TouchableOpacity>
+        {/* Snake Crash Image */}
+        <Image
+          source={require("../assets/crash.png")} 
+          style={styles.crashImage}
+          resizeMode="contain"
+        />
 
-          <TouchableOpacity style={styles.playAgainButton} onPress={reloadGame}>
+        {/* Buttons */}
+        <View style={styles.buttonsContainer}>
+          {/* Play Again Button */}
+          <TouchableOpacity
+            style={styles.playAgainButton}
+            onPress={() => {
+              toggleModal();
+              reloadGame();
+            }}
+          >
             <Text style={styles.playAgainButtonText}>Play Again</Text>
           </TouchableOpacity>
         </View>
@@ -43,7 +66,6 @@ const GameOverModal = ({ isModalVisible, toggleModal, reloadGame }:GameoverModal
 
 const styles = StyleSheet.create({
   modalContainer: {
-    borderRadius: 15,
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
@@ -67,30 +89,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     letterSpacing: 1.2,
   },
+  crashImage: {
+    width: 150, // Adjust width
+    height: 150, // Adjust height
+    marginBottom: 20,
+  },
   buttonsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
   },
-  exitButton: {
-    backgroundColor: "#ff5555",
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 8,
-    marginHorizontal: 10,
-  },
-  exitButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
   playAgainButton: {
-    backgroundColor: "#4caf50",
+    width: "100%",
+    backgroundColor: Colors.accents,
     paddingVertical: 12,
     paddingHorizontal: 30,
-    borderRadius: 8,
-    marginHorizontal: 10,
   },
   playAgainButtonText: {
     color: "#fff",

@@ -6,6 +6,8 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  Animated,
+  Easing,  
 } from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -15,18 +17,45 @@ import useSettingStore from "@/lib/settings";
 
 const HomePage: React.FC = () => {
   const router = useRouter();
+  const bounceAnim = new Animated.Value(0);
 
   const { settingsInit } = useSettingStore();
-  
+
   useEffect(() => {
-    settingsInit(); 
+    settingsInit();
   }, []);
+
+  useEffect(() => {
+    // Infinite smooth up-and-down animation
+    Animated.loop(
+      Animated.timing(bounceAnim, {
+        toValue: 20, // Moving up by 20 units
+        duration: 2000, // Duration for the upward movement
+        easing: Easing.sin, // Using Easing from React Native
+        useNativeDriver: true,
+      })
+    ).start();
+
+    // Returns to the original position after the upward movement
+    Animated.loop(
+      Animated.timing(bounceAnim, {
+        toValue: -20, // Moving down by 20 units
+        duration: 2000, // Same duration for downward movement
+        easing: Easing.sin, 
+        useNativeDriver: true,
+      })
+    ).start();
+  }, []);
+
   return (
     <LinearGradient colors={["#ffffff", "#f0f0f0"]} style={styles.container}>
       <SafeAreaView style={styles.content}>
         <StatusBar barStyle="dark-content" backgroundColor={Colors.primary} />
 
-        <Image source={require("../assets/icon.png")} style={styles.logo} />
+        <Animated.Image
+          source={require("../assets/icon.png")}
+          style={[styles.logo, { transform: [{ translateY: bounceAnim }] }]}
+        />
 
         <Text style={styles.title}>Welcome to Snaki!</Text>
         <Text style={styles.subtitle}>The Classic Snake Game Reimagined</Text>
