@@ -1,6 +1,6 @@
 import * as SQLite from "expo-sqlite";
 
-export async function dbInt() {
+export async function dbInit() {
   const db = await SQLite.openDatabaseAsync("snaki.db");
 
   await db.execAsync(`
@@ -12,3 +12,7 @@ export async function dbInt() {
   `);
   return db
 }
+
+// export async function insertScore(){
+//   const result = await db.runAsync('INSERT INTO test (value, intValue) VALUES (?, ?)', 'aaa', 100);
+// }
