@@ -36,7 +36,7 @@ export default function Settings() {
           },
           style: "destructive",
         },
-      ]
+      ],
     );
   };
 
@@ -59,9 +59,12 @@ export default function Settings() {
             <Switch
               value={soundEnabled}
               onValueChange={async () => {
-                await updateSetting("backgroundMusic", !settings.backgroundMusic);
+                await updateSetting(
+                  "backgroundMusic",
+                  !settings.backgroundMusic,
+                );
                 setSoundEnabled((prev) => !prev);
-                stopBackgroundMusic()
+                stopBackgroundMusic();
               }}
               thumbColor={soundEnabled ? "#a9b8a9" : "#f4f4f4"}
               trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
@@ -93,8 +96,11 @@ export default function Settings() {
         <View style={styles.section}>
           <Text style={styles.settingTitle}>Theme</Text>
           <View style={styles.settingRow}>
-            <Text style={styles.settingText}>Switch between Light and Dark mode</Text>
+            <Text style={styles.settingText}>
+              Switch between Light and Dark mode
+            </Text>
             <Switch
+              disabled //for now will enable this in a much later version
               value={theme === "dark"}
               onValueChange={async () => {
                 const newTheme = theme === "light" ? "dark" : "light";

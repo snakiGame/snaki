@@ -147,10 +147,7 @@ export default function Game(): JSX.Element {
       vibrate(300);
       setModalVisible(true);
       // insertScore(score);
-      // Alert.alert("Game Over", "You have hit a wall", [
-      //   { text: "exit", style: "cancel", onPress: () => BackHandler.exitApp() },
-      //   { text: "Play again", onPress: () => reloadGame() },
-      // ]);
+      
       return;
     }
 
