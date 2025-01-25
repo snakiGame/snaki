@@ -66,10 +66,11 @@ export default function About() {
         {/* Details Section */}
         <View style={styles.detailsContainer}>
           <Text style={styles.aboutText}>
-            Hey there! I’m Tachera Sasi, the genius (or troublemaker) behind
-            Snaki. It's the classic snake game you know and love—just cooler.
-            Like, sunglasses-cool.
+            Hey there! I’m Tachera Sasi, you can call me Tach, the troublemaker behind Snaki.  
+            It's the classic snake game you know and love just cooler.  
+            Like, sunglasses cool.  
           </Text>
+
 
           <Text style={styles.aboutText}>
             Snaki’s all about dodging walls, eating snacks, and pretending

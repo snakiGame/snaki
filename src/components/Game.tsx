@@ -39,8 +39,8 @@ const GAME_BOUNDS = {
   yMin: 0,
   yMax: 63,
 };
-const MOVE_INTERVAL = 50;
-const SCORE_INCREMENT = 2;
+const MOVE_INTERVAL = 55;
+const SCORE_INCREMENT = 1;
 
 interface Score {
   id: string;
@@ -243,7 +243,6 @@ export default function Game(): JSX.Element {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 12,
     flex: 1,
     backgroundColor: Colors.primary,
   },

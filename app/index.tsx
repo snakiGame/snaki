@@ -14,7 +14,6 @@ import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/src/styles/colors";
 import useSettingStore from "@/lib/settings";
-import { dbInit } from "@/lib/db";
 
 const HomePage: React.FC = () => {
   const router = useRouter();
@@ -24,7 +23,6 @@ const HomePage: React.FC = () => {
 
   
   useEffect(() => {
-    dbInit()
     settingsInit();
   }, []);
 
