@@ -5,13 +5,16 @@ import useSettingStore, { settings_backgroundMusic } from "./settings";
 let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally 
 
 export const backgroundMusic = async () => {
-  // Check if background music setting is enabled
+  // Checks if background music setting is enabled
   if (!settings_backgroundMusic()) {
     return;
   }
 
+  if(soundInstance){
+    return //Not playing the audio twice while the other instance is still playing
+  }
   try {
-    // Create and load the sound
+    // Creates and load the sound
     const { sound } = await Audio.Sound.createAsync(
       require("../assets/music/bg-music1.mp3"),
       { shouldPlay: true, isLooping: true }
