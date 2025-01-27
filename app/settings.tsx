@@ -104,7 +104,7 @@ export default function Settings() {
               value={roundedEdges}
               onValueChange={async () => {
                 await updateSetting("roundEdges", !settings.roundEdges);
-                // setTheme(newTheme);
+                setRoundedEdges((prev) => !prev);
               }}
               thumbColor={theme === "dark" ? "#a9b8a9" : "#f4f4f4"}
               trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}

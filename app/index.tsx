@@ -79,7 +79,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <LinearGradient colors={["#ffffff", "#f0f0f0"]} style={styles.container}>
+    <LinearGradient colors={["#ffffff", "#f2f8f9","#d8e9d8"]} style={styles.container}>
       <SafeAreaView style={styles.content}>
         <StatusBar style="dark" backgroundColor={Colors.primary} />
         <Animated.Image

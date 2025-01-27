@@ -16,7 +16,7 @@ import { Colors } from "@/src/styles/colors";
 export default function About() {
   return (
     <LinearGradient colors={["#f0f0f0", "#ffffff"]} style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#000" />
+      <StatusBar style="light" backgroundColor="#000" />
       <ScrollView contentContainerStyle={styles.content}>
         {/* Profile and Title Section */}
         <View style={styles.profileContainer}>
