@@ -65,38 +65,6 @@ export default function Game(): JSX.Element {
 
   const { settings } = useSettingStore();
 
-  // const insertScore = async (score: number) => {
-  //   const db = SQLite.openDatabase("snaki.db"); // No `await` here
-  //   try {
-  //     const date = new Date().toISOString();
-  //     db.transaction((tx) => {
-  //       tx.executeSql(
-  //         "INSERT INTO scores (score, date) VALUES (?, ?)",
-  //         [score, date],
-  //         () => {
-  //           console.log("Score inserted successfully.");
-  //         },
-  //         (txObj, error) => {
-  //           console.error("Error inserting score:", error);
-  //           return false;
-  //         }
-  //       );
-  //     });
-  //   } catch (error) {
-  //     console.error("Database error:", error);
-  //   }
-  // };
-
-
-  // const getScores = async () => {
-  //   const allRows = await db.getAllAsync("SELECT * FROM test");
-  //   let scores
-  //   for (const row of allRows) {
-  //     let score:Score||Unknown = row
-  //     scores.push(score)
-  //     console.log(row.id, row.score, row.date);
-  //   }
-  // };
 
   const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
   const bgMusics = [
