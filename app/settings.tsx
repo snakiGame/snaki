@@ -9,6 +9,7 @@ export default function Settings() {
   const { settings, updateSetting } = useSettingStore();
   const [soundEnabled, setSoundEnabled] = useState(settings.backgroundMusic);
   const [vibrationEnabled, setVibrationEnabled] = useState(settings.vibration);
+  const [roundedEdges, setRoundedEdges] = useState(settings.roundEdges);
   const [theme, setTheme] = useState(settings.theme);
 
   // Sync local state with store
@@ -93,6 +94,23 @@ export default function Settings() {
       {/* Theme Settings */}
       <Text style={styles.sectionHeader}>Appearance</Text>
       <View style={styles.optionContainer}>
+        <View style={styles.section}>
+          <Text style={styles.settingTitle}>Rounded edges</Text>
+          <View style={styles.settingRow}>
+            <Text style={styles.settingText}>
+              Switch between sharp and rounded edges in the app ui
+            </Text>
+            <Switch
+              value={roundedEdges}
+              onValueChange={async () => {
+                await updateSetting("roundEdges", !settings.roundEdges);
+                // setTheme(newTheme);
+              }}
+              thumbColor={theme === "dark" ? "#a9b8a9" : "#f4f4f4"}
+              trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
+            />
+          </View>
+        </View>
         <View style={styles.section}>
           <Text style={styles.settingTitle}>Theme</Text>
           <View style={styles.settingRow}>
