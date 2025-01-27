@@ -24,6 +24,7 @@ import Snake from "./Snake";
 import useSettingStore, {
   settings_Vibration,
   settings_backgroundMusic,
+  settings_isRondedEdges,
 } from "@/lib/settings";
 import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: Colors.primary,
     borderWidth: 12,
-    // borderRadius: 25,
+    borderRadius: settings_isRondedEdges()?10:0,
     backgroundColor: Colors.background,
   },
 });

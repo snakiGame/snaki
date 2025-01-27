@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../styles/colors";
 import { FontAwesome } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { settings_isRondedEdges } from "@/lib/settings";
 
 interface HeaderProps {
   reloadGame: () => void;
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderColor: Colors.primary,
     borderWidth: 12,
-    // borderRadius: 30,
+    borderRadius: settings_isRondedEdges()?10:0,
     borderBottomWidth: 0,
     padding: 15,
     backgroundColor: Colors.background,

@@ -11,7 +11,7 @@ import {
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/src/styles/colors";
-import useSettingStore from "@/lib/settings";
+import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 10,
     elevation: 10,
+    borderRadius: settings_isRondedEdges()?10:0
   },
   modalTitle: {
     fontSize: 30,
@@ -97,8 +98,8 @@ const styles = StyleSheet.create({
     letterSpacing: 1.2,
   },
   crashImage: {
-    width: 150, // Adjust width
-    height: 150, // Adjust height
+    width: 150, 
+    height: 150, 
     marginBottom: 20,
   },
   buttonsContainer: {
@@ -108,6 +109,7 @@ const styles = StyleSheet.create({
   },
   playAgainButton: {
     width: "100%",
+    borderRadius: settings_isRondedEdges()?10:0,
     backgroundColor: Colors.accents,
     paddingVertical: 12,
     paddingHorizontal: 30,
