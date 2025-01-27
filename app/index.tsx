@@ -31,80 +31,45 @@ const HomePage: React.FC = () => {
   const router = useRouter();
   const bounceAnim = new Animated.Value(0);
 
-  //notification configs
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [channels, setChannels] = useState<Notifications.NotificationChannel[]>(
-    [],
-  );
-  const [notification, setNotification] = useState<
-    Notifications.Notification | undefined
-  >(undefined);
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(
-      (token) => token && setExpoPushToken(token),
+    registerForPushNotificationsAsync().then((token) =>
+      token && setExpoPushToken(token)
     );
 
-    if (Platform.OS === "android") {
-      Notifications.getNotificationChannelsAsync().then((value) =>
-        setChannels(value ?? []),
-      );
-    }
     notificationListener.current =
       Notifications.addNotificationReceivedListener((notification) => {
-        setNotification(notification);
+        console.log("Notification received:", notification);
       });
 
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log(response);
+        console.log("Notification clicked:", response);
       });
+
+    scheduleDailyNotification(); // Schedule the daily notification on load
 
     return () => {
       notificationListener.current &&
         Notifications.removeNotificationSubscription(
-          notificationListener.current,
+          notificationListener.current
         );
       responseListener.current &&
         Notifications.removeNotificationSubscription(responseListener.current);
     };
   }, []);
 
-  const { settingsInit,settings } = useSettingStore();
-
-  const schedulenotification = async () => {
-    if(settings.isNotificationSet){
-      return
-    }
-    await schedulePushNotification();
-  };
   useEffect(() => {
-    schedulenotification();
-    settingsInit();
-  }, []);
-
-  useEffect(() => {
-    // Infinite smooth up-and-down animation
-    // NOT working will fix this later
     Animated.loop(
       Animated.timing(bounceAnim, {
-        toValue: 20, // Moving up by 20 units
-        duration: 2000, // Duration for the upward movement
-        easing: Easing.sin, // Using Easing from React Native
-        useNativeDriver: true,
-      }),
-    ).start();
-
-    // Returns to the original position after the upward movement
-    Animated.loop(
-      Animated.timing(bounceAnim, {
-        toValue: -20, // Moving down by 20 units
-        duration: 2000, // Same duration for downward movement
+        toValue: 20,
+        duration: 2000,
         easing: Easing.sin,
         useNativeDriver: true,
-      }),
+      })
     ).start();
   }, []);
 
@@ -112,12 +77,10 @@ const HomePage: React.FC = () => {
     <LinearGradient colors={["#ffffff", "#f0f0f0"]} style={styles.container}>
       <SafeAreaView style={styles.content}>
         <StatusBar style="dark" backgroundColor={Colors.primary} />
-
         <Animated.Image
           source={require("../assets/icon.png")}
           style={[styles.logo, { transform: [{ translateY: bounceAnim }] }]}
         />
-
         <Text style={styles.title}>Welcome to Snaki!</Text>
         <Text style={styles.subtitle}>The Classic Snake Game Reimagined</Text>
 
@@ -138,26 +101,38 @@ const HomePage: React.FC = () => {
   );
 };
 
-async function schedulePushNotification() {
-  await Notifications.scheduleNotificationAsync({
-    content: {
-      title: "You've got mail! 📬",
-      body: "Here is the notification body",
-      data: { data: "goes here", test: { test1: "more data" } },
-    },
-    trigger: {
-      type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-      seconds: 2,
-    },
-  });
+async function scheduleDailyNotification() {
+  const existingNotifications = await Notifications.getAllScheduledNotificationsAsync();
+  const hasScheduledNotification = existingNotifications.some(
+    (notification) => notification.identifier === "daily-snaki-reminder"
+  );
+
+  if (!hasScheduledNotification) {
+    await Notifications.scheduleNotificationAsync({
+      identifier: "daily-snaki-reminder",
+      content: {
+        title: "Play Snaki 🐍",
+        body: "It's time to play Snaki! Improve your skills and climb the leaderboard!",
+        data: { screen: "play" },
+      },
+      trigger: {
+        hour: 8, // 8:00 AM
+        minute: 0,
+        repeats: true,
+      },
+    });
+    console.log("Daily notification scheduled!");
+  } else {
+    console.log("Notification already scheduled.");
+  }
 }
 
 async function registerForPushNotificationsAsync() {
   let token;
 
   if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("myNotificationChannel", {
-      name: "A channel is needed for the permissions prompt to appear",
+    await Notifications.setNotificationChannelAsync("daily-reminders", {
+      name: "Daily Reminders",
       importance: Notifications.AndroidImportance.MAX,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: "#FF231F7C",
@@ -173,27 +148,17 @@ async function registerForPushNotificationsAsync() {
       finalStatus = status;
     }
     if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notification!");
+      alert("Failed to get push token for push notifications!");
       return;
     }
-    try {
-      const projectId =
-        Constants?.expoConfig?.extra?.eas?.projectId ??
-        Constants?.easConfig?.projectId;
-      if (!projectId) {
-        throw new Error("Project ID not found");
-      }
-      token = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId,
-        })
-      ).data;
-      console.log(token);
-    } catch (e) {
-      token = `${e}`;
-    }
+    token = (
+      await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig?.extra?.eas?.projectId,
+      })
+    ).data;
+    console.log("Push token:", token);
   } else {
-    alert("Must use physical device for Push Notifications");
+    alert("Must use a physical device for push notifications.");
   }
 
   return token;
