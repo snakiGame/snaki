@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/src/styles/colors";
-import useSettingStore from "@/lib/settings";
+import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
@@ -30,14 +30,18 @@ Notifications.setNotificationHandler({
 const HomePage: React.FC = () => {
   const router = useRouter();
   const bounceAnim = new Animated.Value(0);
+  const { settingsInit, settings } = useSettingStore();
 
+  useEffect(() => {
+    settingsInit();
+  }, []);
   const [expoPushToken, setExpoPushToken] = useState("");
   const notificationListener = useRef<Notifications.EventSubscription>();
   const responseListener = useRef<Notifications.EventSubscription>();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then((token) =>
-      token && setExpoPushToken(token)
+    registerForPushNotificationsAsync().then(
+      (token) => token && setExpoPushToken(token),
     );
 
     notificationListener.current =
@@ -49,13 +53,14 @@ const HomePage: React.FC = () => {
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification clicked:", response);
       });
-
-    scheduleDailyNotification(); // Schedule the daily notification on load
+    if (!settings.isNotificationSet) {
+      scheduleDailyNotification(); // Schedules the daily notification on load if not loaded yet
+    }
 
     return () => {
       notificationListener.current &&
         Notifications.removeNotificationSubscription(
-          notificationListener.current
+          notificationListener.current,
         );
       responseListener.current &&
         Notifications.removeNotificationSubscription(responseListener.current);
@@ -69,7 +74,7 @@ const HomePage: React.FC = () => {
         duration: 2000,
         easing: Easing.sin,
         useNativeDriver: true,
-      })
+      }),
     ).start();
   }, []);
 
@@ -102,9 +107,10 @@ const HomePage: React.FC = () => {
 };
 
 async function scheduleDailyNotification() {
-  const existingNotifications = await Notifications.getAllScheduledNotificationsAsync();
+  const existingNotifications =
+    await Notifications.getAllScheduledNotificationsAsync();
   const hasScheduledNotification = existingNotifications.some(
-    (notification) => notification.identifier === "daily-snaki-reminder"
+    (notification) => notification.identifier === "daily-snaki-reminder",
   );
 
   if (!hasScheduledNotification) {
@@ -116,6 +122,7 @@ async function scheduleDailyNotification() {
         data: { screen: "play" },
       },
       trigger: {
+        // seconds:5
         hour: 8, // 8:00 AM
         minute: 0,
         repeats: true,
@@ -202,7 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1a1a1a",
     paddingVertical: 16,
     paddingHorizontal: 60,
-    borderRadius: 0,
+    borderRadius: settings_isRondedEdges()?10:0,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -220,7 +227,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accents,
     paddingVertical: 16,
     paddingHorizontal: 60,
-    borderRadius: 0,
+    borderRadius: settings_isRondedEdges()?10:0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,

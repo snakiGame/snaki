@@ -55,10 +55,15 @@ const useSettingStore = create<SettingStore>((set) => ({
   },
 }));
 
-// Utility functions to access specific settings
+// Utility functions to access specific settings outside of a component
 export function settings_backgroundMusic(): boolean {
   const { settings } = useSettingStore.getState();
   return settings.backgroundMusic; // Returns a boolean
+}
+
+export function settings_isRondedEdges(): boolean {
+  const { settings } = useSettingStore.getState();
+  return settings.roundEdges; // Returns a boolean
 }
 
 export function settings_Vibration(): boolean {
