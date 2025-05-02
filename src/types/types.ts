@@ -8,8 +8,35 @@ export interface Coordinate {
 }
 
 export enum Direction {
-  Right,
-  Up,
-  Left,
-  Down,
+  Up = "UP",
+  Down = "DOWN",
+  Left = "LEFT",
+  Right = "RIGHT",
+}
+
+export enum PowerUp {
+  Speed = "SPEED",
+  Slow = "SLOW",
+  DoublePoints = "DOUBLE_POINTS",
+}
+
+export enum FoodType {
+  Normal = "NORMAL",
+  Golden = "GOLDEN",
+  Rainbow = "RAINBOW",
+  Poison = "POISON",
+}
+
+export interface ScoreProps {
+  score: number;
+  highScore: number;
+  combo: number;
+}
+
+export interface GameoverModalProps {
+  isModalVisible: boolean;
+  toggleModal: () => void;
+  reloadGame: () => void;
+  score: number;
+  highScore: number;
 }

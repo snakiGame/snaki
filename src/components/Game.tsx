@@ -11,10 +11,12 @@ import {
   Button,
   Dimensions,
   useWindowDimensions,
+  Animated,
+  Easing,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
-import { Direction, Coordinate, GestureEventType } from "../types/types";
+import { Direction, Coordinate, GestureEventType, PowerUp, FoodType } from "../types/types";
 import { checkEatsFood } from "../utils/checkEatsFood";
 import { checkGameOver } from "../utils/checkGameOver";
 import { randomFoodPosition } from "../utils/randomFoodPosition";
@@ -31,6 +33,7 @@ import useSettingStore, {
 import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
+import PowerUpIndicator from "./PowerUpIndicator";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -38,6 +41,9 @@ const MOVE_INTERVAL = 55;
 const SCORE_INCREMENT = 1;
 const BORDER_WIDTH = 12;
 const GAME_UNIT_SIZE = 10;
+const COMBO_THRESHOLD = 3; // Number of foods to eat in quick succession for a combo
+const COMBO_TIMEOUT = 2000; // Time window for combo in milliseconds
+const POWER_UP_DURATION = 5000; // Duration of power-ups in milliseconds
 
 interface GameBounds {
   xMin: number;
@@ -46,10 +52,9 @@ interface GameBounds {
   yMax: number;
 }
 
-interface Score {
-  id: string;
-  score: string;
-  date: string;
+interface PowerUpState {
+  type: PowerUp | null;
+  endTime: number;
 }
 
 export default function Game(): JSX.Element {
@@ -57,12 +62,22 @@ export default function Game(): JSX.Element {
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
   const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
+  const [foodType, setFoodType] = useState<FoodType>(FoodType.Normal);
   const [score, setScore] = useState<number>(0);
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
 
   const [isModalVisible, setModalVisible] = useState(false);
+
+  // New states for enhanced features
+  const [combo, setCombo] = useState<number>(0);
+  const [lastFoodTime, setLastFoodTime] = useState<number>(0);
+  const [powerUp, setPowerUp] = useState<PowerUpState>({ type: null, endTime: 0 });
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
+  const [comboAnimation] = useState(new Animated.Value(0));
+  const [highScore, setHighScore] = useState<number>(0);
+  const [foodAnimation] = useState(new Animated.Value(0));
 
   const { settings } = useSettingStore();
 
@@ -78,14 +93,67 @@ export default function Game(): JSX.Element {
     setModalVisible(prev => !prev);
   }, []);
 
+  // Handle combo system
+  const updateCombo = useCallback(() => {
+    const now = Date.now();
+    if (now - lastFoodTime < COMBO_TIMEOUT) {
+      setCombo(prev => {
+        const newCombo = prev + 1;
+        if (newCombo >= COMBO_THRESHOLD) {
+          // Trigger combo animation
+          Animated.sequence([
+            Animated.timing(comboAnimation, {
+              toValue: 1,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(comboAnimation, {
+              toValue: 0,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+          ]).start();
+        }
+        return newCombo;
+      });
+    } else {
+      setCombo(1);
+    }
+    setLastFoodTime(now);
+  }, [lastFoodTime, comboAnimation]);
+
+  // Handle power-ups
+  const activatePowerUp = useCallback((type: PowerUp) => {
+    setPowerUp({ type, endTime: Date.now() + POWER_UP_DURATION });
+    switch (type) {
+      case PowerUp.Speed:
+        setSpeedMultiplier(1.5);
+        break;
+      case PowerUp.Slow:
+        setSpeedMultiplier(0.7);
+        break;
+      case PowerUp.DoublePoints:
+        // Handled in score calculation
+        break;
+    }
+  }, []);
+
+  // Check and deactivate expired power-ups
+  useEffect(() => {
+    if (powerUp.type && Date.now() > powerUp.endTime) {
+      setPowerUp({ type: null, endTime: 0 });
+      setSpeedMultiplier(1);
+    }
+  }, [powerUp]);
+
   useEffect(() => {
     if (!isGameOver) {
       const intervalId = setInterval(() => {
         !isPaused && moveSnake();
-      }, MOVE_INTERVAL);
+      }, MOVE_INTERVAL / speedMultiplier);
       return () => clearInterval(intervalId);
     }
-  }, [snake, isGameOver, isPaused]);
+  }, [snake, isGameOver, isPaused, speedMultiplier]);
 
   useEffect(() => {
     backgroundMusic();
@@ -101,11 +169,27 @@ export default function Game(): JSX.Element {
     Vibration.vibrate(length);
   }, [settings.vibration]);
 
+  const calculateScore = useCallback((baseScore: number) => {
+    let finalScore = baseScore;
+    // Apply combo multiplier
+    if (combo >= COMBO_THRESHOLD) {
+      finalScore *= Math.min(combo, 5); // Cap combo multiplier at 5x
+    }
+    // Apply power-up multiplier
+    if (powerUp.type === PowerUp.DoublePoints) {
+      finalScore *= 2;
+    }
+    return finalScore;
+  }, [combo, powerUp.type]);
+
   const moveSnake = useCallback(() => {
     const snakeHead = snake[0];
     const newHead = { ...snakeHead };
 
     if (checkGameOver(snakeHead, gameBounds)) {
+      if (score > highScore) {
+        setHighScore(score);
+      }
       setIsGameOver(true);
       vibrate(300);
       setModalVisible(true);
@@ -128,14 +212,28 @@ export default function Game(): JSX.Element {
     }
 
     if (checkEatsFood(newHead, food, 2)) {
+      // Random chance for special food or power-up
+      const random = Math.random();
+      if (random < 0.1) { // 10% chance for power-up
+        const powerUps = Object.values(PowerUp);
+        const randomPowerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+        activatePowerUp(randomPowerUp);
+      } else if (random < 0.3) { // 20% chance for special food
+        const foodTypes = Object.values(FoodType);
+        setFoodType(foodTypes[Math.floor(Math.random() * foodTypes.length)]);
+      } else {
+        setFoodType(FoodType.Normal);
+      }
+
       setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax));
       setSnake([newHead, ...snake]);
       vibrate(25);
-      setScore(prev => prev + SCORE_INCREMENT);
+      updateCombo();
+      setScore(prev => prev + calculateScore(SCORE_INCREMENT));
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
-  }, [snake, direction, food, gameBounds, vibrate]);
+  }, [snake, direction, food, gameBounds, vibrate, combo, powerUp, calculateScore, updateCombo, activatePowerUp, score, highScore]);
 
   const handleGesture = useCallback((event: GestureEventType) => {
     const { translationX, translationY } = event.nativeEvent;
@@ -149,10 +247,14 @@ export default function Game(): JSX.Element {
   const reloadGame = useCallback(() => {
     setSnake(SNAKE_INITIAL_POSITION);
     setFood(FOOD_INITIAL_POSITION);
+    setFoodType(FoodType.Normal);
     setIsGameOver(false);
     setScore(0);
+    setCombo(0);
     setDirection(Direction.Right);
     setIsPaused(false);
+    setPowerUp({ type: null, endTime: 0 });
+    setSpeedMultiplier(1);
   }, []);
 
   const pauseGame = useCallback(() => {
@@ -171,17 +273,44 @@ export default function Game(): JSX.Element {
           pauseGame={pauseGame}
           isPaused={isPaused}
         >
-          <Score score={score} />
+          <Score score={score} highScore={highScore} combo={combo} />
         </Header>
         <View style={styles.boundaries}>
           <Snake snake={snake} />
-          <Food x={food.x} y={food.y} />
+          <Food x={food.x} y={food.y} type={foodType} />
+          {powerUp.type && (
+            <PowerUpIndicator
+              type={powerUp.type}
+              timeLeft={Math.max(0, powerUp.endTime - Date.now())}
+            />
+          )}
+          {combo >= COMBO_THRESHOLD && (
+            <Animated.Text
+              style={[
+                styles.comboText,
+                {
+                  transform: [
+                    {
+                      scale: comboAnimation.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [1, 1.5],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
+              {combo}x COMBO!
+            </Animated.Text>
+          )}
         </View>
 
         <GameOverModal
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
           reloadGame={reloadGame}
+          score={score}
+          highScore={highScore}
         />
       </SafeAreaView>
     </PanGestureHandler>
@@ -199,5 +328,17 @@ const styles = StyleSheet.create({
     borderWidth: BORDER_WIDTH,
     borderRadius: settings_isRondedEdges() ? 10 : 0,
     backgroundColor: Colors.background,
+  },
+  comboText: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -50 }, { translateY: -50 }],
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.primary,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
