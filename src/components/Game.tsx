@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -9,6 +9,8 @@ import {
   Vibration,
   Text,
   Button,
+  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
@@ -32,14 +34,17 @@ import { backgroundMusic } from "@/lib/utils";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
-const GAME_BOUNDS = {
-  xMin: 0,
-  xMax: 35,
-  yMin: 0,
-  yMax: 63,
-};
 const MOVE_INTERVAL = 55;
 const SCORE_INCREMENT = 1;
+const BORDER_WIDTH = 12;
+const GAME_UNIT_SIZE = 10;
+
+interface GameBounds {
+  xMin: number;
+  xMax: number;
+  yMin: number;
+  yMax: number;
+}
 
 interface Score {
   id: string;
@@ -48,6 +53,7 @@ interface Score {
 }
 
 export default function Game(): JSX.Element {
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const [direction, setDirection] = useState<Direction>(Direction.Right);
   const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
   const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
@@ -58,24 +64,23 @@ export default function Game(): JSX.Element {
 
   const [isModalVisible, setModalVisible] = useState(false);
 
-  const toggleModal = () => {
-    setModalVisible(!isModalVisible);
-  };
-
   const { settings } = useSettingStore();
 
+  // Calculate game bounds based on screen dimensions
+  const gameBounds: GameBounds = {
+    xMin: 0,
+    xMax: Math.floor((screenWidth - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
+    yMin: 0,
+    yMax: Math.floor((screenHeight - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
+  };
 
-  const [currentBgMusic, setCurrentBgMusic] = useState("bg-music1.mp3");
-  const bgMusics = [
-    "../../assets/music/bg-music1.mp3",
-    "../../assets/music/bg-music2.mp3",
-    "../../assets/music/stranger-things.mp3",
-  ];
+  const toggleModal = useCallback(() => {
+    setModalVisible(prev => !prev);
+  }, []);
 
   useEffect(() => {
     if (!isGameOver) {
       const intervalId = setInterval(() => {
-        // backgroundMusic()
         !isPaused && moveSnake();
       }, MOVE_INTERVAL);
       return () => clearInterval(intervalId);
@@ -83,38 +88,27 @@ export default function Game(): JSX.Element {
   }, [snake, isGameOver, isPaused]);
 
   useEffect(() => {
-    let rand_bg_music_index = Math.floor(Math.random() * bgMusics.length);
-    setCurrentBgMusic(bgMusics[rand_bg_music_index]);
     backgroundMusic();
+    return () => {
+      if (sound) {
+        sound.unloadAsync();
+      }
+    };
   }, []);
 
-  const vibrate = async (length: number) => {
-    if (!settings.vibration) {
-      return;
-    }
+  const vibrate = useCallback(async (length: number) => {
+    if (!settings.vibration) return;
     Vibration.vibrate(length);
-  };
-  useEffect(() => {
-    // Clean up the sound on unmount
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
+  }, [settings.vibration]);
 
-  const moveSnake = () => {
+  const moveSnake = useCallback(() => {
     const snakeHead = snake[0];
-    const newHead = { ...snakeHead }; // creating a new head object to avoid mutating the original head
+    const newHead = { ...snakeHead };
 
-    //playing the sound
-    // GAME OVER
-    if (checkGameOver(snakeHead, GAME_BOUNDS)) {
-      setIsGameOver((prev) => !prev);
+    if (checkGameOver(snakeHead, gameBounds)) {
+      setIsGameOver(true);
       vibrate(300);
       setModalVisible(true);
-      // insertScore(score);
-      
       return;
     }
 
@@ -131,58 +125,45 @@ export default function Game(): JSX.Element {
       case Direction.Right:
         newHead.x += 1;
         break;
-      default:
-        break;
     }
 
     if (checkEatsFood(newHead, food, 2)) {
-      setFood(randomFoodPosition(GAME_BOUNDS.xMax, GAME_BOUNDS.yMax));
+      setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax));
       setSnake([newHead, ...snake]);
       vibrate(25);
-      setScore(score + SCORE_INCREMENT);
+      setScore(prev => prev + SCORE_INCREMENT);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
-  };
+  }, [snake, direction, food, gameBounds, vibrate]);
 
-  const handleGesture = (event: GestureEventType) => {
+  const handleGesture = useCallback((event: GestureEventType) => {
     const { translationX, translationY } = event.nativeEvent;
     if (Math.abs(translationX) > Math.abs(translationY)) {
-      if (translationX > 0) {
-        setDirection(Direction.Right);
-      } else {
-        setDirection(Direction.Left);
-      }
+      setDirection(translationX > 0 ? Direction.Right : Direction.Left);
     } else {
-      if (translationY > 0) {
-        setDirection(Direction.Down);
-      } else {
-        setDirection(Direction.Up);
-      }
+      setDirection(translationY > 0 ? Direction.Down : Direction.Up);
     }
-  };
+  }, []);
 
-  const reloadGame = () => {
+  const reloadGame = useCallback(() => {
     setSnake(SNAKE_INITIAL_POSITION);
     setFood(FOOD_INITIAL_POSITION);
     setIsGameOver(false);
     setScore(0);
     setDirection(Direction.Right);
     setIsPaused(false);
-  };
+  }, []);
 
-  const pauseGame = () => {
-    console.log("Game paused");
-    setIsPaused(!isPaused);
-  };
-
-  // console.log(JSON.stringify(snake, null, 0));
+  const pauseGame = useCallback(() => {
+    setIsPaused(prev => !prev);
+  }, []);
 
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
       <SafeAreaView style={styles.container}>
         <StatusBar
-          barStyle={"light-content"}
+          barStyle="light-content"
           backgroundColor={Colors.primary}
         />
         <Header
@@ -197,7 +178,6 @@ export default function Game(): JSX.Element {
           <Food x={food.x} y={food.y} />
         </View>
 
-        {/* game over modal */}
         <GameOverModal
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
@@ -216,8 +196,8 @@ const styles = StyleSheet.create({
   boundaries: {
     flex: 1,
     borderColor: Colors.primary,
-    borderWidth: 12,
-    borderRadius: settings_isRondedEdges()?10:0,
+    borderWidth: BORDER_WIDTH,
+    borderRadius: settings_isRondedEdges() ? 10 : 0,
     backgroundColor: Colors.background,
   },
 });

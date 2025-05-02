@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from "react-native";
 import { Coordinate } from "../types/types";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function getRandomFruitEmoji() {
   const fruitEmojis = ["🍎", "🍊", "🍋", "🍇", "🍉", "🍓", "🍑", "🍍"];
@@ -9,8 +9,13 @@ function getRandomFruitEmoji() {
 }
 
 export default function Food({ x, y }: Coordinate): JSX.Element {
-  const [fruitEmoji, setFruitEmoji] = useState<string>("")
-  return <Text style={[{ top: y * 10, left: x * 10 }, styles.food]}>🍎</Text>;
+  const [fruitEmoji, setFruitEmoji] = useState<string>("🍎");
+
+  useEffect(() => {
+    setFruitEmoji(getRandomFruitEmoji());
+  }, [x, y]); // Change emoji when food position changes
+
+  return <Text style={[{ top: y * 10, left: x * 10 }, styles.food]}>{fruitEmoji}</Text>;
 }
 
 const styles = StyleSheet.create({
