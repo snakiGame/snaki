@@ -29,8 +29,6 @@ import useSettingStore, {
 import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
-import { dbInit } from "@/lib/db";
-import * as SQLite from "expo-sqlite";
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
