@@ -12,33 +12,20 @@ const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = ({ type, timeLeft }) =
   const getPowerUpColor = () => {
     switch (type) {
       case PowerUp.Speed:
-        return '#FFD700'; // Gold
+        return '#4CAF50';
       case PowerUp.Slow:
-        return '#4169E1'; // Royal Blue
+        return '#2196F3';
       case PowerUp.DoublePoints:
-        return '#FF69B4'; // Hot Pink
+        return '#FFC107';
       default:
         return Colors.primary;
     }
   };
 
-  const getPowerUpText = () => {
-    switch (type) {
-      case PowerUp.Speed:
-        return 'SPEED BOOST';
-      case PowerUp.Slow:
-        return 'SLOW MOTION';
-      case PowerUp.DoublePoints:
-        return '2x POINTS';
-      default:
-        return '';
-    }
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: getPowerUpColor() }]}>
-      <Text style={styles.text}>{getPowerUpText()}</Text>
-      <Text style={styles.timer}>{Math.ceil(timeLeft / 1000)}s</Text>
+      <Text style={styles.text}>{type}</Text>
+      <Text style={styles.timeLeft}>{Math.ceil(timeLeft / 1000)}s</Text>
     </View>
   );
 };
@@ -52,23 +39,15 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    gap: 8,
   },
   text: {
     color: '#fff',
     fontWeight: 'bold',
-    marginRight: 8,
   },
-  timer: {
+  timeLeft: {
     color: '#fff',
-    fontWeight: 'bold',
+    fontSize: 12,
   },
 });
 
