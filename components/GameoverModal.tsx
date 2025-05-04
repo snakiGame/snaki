@@ -4,121 +4,164 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  BackHandler,
   Image,
   Vibration,
+  Dimensions,
 } from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "@/styles/colors";
 import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
+import { Ionicons } from "@expo/vector-icons";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
   toggleModal: () => void;
   reloadGame: () => void;
+  score: number;
+  highScore: number;
 }
+
+const { width } = Dimensions.get('window');
 
 const GameOverModal = ({
   isModalVisible,
   toggleModal,
   reloadGame,
+  score,
+  highScore,
 }: GameoverModalProps) => {
   const { settings } = useSettingStore();
   return (
     <Modal
       isVisible={isModalVisible}
-      // onBackdropPress={toggleModal}
-      animationIn="shake"
-      animationOut="wobble"
+      animationIn="zoomIn"
+      animationOut="zoomOut"
+      backdropTransitionOutTiming={0}
+      style={styles.modal}
     >
       <LinearGradient
-        colors={["#1a1a1a", "#000000"]}
+        colors={[Colors.primary, Colors.primary + 'CC']}
         style={styles.modalContainer}
       >
-        {/* Game Over Title */}
-        <Text style={styles.modalTitle}>Game Over</Text>
+        <View style={styles.header}>
+          <Ionicons name="game-controller" size={40} color="#fff" />
+          <Text style={styles.modalTitle}>Game Over</Text>
+        </View>
 
-        {/* Game Over Message */}
-        <Text style={styles.modalMessage}>You have hit a wall!</Text>
+        <View style={styles.scoreContainer}>
+          <View style={styles.scoreBox}>
+            <Text style={styles.scoreLabel}>Score</Text>
+            <Text style={styles.scoreValue}>{score}</Text>
+          </View>
+          <View style={styles.scoreBox}>
+            <Text style={styles.scoreLabel}>Best</Text>
+            <Text style={styles.scoreValue}>{highScore}</Text>
+          </View>
+        </View>
 
-        {/* Snake Crash Image */}
         <Image
           source={require("../assets/crash.png")} 
           style={styles.crashImage}
           resizeMode="contain"
         />
 
-        {/* Buttons */}
-        <View style={styles.buttonsContainer}>
-          {/* Play Again Button */}
-          <TouchableOpacity
-            style={styles.playAgainButton}
-            onPress={() => {
-              if(settings.vibration){
-                //mounting a tiny vibration if enabled
-                Vibration.vibrate(15)
-              }
-              toggleModal();
-              reloadGame();
-            }}
-          >
-            <Text style={styles.playAgainButtonText}>Play Again</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={styles.playAgainButton}
+          onPress={() => {
+            if(settings.vibration) Vibration.vibrate(15);
+            toggleModal();
+            reloadGame();
+          }}
+        >
+          <Ionicons name="refresh" size={20} color="#fff" style={styles.buttonIcon} />
+          <Text style={styles.playAgainButtonText}>Play Again</Text>
+        </TouchableOpacity>
       </LinearGradient>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
+  modal: {
+    margin: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalContainer: {
-    padding: 20,
+    width: width * 0.85,
+    padding: 25,
     alignItems: "center",
-    justifyContent: "center",
+    borderRadius: settings_isRondedEdges() ? 25 : 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 10,
-    borderRadius: settings_isRondedEdges()?10:0
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   modalTitle: {
-    fontSize: 30,
+    fontSize: 32,
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    marginTop: 10,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
-  modalMessage: {
-    fontSize: 18,
-    color: "#aaaaaa",
-    textAlign: "center",
+  scoreContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
     marginBottom: 20,
-    letterSpacing: 1.2,
+  },
+  scoreBox: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 15,
+    borderRadius: 15,
+    minWidth: 100,
+  },
+  scoreLabel: {
+    fontSize: 14,
+    color: '#fff',
+    opacity: 0.8,
+    marginBottom: 5,
+  },
+  scoreValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   crashImage: {
-    width: 150, 
-    height: 150, 
-    marginBottom: 20,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
+    width: 120,
+    height: 120,
+    marginBottom: 25,
   },
   playAgainButton: {
-    width: "100%",
-    borderRadius: settings_isRondedEdges()?10:0,
-    backgroundColor: Colors.accents,
-    paddingVertical: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingVertical: 15,
     paddingHorizontal: 30,
+    borderRadius: 15,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  buttonIcon: {
+    marginRight: 8,
   },
   playAgainButtonText: {
     color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
 

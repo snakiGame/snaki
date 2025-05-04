@@ -311,6 +311,8 @@ export default function Game(): JSX.Element {
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
           reloadGame={reloadGame}
+          score={score}
+          highScore={highScore}
         />
 
         <ScoreModal
