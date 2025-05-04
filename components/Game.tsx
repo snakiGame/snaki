@@ -328,7 +328,6 @@ export default function Game(): JSX.Element {
         <ScoreModal
           isVisible={isScoreModalVisible}
           onClose={() => {pauseGame();setScoreModalVisible(false)}}
-          highScore={localHighScore}
         />
       </SafeAreaView>
     </PanGestureHandler>

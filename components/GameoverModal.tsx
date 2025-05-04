@@ -35,7 +35,7 @@ const GameOverModal = ({
   return (
     <Modal
       isVisible={isModalVisible}
-      animationIn="zoomIn"
+      animationIn="wobble"
       animationOut="zoomOut"
       backdropTransitionOutTiming={0}
       style={styles.modal}
