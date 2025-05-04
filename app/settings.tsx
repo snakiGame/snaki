@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
 import useSettingStore from "@/lib/settings";
 import { stopBackgroundMusic } from "@/lib/utils";
 import { StatusBar } from "expo-status-bar";
-import { Colors } from "@/src/styles/colors";
+import { Colors } from "@/styles/colors";
 
 export default function Settings() {
   const router = useRouter();

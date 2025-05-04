@@ -13,7 +13,7 @@ import {
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "@/src/styles/colors";
+import { Colors } from "@/styles/colors";
 import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "@/src/styles/colors";
+import { Colors } from "@/styles/colors";
 import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
 
 interface GameoverModalProps {
