@@ -36,9 +36,9 @@ const MOVE_INTERVAL = 55;
 const SCORE_INCREMENT = 1;
 const BORDER_WIDTH = 12;
 const GAME_UNIT_SIZE = 10;
-const COMBO_THRESHOLD = 3; 
-const COMBO_TIMEOUT = 2000; 
-const POWER_UP_DURATION = 5000; 
+const COMBO_THRESHOLD = 3;
+const COMBO_TIMEOUT = 2000;
+const POWER_UP_DURATION = 5000;
 
 interface GameBounds {
   xMin: number;
@@ -132,7 +132,7 @@ export default function Game(): JSX.Element {
     }
   }, []);
 
-  
+
   useEffect(() => {
     if (powerUp.type && Date.now() > powerUp.endTime) {
       setPowerUp({ type: null, endTime: 0 });
@@ -165,11 +165,11 @@ export default function Game(): JSX.Element {
 
   const calculateScore = useCallback((baseScore: number) => {
     let finalScore = baseScore;
-    
+
     if (combo >= COMBO_THRESHOLD) {
       finalScore *= Math.min(combo, 5);
     }
-    
+
     if (powerUp.type === PowerUp.DoublePoints) {
       finalScore *= 2;
     }
@@ -208,7 +208,7 @@ export default function Game(): JSX.Element {
     if (checkEatsFood(newHead, food, 2)) {
       // Random chance for special food or power-up
       const random = Math.random();
-      if (random < 0.1) { 
+      if (random < 0.1) {
         const powerUps = Object.values(PowerUp);
         const randomPowerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
         activatePowerUp(randomPowerUp);
@@ -251,7 +251,7 @@ export default function Game(): JSX.Element {
     setSpeedMultiplier(1);
   }, []);
 
-  const pauseGame = useCallback(() => {
+  const pauseGame = useCallback(() => { //pauses and unpauses the game
     setIsPaused(prev => !prev);
   }, []);
 
@@ -267,10 +267,13 @@ export default function Game(): JSX.Element {
           pauseGame={pauseGame}
           isPaused={isPaused}
         >
-          <Score 
-            score={score} 
-            combo={combo} 
-            onHighScorePress={() => setScoreModalVisible(true)} 
+          <Score
+            score={score}
+            combo={combo}
+            onHighScorePress={() => {
+              pauseGame()
+              setScoreModalVisible(true)
+            }}
           />
         </Header>
         <View style={styles.boundaries}>
@@ -317,7 +320,7 @@ export default function Game(): JSX.Element {
 
         <ScoreModal
           isVisible={isScoreModalVisible}
-          onClose={() => setScoreModalVisible(false)}
+          onClose={() => {pauseGame();setScoreModalVisible(false)}}
           highScore={highScore}
         />
       </SafeAreaView>
