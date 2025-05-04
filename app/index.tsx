@@ -122,7 +122,6 @@ async function scheduleDailyNotification() {
         data: { screen: "play" },
       },
       trigger: {
-        // seconds:5
         hour: 8, // 8:00 AM
         minute: 0,
         repeats: true,

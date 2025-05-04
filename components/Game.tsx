@@ -4,15 +4,9 @@ import {
   StyleSheet,
   View,
   StatusBar,
-  Alert,
-  BackHandler,
   Vibration,
-  Text,
-  Button,
-  Dimensions,
   useWindowDimensions,
   Animated,
-  Easing,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";

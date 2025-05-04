@@ -20,7 +20,7 @@ export default function Header({
 }: HeaderProps): JSX.Element {
   const router = useRouter();
   
-  const pauseGameThemPushToSettings = ()=>{//Pauses the game the pushs to settings page
+  const pauseGameThenPushToSettings = ()=>{
     pauseGame()
     router.push("/settings")
   }
@@ -30,7 +30,7 @@ export default function Header({
       <View style={styles.controls}>
         <TouchableOpacity
           style={styles.settings}
-          onPress={() => pauseGameThemPushToSettings()}
+          onPress={() => pauseGameThenPushToSettings()}
         >
           <Ionicons name="settings-sharp" size={35} color={Colors.primary} />
         </TouchableOpacity>
