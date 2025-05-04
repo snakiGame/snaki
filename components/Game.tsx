@@ -28,6 +28,7 @@ import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
 import PowerUpIndicator from "./PowerUpIndicator";
 import { LinearGradient } from 'expo-linear-gradient';
+import ScoreModal from './ScoreModal';
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -69,6 +70,7 @@ export default function Game(): JSX.Element {
   const [comboAnimation] = useState(new Animated.Value(0));
   const [highScore, setHighScore] = useState<number>(0);
   const [foodAnimation] = useState(new Animated.Value(0));
+  const [isScoreModalVisible, setScoreModalVisible] = useState(false);
 
   const { settings } = useSettingStore();
 
@@ -265,7 +267,11 @@ export default function Game(): JSX.Element {
           pauseGame={pauseGame}
           isPaused={isPaused}
         >
-          <Score score={score} highScore={highScore} combo={combo} />
+          <Score 
+            score={score} 
+            combo={combo} 
+            onHighScorePress={() => setScoreModalVisible(true)} 
+          />
         </Header>
         <View style={styles.boundaries}>
           <LinearGradient
@@ -305,6 +311,12 @@ export default function Game(): JSX.Element {
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
           reloadGame={reloadGame}
+        />
+
+        <ScoreModal
+          isVisible={isScoreModalVisible}
+          onClose={() => setScoreModalVisible(false)}
+          highScore={highScore}
         />
       </SafeAreaView>
     </PanGestureHandler>

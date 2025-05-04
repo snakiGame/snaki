@@ -63,8 +63,7 @@ export default function Header({
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: Platform.OS === 'ios' ? 60 : 35,
-    paddingBottom: 15,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
     backgroundColor: Colors.primary,
     borderBottomLeftRadius: settings_isRondedEdges() ? 25 : 0,
     borderBottomRightRadius: settings_isRondedEdges() ? 25 : 0,

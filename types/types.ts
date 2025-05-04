@@ -29,8 +29,9 @@ export enum FoodType {
 
 export interface ScoreProps {
   score: number;
-  highScore: number;
   combo: number;
+  onHighScorePress: () => void;
+  highScore?: number;
 }
 
 export interface GameoverModalProps {
