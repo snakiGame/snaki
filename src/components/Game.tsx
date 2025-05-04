@@ -30,7 +30,6 @@ import useSettingStore, {
   settings_backgroundMusic,
   settings_isRondedEdges,
 } from "@/lib/settings";
-import ModalComponent from "@/components/Modal";
 import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
 import PowerUpIndicator from "./PowerUpIndicator";
@@ -41,9 +40,9 @@ const MOVE_INTERVAL = 55;
 const SCORE_INCREMENT = 1;
 const BORDER_WIDTH = 12;
 const GAME_UNIT_SIZE = 10;
-const COMBO_THRESHOLD = 3; // Number of foods to eat in quick succession for a combo
-const COMBO_TIMEOUT = 2000; // Time window for combo in milliseconds
-const POWER_UP_DURATION = 5000; // Duration of power-ups in milliseconds
+const COMBO_THRESHOLD = 3; 
+const COMBO_TIMEOUT = 2000; 
+const POWER_UP_DURATION = 5000; 
 
 interface GameBounds {
   xMin: number;
@@ -67,10 +66,7 @@ export default function Game(): JSX.Element {
   const [isGameOver, setIsGameOver] = useState<boolean>(false);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-
   const [isModalVisible, setModalVisible] = useState(false);
-
-  // New states for enhanced features
   const [combo, setCombo] = useState<number>(0);
   const [lastFoodTime, setLastFoodTime] = useState<number>(0);
   const [powerUp, setPowerUp] = useState<PowerUpState>({ type: null, endTime: 0 });
@@ -81,13 +77,13 @@ export default function Game(): JSX.Element {
 
   const { settings } = useSettingStore();
 
-  // Calculate game bounds based on screen dimensions
   const gameBounds: GameBounds = {
     xMin: 0,
     xMax: Math.floor((screenWidth - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
     yMin: 0,
     yMax: Math.floor((screenHeight - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
   };
+  console.log(gameBounds)
 
   const toggleModal = useCallback(() => {
     setModalVisible(prev => !prev);
@@ -100,6 +96,7 @@ export default function Game(): JSX.Element {
       setCombo(prev => {
         const newCombo = prev + 1;
         if (newCombo >= COMBO_THRESHOLD) {
+
           // Trigger combo animation
           Animated.sequence([
             Animated.timing(comboAnimation, {
@@ -138,7 +135,7 @@ export default function Game(): JSX.Element {
     }
   }, []);
 
-  // Check and deactivate expired power-ups
+  
   useEffect(() => {
     if (powerUp.type && Date.now() > powerUp.endTime) {
       setPowerUp({ type: null, endTime: 0 });
@@ -171,11 +168,11 @@ export default function Game(): JSX.Element {
 
   const calculateScore = useCallback((baseScore: number) => {
     let finalScore = baseScore;
-    // Apply combo multiplier
+    
     if (combo >= COMBO_THRESHOLD) {
-      finalScore *= Math.min(combo, 5); // Cap combo multiplier at 5x
+      finalScore *= Math.min(combo, 5);
     }
-    // Apply power-up multiplier
+    
     if (powerUp.type === PowerUp.DoublePoints) {
       finalScore *= 2;
     }
@@ -214,11 +211,11 @@ export default function Game(): JSX.Element {
     if (checkEatsFood(newHead, food, 2)) {
       // Random chance for special food or power-up
       const random = Math.random();
-      if (random < 0.1) { // 10% chance for power-up
+      if (random < 0.1) { 
         const powerUps = Object.values(PowerUp);
         const randomPowerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
         activatePowerUp(randomPowerUp);
-      } else if (random < 0.3) { // 20% chance for special food
+      } else if (random < 0.3) {
         const foodTypes = Object.values(FoodType);
         setFoodType(foodTypes[Math.floor(Math.random() * foodTypes.length)]);
       } else {
@@ -309,8 +306,8 @@ export default function Game(): JSX.Element {
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
           reloadGame={reloadGame}
-          score={score}
-          highScore={highScore}
+          // score={score}
+          // highScore={highScore}
         />
       </SafeAreaView>
     </PanGestureHandler>
