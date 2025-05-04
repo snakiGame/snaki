@@ -13,7 +13,7 @@ const Score: React.FC<ScoreProps> = ({ score, combo, onHighScorePress }) => {
       </View>
       {combo > 0 && (
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
+          colors={[Colors.accents, 'rgba(255, 255, 255, 0.1)']}
           style={styles.comboContainer}
         >
           <Text style={styles.comboLabel}>Combo</Text>
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: Colors.accents,
   },
   comboLabel: {
     fontSize: 10,

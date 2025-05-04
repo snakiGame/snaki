@@ -22,8 +22,10 @@ import Constants from "expo-constants";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
 
@@ -36,8 +38,8 @@ const HomePage: React.FC = () => {
     settingsInit();
   }, []);
   const [expoPushToken, setExpoPushToken] = useState("");
-  const notificationListener = useRef<Notifications.EventSubscription>();
-  const responseListener = useRef<Notifications.EventSubscription>();
+  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(
@@ -122,9 +124,11 @@ async function scheduleDailyNotification() {
         data: { screen: "play" },
       },
       trigger: {
+        type: 'daily',
         hour: 8, // 8:00 AM
         minute: 0,
         repeats: true,
+        channelId: 'daily-reminders',
       },
     });
     console.log("Daily notification scheduled!");

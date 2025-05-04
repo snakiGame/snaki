@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   settings: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.accents,
   },
   reload: {
     backgroundColor: 'rgba(255, 255, 255, 0.15)',

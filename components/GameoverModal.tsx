@@ -84,6 +84,7 @@ const GameOverModal = ({
 
 const styles = StyleSheet.create({
   modal: {
+    height:'100%',
     margin: 0,
     justifyContent: 'center',
     alignItems: 'center',
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
   playAgainButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: Colors.accents,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 15,
