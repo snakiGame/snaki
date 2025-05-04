@@ -54,7 +54,7 @@ export default function Header({
 const styles = StyleSheet.create({
   container: {
     flex: 0.08,
-    marginTop: 5,
+    marginTop: 25,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
     borderWidth: 12,
     borderRadius: settings_isRondedEdges()?10:0,
     borderBottomWidth: 0,
-    padding: 15,
+    padding: 10,
     backgroundColor: Colors.background,
   },
   controls: {
