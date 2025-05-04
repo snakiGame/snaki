@@ -1,25 +1,28 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { ScoreProps } from '../types/types';
 import { Colors } from '../styles/colors';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const Score: React.FC<ScoreProps> = ({ score, highScore, combo }) => {
+const Score: React.FC<ScoreProps> = ({ score, combo, onHighScorePress }) => {
   return (
     <View style={styles.container}>
       <View style={styles.scoreContainer}>
         <Text style={styles.scoreLabel}>Score</Text>
         <Text style={styles.scoreValue}>{score}</Text>
       </View>
-      <View style={styles.scoreContainer}>
-        <Text style={styles.scoreLabel}>High Score</Text>
-        <Text style={styles.scoreValue}>{highScore}</Text>
-      </View>
       {combo > 0 && (
-        <View style={styles.comboContainer}>
+        <LinearGradient
+          colors={['rgba(255, 255, 255, 0.2)', 'rgba(255, 255, 255, 0.1)']}
+          style={styles.comboContainer}
+        >
           <Text style={styles.comboLabel}>Combo</Text>
           <Text style={styles.comboValue}>{combo}x</Text>
-        </View>
+        </LinearGradient>
       )}
+      <TouchableOpacity onPress={onHighScorePress} style={styles.highScoreButton}>
+        <Text style={styles.highScoreButtonText}>🏆</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -28,38 +31,61 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
+    gap: 15,
   },
   scoreContainer: {
     alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
   },
   scoreLabel: {
-    fontSize: 12,
-    color: Colors.text,
+    fontSize: 10,
+    color: '#fff',
     opacity: 0.8,
+    fontWeight: '500',
   },
   scoreValue: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   comboContainer: {
     alignItems: 'center',
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 15,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   comboLabel: {
     fontSize: 10,
     color: '#fff',
     opacity: 0.8,
+    fontWeight: '500',
   },
   comboValue: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  highScoreButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  highScoreButtonText: {
+    fontSize: 16,
   },
 });
 

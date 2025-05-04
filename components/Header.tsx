@@ -1,4 +1,4 @@
-import { TouchableOpacity, StyleSheet, View } from "react-native";
+import { TouchableOpacity, StyleSheet, View, Platform, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../styles/colors";
 import { FontAwesome } from "@expo/vector-icons";
@@ -19,6 +19,8 @@ export default function Header({
   isPaused,
 }: HeaderProps): JSX.Element {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 360;
   
   const pauseGameThenPushToSettings = ()=>{
     pauseGame()
@@ -27,54 +29,91 @@ export default function Header({
   
   return (
     <View style={styles.container}>
-      <View style={styles.controls}>
-        <TouchableOpacity
-          style={styles.settings}
-          onPress={() => pauseGameThenPushToSettings()}
-        >
-          <Ionicons name="settings-sharp" size={35} color={Colors.primary} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={reloadGame}>
-          <Ionicons name="reload-circle" size={35} color={Colors.primary} />
-        </TouchableOpacity>
+      <View style={[styles.content, isSmallScreen && styles.smallScreenContent]}>
+        <View style={styles.controls}>
+          <TouchableOpacity
+            style={[styles.button, styles.settings]}
+            onPress={() => pauseGameThenPushToSettings()}
+          >
+            <Ionicons name="settings-sharp" size={isSmallScreen ? 20 : 24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.reload]}
+            onPress={reloadGame}
+          >
+            <Ionicons name="reload-circle" size={isSmallScreen ? 20 : 24} color="#fff" />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={pauseGame}>
-          <FontAwesome
-            name={isPaused ? "play-circle" : "pause-circle"}
-            size={35}
-            color={Colors.primary}
-          />
-        </TouchableOpacity>
+          <TouchableOpacity 
+            style={[styles.button, styles.pause]}
+            onPress={pauseGame}
+          >
+            <FontAwesome
+              name={isPaused ? "play-circle" : "pause-circle"}
+              size={isSmallScreen ? 20 : 24}
+              color="#fff"
+            />
+          </TouchableOpacity>
+        </View>
+        {children}
       </View>
-      {children}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 0.08,
-    marginTop: 25,
+    paddingTop: Platform.OS === 'ios' ? 60 : 35,
+    paddingBottom: 15,
+    backgroundColor: Colors.primary,
+    borderBottomLeftRadius: settings_isRondedEdges() ? 25 : 0,
+    borderBottomRightRadius: settings_isRondedEdges() ? 25 : 0,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  content: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    borderColor: Colors.primary,
-    borderWidth: 12,
-    borderRadius: settings_isRondedEdges()?10:0,
-    borderBottomWidth: 0,
-    padding: 10,
-    backgroundColor: Colors.background,
+    paddingHorizontal: 20,
+  },
+  smallScreenContent: {
+    paddingHorizontal: 15,
   },
   controls: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    gap: 6,
+    gap: 15,
+  },
+  button: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   settings: {
-    backgroundColor: Colors.accents,
-    borderRadius: 10,
-    padding: 2,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  reload: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  pause: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
 });

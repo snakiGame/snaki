@@ -27,6 +27,7 @@ import useSettingStore, {
 import GameOverModal from "@/components/GameoverModal";
 import { backgroundMusic } from "@/lib/utils";
 import PowerUpIndicator from "./PowerUpIndicator";
+import { LinearGradient } from 'expo-linear-gradient';
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -267,6 +268,10 @@ export default function Game(): JSX.Element {
           <Score score={score} highScore={highScore} combo={combo} />
         </Header>
         <View style={styles.boundaries}>
+          <LinearGradient
+            colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+            style={styles.gridBackground}
+          />
           <Snake snake={snake} />
           <Food x={food.x} y={food.y} type={foodType} />
           {powerUp.type && (
@@ -300,8 +305,6 @@ export default function Game(): JSX.Element {
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
           reloadGame={reloadGame}
-          // score={score}
-          // highScore={highScore}
         />
       </SafeAreaView>
     </PanGestureHandler>
@@ -315,21 +318,40 @@ const styles = StyleSheet.create({
   },
   boundaries: {
     flex: 1,
-    borderColor: Colors.primary,
-    borderWidth: BORDER_WIDTH,
-    borderRadius: settings_isRondedEdges() ? 10 : 0,
+    margin: 15,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderWidth: 2,
+    borderRadius: settings_isRondedEdges() ? 30 : 0,
     backgroundColor: Colors.background,
+    overflow: 'hidden',
+    position: 'relative',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
+  },
+  gridBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    opacity: 0.3,
   },
   comboText: {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: [{ translateX: -50 }, { translateY: -50 }],
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
     color: Colors.primary,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 4,
   },
 });
