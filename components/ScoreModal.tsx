@@ -1,75 +1,93 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import Modal from 'react-native-modal';
-import { Colors } from '../styles/colors';
-import { settings_isRondedEdges } from '@/lib/settings';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, FlatList, Dimensions } from 'react-native';
+import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
+import { useScoreStore } from '@/lib/scoreStore';
 
 interface ScoreModalProps {
   isVisible: boolean;
   onClose: () => void;
-  highScore: number;
 }
 
 const { width } = Dimensions.get('window');
 
-export default function ScoreModal({ isVisible, onClose, highScore }: ScoreModalProps) {
+export default function ScoreModal({ isVisible, onClose }: ScoreModalProps): JSX.Element {
+  const { highScore, scores } = useScoreStore();
+
+  const renderScoreItem = ({ item, index }: { item: { score: number; date: string }; index: number }) => (
+    <View style={styles.scoreItem}>
+      <Text style={styles.scoreRank}>#{index + 1}</Text>
+      <View style={styles.scoreDetails}>
+        <Text style={styles.scoreValue}>{item.score}</Text>
+        <Text style={styles.scoreDate}>{new Date(item.date).toLocaleDateString()}</Text>
+      </View>
+    </View>
+  );
+
   return (
     <Modal
-      isVisible={isVisible}
-      onBackdropPress={onClose}
-      onSwipeComplete={onClose}
-      swipeDirection={['down']}
-      style={styles.modal}
-      animationIn="slideInUp"
-      animationOut="slideOutDown"
-      backdropTransitionOutTiming={0}
+      visible={isVisible}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}
     >
-      <View style={styles.container}>
-        <View style={styles.handle} />
-        <View style={styles.header}>
-          <Ionicons name="trophy" size={32} color="#fff" />
-          <Text style={styles.title}>High Score</Text>
-        </View>
+      <BlurView intensity={20} style={styles.modalContainer}>
         <LinearGradient
-          colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
-          style={styles.scoreContainer}
+          colors={['rgba(0,0,0,0.8)', 'rgba(0,0,0,0.9)']}
+          style={styles.modalContent}
         >
-          <Text style={styles.scoreLabel}>Best Score</Text>
-          <Text style={styles.scoreValue}>{highScore}</Text>
-          <View style={styles.statsContainer}>
-            <View style={styles.statItem}>
-              <Ionicons name="star" size={20} color="#FFD700" />
-              <Text style={styles.statText}>Keep going!</Text>
-            </View>
+          <View style={styles.handle} />
+          
+          <View style={styles.header}>
+            <Ionicons name="trophy" size={32} color="#FFD700" />
+            <Text style={styles.title}>High Scores</Text>
           </View>
+
+          <View style={styles.highScoreContainer}>
+            <Text style={styles.highScoreLabel}>Best Score</Text>
+            <Text style={styles.highScoreValue}>{highScore}</Text>
+          </View>
+
+          <FlatList
+            data={scores}
+            renderItem={renderScoreItem}
+            keyExtractor={(item) => item.date}
+            style={styles.scoreList}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <Text style={styles.emptyText}>No scores yet. Start playing!</Text>
+            }
+          />
+
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={onClose}
+          >
+            <Ionicons name="close" size={24} color="#fff" />
+          </TouchableOpacity>
         </LinearGradient>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Ionicons name="close" size={24} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      </BlurView>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modal: {
-    margin: 0,
+  modalContainer: {
+    flex: 1,
     justifyContent: 'flex-end',
   },
-  container: {
-    backgroundColor: Colors.primary,
-    borderTopLeftRadius: settings_isRondedEdges() ? 25 : 0,
-    borderTopRightRadius: settings_isRondedEdges() ? 25 : 0,
-    padding: 25,
-    paddingBottom: 40,
-    width: width,
+  modalContent: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingTop: 10,
+    maxHeight: '80%',
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    backgroundColor: 'rgba(255,255,255,0.3)',
     borderRadius: 2,
     alignSelf: 'center',
     marginBottom: 20,
@@ -78,53 +96,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 25,
+    marginBottom: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
     marginLeft: 10,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
-  scoreContainer: {
+  highScoreContainer: {
     alignItems: 'center',
-    padding: 25,
-    borderRadius: 20,
     marginBottom: 20,
+    padding: 15,
+    backgroundColor: 'rgba(255,215,0,0.1)',
+    borderRadius: 15,
   },
-  scoreLabel: {
+  highScoreLabel: {
     fontSize: 16,
-    color: '#fff',
-    opacity: 0.8,
-    marginBottom: 10,
+    color: '#FFD700',
+    marginBottom: 5,
   },
-  scoreValue: {
-    fontSize: 48,
+  highScoreValue: {
+    fontSize: 36,
     fontWeight: 'bold',
-    color: '#fff',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: '#FFD700',
+  },
+  scoreList: {
     marginBottom: 20,
   },
-  statsContainer: {
-    width: '100%',
-    alignItems: 'center',
-  },
-  statItem: {
+  scoreItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    padding: 12,
-    borderRadius: 12,
+    padding: 15,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 10,
+    marginBottom: 10,
   },
-  statText: {
+  scoreRank: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FFD700',
+    width: 40,
+  },
+  scoreDetails: {
+    flex: 1,
+  },
+  scoreValue: {
+    fontSize: 20,
+    fontWeight: 'bold',
     color: '#fff',
-    fontSize: 16,
-    marginLeft: 8,
+  },
+  scoreDate: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.6)',
+    marginTop: 2,
   },
   closeButton: {
     position: 'absolute',
@@ -133,8 +158,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.6)',
+    fontSize: 16,
+    marginTop: 20,
   },
 });

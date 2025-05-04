@@ -29,6 +29,7 @@ import { backgroundMusic } from "@/lib/utils";
 import PowerUpIndicator from "./PowerUpIndicator";
 import { LinearGradient } from 'expo-linear-gradient';
 import ScoreModal from './ScoreModal';
+import { useScoreStore } from '@/lib/scoreStore';
 
 const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
 const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
@@ -68,7 +69,8 @@ export default function Game(): JSX.Element {
   const [powerUp, setPowerUp] = useState<PowerUpState>({ type: null, endTime: 0 });
   const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
   const [comboAnimation] = useState(new Animated.Value(0));
-  const [highScore, setHighScore] = useState<number>(0);
+  const { highScore, addScore } = useScoreStore();
+  const [localHighScore, setLocalHighScore] = useState<number>(highScore);
   const [foodAnimation] = useState(new Animated.Value(0));
   const [isScoreModalVisible, setScoreModalVisible] = useState(false);
 
@@ -181,8 +183,8 @@ export default function Game(): JSX.Element {
     const newHead = { ...snakeHead };
 
     if (checkGameOver(snakeHead, gameBounds)) {
-      if (score > highScore) {
-        setHighScore(score);
+      if (score > localHighScore) {
+        addScore(score);
       }
       setIsGameOver(true);
       vibrate(300);
@@ -227,7 +229,7 @@ export default function Game(): JSX.Element {
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
-  }, [snake, direction, food, gameBounds, vibrate, combo, powerUp, calculateScore, updateCombo, activatePowerUp, score, highScore]);
+  }, [snake, direction, food, gameBounds, vibrate, combo, powerUp, calculateScore, updateCombo, activatePowerUp, score, localHighScore, addScore]);
 
   const handleGesture = useCallback((event: GestureEventType) => {
     const { translationX, translationY } = event.nativeEvent;
@@ -254,6 +256,11 @@ export default function Game(): JSX.Element {
   const pauseGame = useCallback(() => { //pauses and unpauses the game
     setIsPaused(prev => !prev);
   }, []);
+
+  // Update local high score when store changes
+  useEffect(() => {
+    setLocalHighScore(highScore);
+  }, [highScore]);
 
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
@@ -315,13 +322,13 @@ export default function Game(): JSX.Element {
           toggleModal={toggleModal}
           reloadGame={reloadGame}
           score={score}
-          highScore={highScore}
+          highScore={localHighScore}
         />
 
         <ScoreModal
           isVisible={isScoreModalVisible}
           onClose={() => {pauseGame();setScoreModalVisible(false)}}
-          highScore={highScore}
+          highScore={localHighScore}
         />
       </SafeAreaView>
     </PanGestureHandler>
