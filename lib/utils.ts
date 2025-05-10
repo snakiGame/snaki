@@ -3,7 +3,7 @@ import useSettingStore, { settings_backgroundMusic } from "./settings";
 
 
 export let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally 
-
+ 
 export const backgroundMusic = async () => {
   // Checks if background music setting is enabled
   if (!settings_backgroundMusic()) {
