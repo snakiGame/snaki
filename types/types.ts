@@ -32,6 +32,7 @@ export interface ScoreProps {
   combo: number;
   onHighScorePress: () => void;
   highScore?: number;
+  difficulty?: number;
 }
 
 export interface GameoverModalProps {
