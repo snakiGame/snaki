@@ -7,6 +7,7 @@ import useSettingStore from "@/lib/settings";
 import { stopBackgroundMusic } from "@/lib/utils";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/styles/colors";
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Settings() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function Settings() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar style="dark" backgroundColor={Colors.primary} />
+      <StatusBar style="light" backgroundColor={Colors.primary} />
       <ScrollView 
         style={styles.container}
         contentContainerStyle={styles.contentContainer}
@@ -161,7 +162,10 @@ export default function Settings() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#ffffff",
+    backgroundColor: Colors.primary,
+  },
+  background: {
+    flex: 1,
   },
   container: {
     flex: 1,
@@ -177,24 +181,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#222",
+    color: Colors.white,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   subtitle: {
     fontSize: 16,
-    color: "#666",
+    color: 'rgba(255, 255, 255, 0.7)',
     marginTop: 5,
     textAlign: "center",
   },
   sectionHeader: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: Colors.white,
     marginVertical: 15,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   optionContainer: {
-    backgroundColor: "#f2f8f2",
-    borderRadius: 12,
-    borderColor: "#d8e9d8",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 20,
+    borderColor: "rgba(255, 255, 255, 0.1)",
     borderWidth: 1,
     padding: 10,
     elevation: 2,
@@ -204,13 +214,13 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 3,
   },
   section: {
     padding: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#d8e9d8",
+    borderBottomColor: "rgba(255, 255, 255, 0.1)",
   },
   lastSection: {
     borderBottomWidth: 0,
@@ -218,8 +228,11 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#444",
+    color: Colors.white,
     marginBottom: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   settingRow: {
     flexDirection: "row",
@@ -228,7 +241,7 @@ const styles = StyleSheet.create({
   },
   settingText: {
     fontSize: 16,
-    color: "#555",
+    color: 'rgba(255, 255, 255, 0.8)',
     flex: 1,
     marginRight: 10,
   },
@@ -238,7 +251,7 @@ const styles = StyleSheet.create({
   },
   resetButton: {
     backgroundColor: "#e63946",
-    borderRadius: 10,
+    borderRadius: 20,
     paddingVertical: 12,
     paddingHorizontal: 20,
     shadowColor: "#000",
@@ -246,14 +259,19 @@ const styles = StyleSheet.create({
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   resetButtonText: {
-    color: "#ffffff",
+    color: Colors.white,
     fontSize: 16,
     fontWeight: "bold",
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   footer: {
     marginTop: 30,
@@ -262,7 +280,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: "#888",
+    color: "rgba(255, 255, 255, 0.5)",
     textAlign: "center",
   },
 });

@@ -17,13 +17,16 @@ export default function ScoreModal({ isVisible, onClose }: ScoreModalProps): JSX
   const { highScore, scores } = useScoreStore();
 
   const renderScoreItem = ({ item, index }: { item: { score: number; date: string }; index: number }) => (
-    <View style={styles.scoreItem}>
+    <LinearGradient
+      colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
+      style={styles.scoreItem}
+    >
       <Text style={styles.scoreRank}>#{index + 1}</Text>
       <View style={styles.scoreDetails}>
         <Text style={styles.scoreValue}>{item.score}</Text>
         <Text style={styles.scoreDate}>{new Date(item.date).toLocaleDateString()}</Text>
       </View>
-    </View>
+    </LinearGradient>
   );
 
   return (

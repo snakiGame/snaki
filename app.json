@@ -17,6 +17,7 @@
       "bundleIdentifier": "com.tach.snaki"
     },
     "android": {
+      "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon.jpeg",
         "backgroundColor": "#ffffff",
