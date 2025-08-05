@@ -34,10 +34,10 @@ const useSettingStore = create<SettingStore>((set) => ({
     try {
       const storedSettings = await AsyncStorage.getItem("settings");
       if (storedSettings) {
-        set({ settings: JSON.parse(storedSettings) }); // Loads from AsyncStorage
+        set({ settings: JSON.parse(storedSettings) });
       } else {
         const defaults = defaultSettings();
-        await AsyncStorage.setItem("settings", JSON.stringify(defaults)); // Saves defaults
+        await AsyncStorage.setItem("settings", JSON.stringify(defaults));
         set({ settings: defaults });
       }
     } catch (error) {
@@ -58,17 +58,17 @@ const useSettingStore = create<SettingStore>((set) => ({
 // Utility functions to access specific settings outside of a component
 export function settings_backgroundMusic(): boolean {
   const { settings } = useSettingStore.getState();
-  return settings.backgroundMusic; // Returns a boolean
+  return settings.backgroundMusic;
 }
 
 export function settings_isRondedEdges(): boolean {
   const { settings } = useSettingStore.getState();
-  return settings.roundEdges; // Returns a boolean
+  return settings.roundEdges;
 }
 
 export function settings_Vibration(): boolean {
   const { settings } = useSettingStore.getState();
-  return settings.vibration; // Returns a boolean
+  return settings.vibration;
 }
 
 export default useSettingStore;
