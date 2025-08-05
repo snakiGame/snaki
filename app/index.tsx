@@ -131,9 +131,8 @@ async function scheduleDailyNotification() {
         channelId: 'daily-reminders',
       },
     });
-    console.log("Daily notification scheduled!");
   } else {
-    console.log("Notification already scheduled.");
+    return
   }
 }
 
