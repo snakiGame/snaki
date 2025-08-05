@@ -1,5 +1,5 @@
 import { Audio } from "expo-av";
-import useSettingStore, { settings_backgroundMusic } from "./settings";
+import { settings_backgroundMusic } from "./settings";
 
 
 export let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally 
