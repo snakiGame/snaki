@@ -1,17 +1,13 @@
 import React, { useState, useCallback } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  StatusBar,
-} from "react-native";
+import { SafeAreaView, StyleSheet, StatusBar, Vibration } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
 import Header from "./Header";
 import Score from "./Score";
 import GameOverModal from "@/components/GameoverModal";
-import ScoreModal from './ScoreModal';
-import GameBoard from './GameBoard';
-import { useGame } from '../hooks/useGame';
+import ScoreModal from "./ScoreModal";
+import GameBoard from "./GameBoard";
+import { useGame } from "../hooks/useGame";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -38,17 +34,16 @@ export default function Game(): JSX.Element {
   } = useGame();
 
   const toggleModal = useCallback(() => {
-    setModalVisible(prev => !prev);
+    setModalVisible((prev) => !prev);
   }, []);
 
   // Handle combo system
   const updateCombo = useCallback(() => {
     const now = Date.now();
     if (now - lastFoodTime < COMBO_TIMEOUT) {
-      setCombo(prev => {
+      setCombo((prev) => {
         const newCombo = prev + 1;
         if (newCombo >= COMBO_THRESHOLD) {
-
           // Trigger combo animation
           Animated.sequence([
             Animated.timing(comboAnimation, {
@@ -87,7 +82,6 @@ export default function Game(): JSX.Element {
     }
   }, []);
 
-
   useEffect(() => {
     if (powerUp.type && Date.now() > powerUp.endTime) {
       setPowerUp({ type: null, endTime: 0 });
@@ -100,11 +94,11 @@ export default function Game(): JSX.Element {
     // Find the highest difficulty level that the player has reached
     const currentLevel = [...DIFFICULTY_LEVELS]
       .reverse()
-      .find(level => score >= level.score);
+      .find((level) => score >= level.score);
 
     // Update the current difficulty level
-    const difficultyIndex = DIFFICULTY_LEVELS.findIndex(level => 
-      level.interval === currentLevel?.interval
+    const difficultyIndex = DIFFICULTY_LEVELS.findIndex(
+      (level) => level.interval === currentLevel?.interval
     );
     setCurrentDifficulty(difficultyIndex + 1); // +1 because levels are 1-based
 
@@ -130,23 +124,29 @@ export default function Game(): JSX.Element {
     };
   }, []);
 
-  const vibrate = useCallback(async (length: number) => {
-    if (!settings.vibration) return;
-    Vibration.vibrate(length);
-  }, [settings.vibration]);
+  const vibrate = useCallback(
+    async (length: number) => {
+      if (!settings.vibration) return;
+      Vibration.vibrate(length);
+    },
+    [settings.vibration]
+  );
 
-  const calculateScore = useCallback((baseScore: number) => {
-    let finalScore = baseScore;
+  const calculateScore = useCallback(
+    (baseScore: number) => {
+      let finalScore = baseScore;
 
-    if (combo >= COMBO_THRESHOLD) {
-      finalScore *= Math.min(combo, 5);
-    }
+      if (combo >= COMBO_THRESHOLD) {
+        finalScore *= Math.min(combo, 5);
+      }
 
-    if (powerUp.type === PowerUp.DoublePoints) {
-      finalScore *= 2;
-    }
-    return finalScore;
-  }, [combo, powerUp.type]);
+      if (powerUp.type === PowerUp.DoublePoints) {
+        finalScore *= 2;
+      }
+      return finalScore;
+    },
+    [combo, powerUp.type]
+  );
 
   const moveSnake = useCallback(() => {
     const snakeHead = snake[0];
@@ -184,7 +184,7 @@ export default function Game(): JSX.Element {
         vibrate(100); // Stronger vibration for poison
 
         // Reduce score
-        setScore(prev => Math.max(0, prev - 5));
+        setScore((prev) => Math.max(0, prev - 5));
 
         // Shrink snake if possible (don't go below length 1)
         if (snake.length > 1) {
@@ -213,14 +213,15 @@ export default function Game(): JSX.Element {
           scoreIncrement = 5;
         }
 
-        setScore(prev => prev + calculateScore(scoreIncrement));
+        setScore((prev) => prev + calculateScore(scoreIncrement));
       }
 
       // Random chance for special food or power-up
       const random = Math.random();
       if (random < 0.1) {
         const powerUps = Object.values(PowerUp);
-        const randomPowerUp = powerUps[Math.floor(Math.random() * powerUps.length)];
+        const randomPowerUp =
+          powerUps[Math.floor(Math.random() * powerUps.length)];
         activatePowerUp(randomPowerUp);
       } else if (random < 0.3) {
         const foodTypes = Object.values(FoodType);
@@ -233,26 +234,43 @@ export default function Game(): JSX.Element {
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
     }
-  }, [snake, direction, food, gameBounds, vibrate, combo, powerUp, calculateScore, updateCombo, activatePowerUp, score, localHighScore, addScore]);
+  }, [
+    snake,
+    direction,
+    food,
+    gameBounds,
+    vibrate,
+    combo,
+    powerUp,
+    calculateScore,
+    updateCombo,
+    activatePowerUp,
+    score,
+    localHighScore,
+    addScore,
+  ]);
 
-  const handleGesture = useCallback((event: GestureEventType) => {
-    const { translationX, translationY } = event.nativeEvent;
+  const handleGesture = useCallback(
+    (event: GestureEventType) => {
+      const { translationX, translationY } = event.nativeEvent;
 
-    // Prevent reversing direction (e.g., going right then immediately left)
-    if (Math.abs(translationX) > Math.abs(translationY)) {
-      if (translationX > 0 && direction !== Direction.Left) {
-        setDirection(Direction.Right);
-      } else if (translationX < 0 && direction !== Direction.Right) {
-        setDirection(Direction.Left);
+      // Prevent reversing direction (e.g., going right then immediately left)
+      if (Math.abs(translationX) > Math.abs(translationY)) {
+        if (translationX > 0 && direction !== Direction.Left) {
+          setDirection(Direction.Right);
+        } else if (translationX < 0 && direction !== Direction.Right) {
+          setDirection(Direction.Left);
+        }
+      } else {
+        if (translationY > 0 && direction !== Direction.Up) {
+          setDirection(Direction.Down);
+        } else if (translationY < 0 && direction !== Direction.Down) {
+          setDirection(Direction.Up);
+        }
       }
-    } else {
-      if (translationY > 0 && direction !== Direction.Up) {
-        setDirection(Direction.Down);
-      } else if (translationY < 0 && direction !== Direction.Down) {
-        setDirection(Direction.Up);
-      }
-    }
-  }, [direction]);
+    },
+    [direction]
+  );
 
   const reloadGame = useCallback(() => {
     setSnake(SNAKE_INITIAL_POSITION);
@@ -267,8 +285,9 @@ export default function Game(): JSX.Element {
     setSpeedMultiplier(1);
   }, []);
 
-  const pauseGame = useCallback(() => { //pauses and unpauses the game
-    setIsPaused(prev => !prev);
+  const pauseGame = useCallback(() => {
+    //pauses and unpauses the game
+    setIsPaused((prev) => !prev);
   }, []);
 
   // Update local high score when store changes
@@ -279,10 +298,7 @@ export default function Game(): JSX.Element {
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
       <SafeAreaView style={styles.container}>
-        <StatusBar
-          barStyle="light-content"
-          backgroundColor={Colors.primary}
-        />
+        <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
         <Header
           reloadGame={reloadGame}
           pauseGame={pauseGame}
@@ -293,19 +309,17 @@ export default function Game(): JSX.Element {
             combo={combo}
             difficulty={currentDifficulty}
             onHighScorePress={() => {
-              pauseGame()
-              setScoreModalVisible(true)
+              pauseGame();
+              setScoreModalVisible(true);
             }}
           />
         </Header>
         <View style={styles.boundaries}>
           <LinearGradient
-            colors={['rgba(255, 255, 255, 0.1)', 'rgba(255, 255, 255, 0.05)']}
+            colors={["rgba(255, 255, 255, 0.1)", "rgba(255, 255, 255, 0.05)"]}
             style={styles.gridBackground}
           />
-          {poisonEffect && (
-            <View style={styles.poisonOverlay} />
-          )}
+          {poisonEffect && <View style={styles.poisonOverlay} />}
           <Snake snake={snake} />
           <Food x={food.x} y={food.y} type={foodType} />
           {powerUp.type && (
@@ -366,12 +380,12 @@ const styles = StyleSheet.create({
   boundaries: {
     flex: 1,
     margin: 15,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    borderColor: "rgba(255, 255, 255, 0.3)",
     borderWidth: 2,
     borderRadius: settings_isRondedEdges() ? 30 : 0,
     backgroundColor: Colors.background,
-    overflow: 'hidden',
-    position: 'relative',
+    overflow: "hidden",
+    position: "relative",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -382,7 +396,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   gridBackground: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -390,24 +404,24 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   comboText: {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
+    position: "absolute",
+    top: "50%",
+    left: "50%",
     transform: [{ translateX: -50 }, { translateY: -50 }],
     fontSize: 32,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: Colors.primary,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: "rgba(0, 0, 0, 0.3)",
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 4,
   },
   poisonOverlay: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(255, 0, 0, 0.2)',
+    backgroundColor: "rgba(255, 0, 0, 0.2)",
     zIndex: 1,
   },
 });

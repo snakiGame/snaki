@@ -1,15 +1,15 @@
-import { useEffect, useCallback } from 'react';
-import { useWindowDimensions } from 'react-native';
-import { Audio } from 'expo-av';
-import { useGameState } from './useGameState';
-import { useComboSystem } from './useComboSystem';
-import { useGestureHandler } from './useGestureHandler';
-import { useGameLoop } from './useGameLoop';
-import { GameBounds, BORDER_WIDTH, GAME_UNIT_SIZE } from '../lib/gameConstants';
-import { GestureEventType } from '../types/types';
-import { useScoreStore } from '@/lib/scoreStore';
-import useSettingStore from '@/lib/settings';
-import { backgroundMusic } from '@/lib/utils';
+import { useEffect, useCallback } from "react";
+import { useWindowDimensions } from "react-native";
+import { Audio } from "expo-av";
+import { useGameState } from "./useGameState";
+import { useComboSystem } from "./useComboSystem";
+import { useGestureHandler } from "./useGestureHandler";
+import { useGameLoop } from "./useGameLoop";
+import { GameBounds, BORDER_WIDTH, GAME_UNIT_SIZE } from "../lib/gameConstants";
+import { GestureEventType } from "../types/types";
+import { useScoreStore } from "@/lib/scoreStore";
+import useSettingStore from "@/lib/settings";
+import { backgroundMusic } from "@/lib/utils";
 
 export const useGame = () => {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
@@ -19,9 +19,9 @@ export const useGame = () => {
   // Calculate game bounds
   const gameBounds: GameBounds = {
     xMin: 0,
-    xMax: Math.floor((screenWidth - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
+    xMax: Math.floor((screenWidth - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
     yMin: 0,
-    yMax: Math.floor((screenHeight - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
+    yMax: Math.floor((screenHeight - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
   };
 
   // Initialize hooks
@@ -43,14 +43,14 @@ export const useGame = () => {
     gameBounds,
     localHighScore: highScore,
     vibrationEnabled: settings.vibration,
-    
+
     setSnake: gameState.setSnake,
     setFood: gameState.setFood,
     setFoodType: gameState.setFoodType,
     setScore: gameState.setScore,
     setIsGameOver: gameState.setIsGameOver,
     setPoisonEffect: gameState.setPoisonEffect,
-    
+
     getCurrentMoveInterval: gameState.getCurrentMoveInterval,
     updateCombo: comboSystem.updateCombo,
     resetCombo: comboSystem.resetCombo,
@@ -63,9 +63,16 @@ export const useGame = () => {
   });
 
   // Handle gesture
-  const handleGesture = useCallback((event: GestureEventType) => {
-    gestureHandler.handleGesture(event, gameState.direction, gameState.setDirection);
-  }, [gestureHandler, gameState.direction, gameState.setDirection]);
+  const handleGesture = useCallback(
+    (event: GestureEventType) => {
+      gestureHandler.handleGesture(
+        event,
+        gameState.direction,
+        gameState.setDirection
+      );
+    },
+    [gestureHandler, gameState.direction, gameState.setDirection]
+  );
 
   // Initialize background music
   useEffect(() => {
@@ -77,10 +84,10 @@ export const useGame = () => {
     ...gameState,
     gameBounds,
     localHighScore: highScore,
-    
+
     // Combo system
     comboAnimation: comboSystem.comboAnimation,
-    
+
     // Actions
     handleGesture,
     vibrate,
