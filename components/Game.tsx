@@ -1,95 +1,41 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   SafeAreaView,
   StyleSheet,
-  View,
   StatusBar,
-  Vibration,
-  useWindowDimensions,
-  Animated,
 } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
-import { Direction, Coordinate, GestureEventType, PowerUp, FoodType } from "../types/types";
-import { checkEatsFood } from "../utils/checkEatsFood";
-import { checkGameOver } from "../utils/checkGameOver";
-import { randomFoodPosition } from "../utils/randomFoodPosition";
-import { Audio } from "expo-av";
-import Food from "./Food";
 import Header from "./Header";
 import Score from "./Score";
-import Snake from "./Snake";
-import useSettingStore, {
-  settings_Vibration,
-  settings_backgroundMusic,
-  settings_isRondedEdges,
-} from "@/lib/settings";
 import GameOverModal from "@/components/GameoverModal";
-import { backgroundMusic } from "@/lib/utils";
-import PowerUpIndicator from "./PowerUpIndicator";
-import { LinearGradient } from 'expo-linear-gradient';
 import ScoreModal from './ScoreModal';
-import { useScoreStore } from '@/lib/scoreStore';
-
-const SNAKE_INITIAL_POSITION = [{ x: 5, y: 5 }];
-const FOOD_INITIAL_POSITION = { x: 5, y: 20 };
-const BASE_MOVE_INTERVAL = 55; // Base speed
-const DIFFICULTY_LEVELS = [
-  { score: 0, interval: 55 },    // Level 1: Normal speed
-  { score: 20, interval: 45 },   // Level 2: Faster
-  { score: 50, interval: 35 },   // Level 3: Even faster
-  { score: 100, interval: 25 },  // Level 4: Very fast
-];
-const SCORE_INCREMENT = 1;
-const BORDER_WIDTH = 12;
-const GAME_UNIT_SIZE = 10;
-const COMBO_THRESHOLD = 3;
-const COMBO_TIMEOUT = 2000;
-const POWER_UP_DURATION = 5000;
-
-interface GameBounds {
-  xMin: number;
-  xMax: number;
-  yMin: number;
-  yMax: number;
-}
-
-interface PowerUpState {
-  type: PowerUp | null;
-  endTime: number;
-}
+import GameBoard from './GameBoard';
+import { useGame } from '../hooks/useGame';
 
 export default function Game(): JSX.Element {
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
-  const [direction, setDirection] = useState<Direction>(Direction.Right);
-  const [snake, setSnake] = useState<Coordinate[]>(SNAKE_INITIAL_POSITION);
-  const [food, setFood] = useState<Coordinate>(FOOD_INITIAL_POSITION);
-  const [foodType, setFoodType] = useState<FoodType>(FoodType.Normal);
-  const [score, setScore] = useState<number>(0);
-  const [isGameOver, setIsGameOver] = useState<boolean>(false);
-  const [isPaused, setIsPaused] = useState<boolean>(false);
-  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  // Modal states
   const [isModalVisible, setModalVisible] = useState(false);
-  const [combo, setCombo] = useState<number>(0);
-  const [lastFoodTime, setLastFoodTime] = useState<number>(0);
-  const [powerUp, setPowerUp] = useState<PowerUpState>({ type: null, endTime: 0 });
-  const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
-  const [comboAnimation] = useState(new Animated.Value(0));
-  const { highScore, addScore } = useScoreStore();
-  const [localHighScore, setLocalHighScore] = useState<number>(highScore);
-  const [foodAnimation] = useState(new Animated.Value(0));
   const [isScoreModalVisible, setScoreModalVisible] = useState(false);
-  const [poisonEffect, setPoisonEffect] = useState(false);
-  const [currentDifficulty, setCurrentDifficulty] = useState<number>(1);
 
-  const { settings } = useSettingStore();
-
-  const gameBounds: GameBounds = {
-    xMin: 0,
-    xMax: Math.floor((screenWidth - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
-    yMin: 0,
-    yMax: Math.floor((screenHeight - (BORDER_WIDTH * 2)) / GAME_UNIT_SIZE),
-  };
+  // Use the consolidated game hook
+  const {
+    snake,
+    food,
+    foodType,
+    score,
+    isGameOver,
+    isPaused,
+    combo,
+    powerUp,
+    currentDifficulty,
+    poisonEffect,
+    localHighScore,
+    comboAnimation,
+    handleGesture,
+    resetGame,
+    togglePause,
+  } = useGame();
 
   const toggleModal = useCallback(() => {
     setModalVisible(prev => !prev);

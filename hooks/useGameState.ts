@@ -1,36 +1,54 @@
-import { useState, useCallback, useEffect } from 'react';
-import { Direction, Coordinate, PowerUp, FoodType } from '../types/types';
-import { 
-  INITIAL_GAME_STATE, 
-  PowerUpState, 
-  DIFFICULTY_LEVELS, 
+import { useState, useCallback, useEffect } from "react";
+import { Direction, Coordinate, PowerUp, FoodType } from "../types/types";
+import {
+  INITIAL_GAME_STATE,
+  PowerUpState,
+  DIFFICULTY_LEVELS,
   BASE_MOVE_INTERVAL,
-  POWER_UP_DURATION 
-} from '../lib/gameConstants';
+  POWER_UP_DURATION,
+} from "../lib/gameConstants";
 
 export const useGameState = () => {
-  const [direction, setDirection] = useState<Direction>(INITIAL_GAME_STATE.direction);
+  const [direction, setDirection] = useState<Direction>(
+    INITIAL_GAME_STATE.direction
+  );
   const [snake, setSnake] = useState<Coordinate[]>(INITIAL_GAME_STATE.snake);
   const [food, setFood] = useState<Coordinate>(INITIAL_GAME_STATE.food);
-  const [foodType, setFoodType] = useState<FoodType>(INITIAL_GAME_STATE.foodType);
+  const [foodType, setFoodType] = useState<FoodType>(
+    INITIAL_GAME_STATE.foodType
+  );
   const [score, setScore] = useState<number>(INITIAL_GAME_STATE.score);
-  const [isGameOver, setIsGameOver] = useState<boolean>(INITIAL_GAME_STATE.isGameOver);
-  const [isPaused, setIsPaused] = useState<boolean>(INITIAL_GAME_STATE.isPaused);
+  const [isGameOver, setIsGameOver] = useState<boolean>(
+    INITIAL_GAME_STATE.isGameOver
+  );
+  const [isPaused, setIsPaused] = useState<boolean>(
+    INITIAL_GAME_STATE.isPaused
+  );
   const [combo, setCombo] = useState<number>(INITIAL_GAME_STATE.combo);
-  const [powerUp, setPowerUp] = useState<PowerUpState>({ type: null, endTime: 0 });
-  const [speedMultiplier, setSpeedMultiplier] = useState<number>(INITIAL_GAME_STATE.speedMultiplier);
-  const [currentDifficulty, setCurrentDifficulty] = useState<number>(INITIAL_GAME_STATE.currentDifficulty);
-  const [poisonEffect, setPoisonEffect] = useState<boolean>(INITIAL_GAME_STATE.poisonEffect);
+  const [powerUp, setPowerUp] = useState<PowerUpState>({
+    type: null,
+    endTime: 0,
+  });
+  const [speedMultiplier, setSpeedMultiplier] = useState<number>(
+    INITIAL_GAME_STATE.speedMultiplier
+  );
+  const [currentDifficulty, setCurrentDifficulty] = useState<number>(
+    INITIAL_GAME_STATE.currentDifficulty
+  );
+  const [poisonEffect, setPoisonEffect] = useState<boolean>(
+    INITIAL_GAME_STATE.poisonEffect
+  );
   const [lastFoodTime, setLastFoodTime] = useState<number>(0);
 
   // Calculate current move interval based on score and difficulty levels
   const getCurrentMoveInterval = useCallback(() => {
     const currentLevel = [...DIFFICULTY_LEVELS]
       .reverse()
-      .find(level => score >= level.score);
+      .find((level) => score >= level.score);
 
-    const difficultyIndex = DIFFICULTY_LEVELS.findIndex((level: { score: number; interval: number }) => 
-      level.interval === currentLevel?.interval
+    const difficultyIndex = DIFFICULTY_LEVELS.findIndex(
+      (level: { score: number; interval: number }) =>
+        level.interval === currentLevel?.interval
     );
     setCurrentDifficulty(difficultyIndex + 1);
 
@@ -78,7 +96,7 @@ export const useGameState = () => {
   }, []);
 
   const togglePause = useCallback(() => {
-    setIsPaused(prev => !prev);
+    setIsPaused((prev) => !prev);
   }, []);
 
   return {
@@ -96,7 +114,7 @@ export const useGameState = () => {
     currentDifficulty,
     poisonEffect,
     lastFoodTime,
-    
+
     // State setters
     setDirection,
     setSnake,
@@ -107,10 +125,10 @@ export const useGameState = () => {
     setCombo,
     setPoisonEffect,
     setLastFoodTime,
-    
+
     // Computed values
     getCurrentMoveInterval,
-    
+
     // Actions
     activatePowerUp,
     resetGame,

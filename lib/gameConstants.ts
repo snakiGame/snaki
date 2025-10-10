@@ -13,10 +13,10 @@ export const POWER_UP_DURATION = 5000; // 5 seconds
 
 // Difficulty progression
 export const DIFFICULTY_LEVELS = [
-  { score: 0, interval: 55 },    // Level 1: Normal speed
-  { score: 20, interval: 45 },   // Level 2: Faster
-  { score: 50, interval: 35 },   // Level 3: Even faster
-  { score: 100, interval: 25 },  // Level 4: Very fast
+  { score: 0, interval: 55 }, // Level 1: Normal speed
+  { score: 20, interval: 45 }, // Level 2: Faster
+  { score: 50, interval: 35 }, // Level 3: Even faster
+  { score: 100, interval: 25 }, // Level 4: Very fast
 ];
 
 // Initial game state
@@ -60,8 +60,8 @@ export const SCORE_MULTIPLIERS = {
 
 // Food spawn probabilities
 export const FOOD_PROBABILITIES = {
-  powerUp: 0.1,   // 10% chance for power-up
-  special: 0.3,   // 30% chance for special food (includes power-up chance)
+  powerUp: 0.1, // 10% chance for power-up
+  special: 0.3, // 30% chance for special food (includes power-up chance)
 };
 
 // Vibration patterns
