@@ -20,7 +20,7 @@
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon.jpeg",
-        "backgroundColor": "#ffffff",
+        "backgroundColor": "#ffffff"
       },
       "package": "com.tach.snaki"
     },
@@ -33,7 +33,8 @@
       "expo-router",
       "expo-font",
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true
