@@ -20,7 +20,7 @@
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/android-icon.jpeg",
-        "backgroundColor": "#ffffff",
+        "backgroundColor": "#ffffff"
       },
       "package": "com.tach.snaki"
     },
