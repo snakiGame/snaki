@@ -33,7 +33,8 @@
       "expo-router",
       "expo-font",
       "expo-sqlite",
-      "expo-web-browser"
+      "expo-web-browser",
+      "expo-splash-screen"
     ],
     "experiments": {
       "typedRoutes": true

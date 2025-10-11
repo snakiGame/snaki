@@ -6,12 +6,18 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   useEffect(() => {
-    SplashScreen.hideAsync();
+    const timer = setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, []);
   return (
-    <Stack screenOptions={{
-      headerShown:false
-    }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="play" />
       <Stack.Screen name="about" />
