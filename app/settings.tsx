@@ -42,14 +42,14 @@ export default function Settings() {
           },
           style: "destructive",
         },
-      ],
+      ]
     );
   };
 
   return (
     <LinearGradient colors={["#f0f0f0", "#ffffff"]} style={styles.container}>
       <StatusBar style="dark" backgroundColor="#f0f0f0" />
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
@@ -70,13 +70,13 @@ export default function Settings() {
                 onValueChange={async () => {
                   await updateSetting(
                     "backgroundMusic",
-                    !settings.backgroundMusic,
+                    !settings.backgroundMusic
                   );
                   setSoundEnabled((prev) => !prev);
                   stopBackgroundMusic();
                 }}
-                thumbColor={soundEnabled ? "#a9b8a9" : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
+                thumbColor={soundEnabled ? Colors.primary : "#f4f4f4"}
+                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
               />
             </View>
           </View>
@@ -92,8 +92,8 @@ export default function Settings() {
                   await updateSetting("vibration", !settings.vibration);
                   setVibrationEnabled((prev) => !prev);
                 }}
-                thumbColor={vibrationEnabled ? "#a9b8a9" : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
+                thumbColor={vibrationEnabled ? Colors.primary : "#f4f4f4"}
+                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
               />
             </View>
           </View>
@@ -114,8 +114,8 @@ export default function Settings() {
                   await updateSetting("roundEdges", !settings.roundEdges);
                   setRoundedEdges((prev) => !prev);
                 }}
-                thumbColor={theme === "dark" ? "#a9b8a9" : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
+                thumbColor={roundedEdges ? Colors.primary : "#f4f4f4"}
+                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
               />
             </View>
           </View>
@@ -133,8 +133,8 @@ export default function Settings() {
                   await updateSetting("theme", newTheme);
                   setTheme(newTheme);
                 }}
-                thumbColor={theme === "dark" ? "#a9b8a9" : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#cfe0cf" }}
+                thumbColor={theme === "dark" ? Colors.primary : "#cccccc"}
+                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
               />
             </View>
           </View>
@@ -165,7 +165,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingHorizontal: 20,
     paddingVertical: 30,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    paddingBottom: Platform.OS === "ios" ? 40 : 20,
   },
   header: {
     marginBottom: 30,
@@ -232,41 +232,36 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   buttonContainer: {
-    marginTop: 20,
+    marginTop: 30,
     alignItems: "center",
   },
   resetButton: {
     backgroundColor: "#e63946",
-    borderRadius: 20,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.2,
     shadowRadius: 4,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
+    elevation: 3,
   },
   resetButtonText: {
-    color: Colors.white,
+    color: "#ffffff",
     fontSize: 16,
     fontWeight: "bold",
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   footer: {
-    marginTop: 30,
+    marginTop: 50,
     marginBottom: 30,
     alignItems: "center",
   },
   footerText: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.5)",
+    color: "#888888",
     textAlign: "center",
   },
 });
