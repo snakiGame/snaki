@@ -1,8 +1,12 @@
 import { Fragment } from "react";
 import { StyleSheet, View } from "react-native";
-import { SnakeProps } from "../types/types";
+import { Coordinate } from "../types/types";
+
+interface SnakeProps {
+  snake: Coordinate[];
+}
 import { Colors } from "../styles/colors";
-import { LinearGradient } from 'expo-linear-gradient';
+import { LinearGradient } from "expo-linear-gradient";
 
 export default function Snake({ snake }: SnakeProps): JSX.Element {
   return (
@@ -15,9 +19,11 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
         return (
           <LinearGradient
             key={index}
-            colors={index === 0 ? 
-              [Colors.primary, Colors.primary + 'CC'] : 
-              [Colors.primary + 'CC', Colors.primary + '99']}
+            colors={
+              index === 0
+                ? [Colors.primary, Colors.primary + "CC"]
+                : [Colors.primary + "CC", Colors.primary + "99"]
+            }
             style={[styles.snake, segmentStyle]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
@@ -46,10 +52,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   eye: {
-    position: 'absolute',
+    position: "absolute",
     width: 4,
     height: 4,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 2,
     top: 2,
     right: 2,
