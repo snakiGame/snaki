@@ -47,7 +47,12 @@ export default function Settings() {
   };
 
   return (
-    <LinearGradient colors={["#f0f0f0", "#ffffff"]} style={styles.container}>
+    <LinearGradient
+      colors={["#f0f0f0", "#ffffff"]}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 0, y: 1 }}
+    >
       <StatusBar style="dark" backgroundColor="#f0f0f0" />
       <ScrollView
         contentContainerStyle={styles.contentContainer}
@@ -76,7 +81,7 @@ export default function Settings() {
                   stopBackgroundMusic();
                 }}
                 thumbColor={soundEnabled ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
+                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
               />
             </View>
           </View>
@@ -93,7 +98,7 @@ export default function Settings() {
                   setVibrationEnabled((prev) => !prev);
                 }}
                 thumbColor={vibrationEnabled ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
+                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
               />
             </View>
           </View>
@@ -115,7 +120,7 @@ export default function Settings() {
                   setRoundedEdges((prev) => !prev);
                 }}
                 thumbColor={roundedEdges ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
+                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
               />
             </View>
           </View>
@@ -134,7 +139,7 @@ export default function Settings() {
                   setTheme(newTheme);
                 }}
                 thumbColor={theme === "dark" ? Colors.primary : "#cccccc"}
-                trackColor={{ false: "#d8d8d8", true: Colors.primary + "40" }}
+                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
               />
             </View>
           </View>

@@ -21,8 +21,8 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
             key={index}
             colors={
               index === 0
-                ? [Colors.primary, Colors.primary + "CC"]
-                : [Colors.primary + "CC", Colors.primary + "99"]
+                ? ["#81c784", "#81c784CC"]
+                : ["#81c784CC", "#81c78499"]
             }
             style={[styles.snake, segmentStyle]}
             start={{ x: 0, y: 0 }}
