@@ -47,10 +47,9 @@ export default function Settings() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar style="light" backgroundColor={Colors.primary} />
+    <LinearGradient colors={["#f0f0f0", "#ffffff"]} style={styles.container}>
+      <StatusBar style="dark" backgroundColor="#f0f0f0" />
       <ScrollView 
-        style={styles.container}
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
       >
@@ -155,72 +154,61 @@ export default function Settings() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.primary,
-  },
-  background: {
-    flex: 1,
-  },
   container: {
     flex: 1,
   },
   contentContainer: {
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
     paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   header: {
-    marginBottom: 20,
+    marginBottom: 30,
     alignItems: "center",
+    paddingVertical: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#cccccc",
   },
   title: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: "bold",
-    color: Colors.white,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: "#222222",
+    marginBottom: 5,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 18,
+    color: "#555555",
     marginTop: 5,
     textAlign: "center",
+    fontStyle: "italic",
   },
   sectionHeader: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
-    color: Colors.white,
-    marginVertical: 15,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: "#222222",
+    marginTop: 30,
+    marginBottom: 15,
   },
   optionContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    borderRadius: 20,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    borderWidth: 1,
-    padding: 10,
-    elevation: 2,
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    padding: 20,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowColor: "#000000",
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowRadius: 6,
+    elevation: 5,
   },
   section: {
-    padding: 15,
+    paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    borderBottomColor: "#eeeeee",
   },
   lastSection: {
     borderBottomWidth: 0,
@@ -228,11 +216,8 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: Colors.white,
-    marginBottom: 5,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    color: "#222222",
+    marginBottom: 8,
   },
   settingRow: {
     flexDirection: "row",
@@ -241,9 +226,10 @@ const styles = StyleSheet.create({
   },
   settingText: {
     fontSize: 16,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: "#333333",
     flex: 1,
     marginRight: 10,
+    lineHeight: 22,
   },
   buttonContainer: {
     marginTop: 20,

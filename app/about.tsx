@@ -10,7 +10,7 @@ import {
 import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
-import { Ionicons } from "@expo/vector-icons"; // Importing icons from Expo's icon library
+import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "@/styles/colors";
 
 export default function About() {
