@@ -1,13 +1,14 @@
-" use dom"
+" use dom";
 
-import React from 'react'
+import React from "react";
+import { Text, View } from "react-native";
 
 const index = () => {
   return (
-    <div>
-      <h1>Hello Snaki</h1>
-    </div>
-  )
-}
+    <View>
+      <Text>Hello Snaki</Text>
+    </View>
+  );
+};
 
-export default index
+export default index;
