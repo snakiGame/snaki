@@ -1,0 +1,121 @@
+SNAKE GAME LOGIC ISSUES ANALYSIS
+=====================================
+
+## CRITICAL ISSUES:
+
+### 1. Game Over Check Logic Flaw
+**File**: hooks/useGameLoop.ts (lines 88-96)
+**Issue**: The game over check happens BEFORE the snake moves, but uses the current snake head position. This means:
+- The check is performed with the old position, not where the snake is about to move
+- The snake could move into a wall or itself and the collision wouldn't be detected until the next frame
+**Fix needed**: Move the collision check after calculating the new head position.
+
+### 2. Food Collision Detection Issues
+**File**: utils/checkEatsFood.ts
+**Issue**: The collision detection uses an `area` parameter (set to 2 in the game loop), but creates inconsistent behavior:
+- Uses `<` comparison instead of `<=`, which could miss exact collisions
+- The area-based detection might allow food to be eaten from a distance rather than requiring exact position overlap
+**Fix needed**: Use exact position matching or fix the comparison logic.
+
+### 3. Boundary Calculation Problem
+**File**: hooks/useGame.ts (lines 21-26)
+**Issue**: The game bounds calculation doesn't account for the actual game unit positioning:
+```typescript
+gameBounds: GameBounds = {
+  xMin: 0,
+  xMax: Math.floor((screenWidth - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
+  yMin: 0,
+  yMax: Math.floor((screenHeight - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
+};
+```
+This could cause the snake to move beyond visible boundaries since the screen dimensions include status bars, headers, etc.
+**Fix needed**: Calculate bounds relative to the actual game area, not screen dimensions.
+
+## LOGIC FLOW ISSUES:
+
+### 4. Food Spawning in Snake Body
+**File**: utils/randomFoodPosition.ts
+**Issue**: The `randomFoodPosition` function doesn't check if the new food position overlaps with the snake's body. This could spawn food inside the snake, making it impossible to reach.
+**Fix needed**: Add collision check against snake body when spawning food.
+
+### 5. Power-up Expiration Race Condition
+**File**: hooks/useGameState.ts (lines 73-78)
+**Issue**: Power-ups are checked for expiration using `useEffect`, but there's a potential race condition where the power-up could expire mid-calculation, leading to inconsistent game state.
+**Fix needed**: Use a more deterministic approach for power-up expiration.
+
+### 6. Gesture Handler Direction Logic
+**File**: hooks/useGestureHandler.ts
+**Issue**: The gesture detection might be too sensitive and could register unintended direction changes, especially on small swipes.
+**Fix needed**: Add minimum swipe distance threshold and debouncing.
+
+## PERFORMANCE ISSUES:
+
+### 7. Excessive Re-renders
+**File**: hooks/useGameLoop.ts (lines 117-135)
+**Issue**: The `moveSnake` callback has a very large dependency array, which could cause unnecessary re-renders and impact performance.
+**Fix needed**: Split the large dependency array and optimize callback dependencies.
+
+### 8. Game Loop Timing Issues
+**File**: hooks/useGameLoop.ts
+**Issue**: The game loop uses `setInterval` with a dynamic interval, but changing the interval doesn't immediately take effect - the old interval continues until the next game state change.
+**Fix needed**: Implement proper interval management with immediate updates.
+
+## MINOR ISSUES:
+
+### 9. Combo System Reset Inconsistency
+**File**: hooks/useGameLoop.ts and hooks/useComboSystem.ts
+**Issue**: The combo system resets to 0 when poison is eaten but resets to 1 for normal timeout, which is inconsistent.
+**Fix needed**: Make combo reset behavior consistent.
+
+### 10. Score Validation Missing
+**File**: hooks/useGameLoop.ts
+**Issue**: There's no validation to prevent negative scores, which could happen with multiple poison foods.
+**Fix needed**: Add Math.max(0, score) validation for all score changes.
+
+## ADDITIONAL POTENTIAL ISSUES:
+
+### 11. Self-Collision Check Optimization
+**File**: utils/checkGameOver.ts (lines 20-25)
+**Issue**: The self-collision check iterates through the entire snake body, which is inefficient for longer snakes.
+**Fix needed**: Optimize by checking only relevant segments or using a more efficient data structure.
+
+### 12. Food Type Probability Logic
+**File**: hooks/useGameLoop.ts (lines 182-192)
+**Issue**: The food type selection logic could potentially select the same type multiple times due to nested probability checks.
+**Fix needed**: Implement proper weighted random selection.
+
+### 13. Missing Edge Case Handling
+**Issue**: Various edge cases are not handled:
+- What happens when the game area is too small for the snake?
+- Handling of very fast gesture inputs
+- Recovery from invalid game states
+**Fix needed**: Add comprehensive edge case validation.
+
+## RECOMMENDATIONS:
+
+1. **Restructure collision detection** - Check collisions after calculating new position
+2. **Implement food collision avoidance** - Ensure food doesn't spawn on snake body
+3. **Add bounds validation** - Ensure game bounds are correctly calculated relative to the actual game area
+4. **Optimize re-renders** - Split the large game loop dependency array
+5. **Add input validation** - Validate score changes and prevent impossible game states
+6. **Improve gesture sensitivity** - Add minimum swipe distance threshold
+7. **Implement proper state management** - Use reducers for complex state updates
+8. **Add unit tests** - Test collision detection, boundary checks, and game logic
+9. **Performance monitoring** - Add performance metrics for game loop timing
+10. **Error boundaries** - Add error handling for unexpected game states
+
+## PRIORITY LEVELS:
+
+**HIGH PRIORITY** (Game Breaking):
+- Issues #1, #2, #3 - Core game mechanics
+- Issue #4 - Could make game unplayable
+
+**MEDIUM PRIORITY** (User Experience):
+- Issues #5, #6, #8 - Affects gameplay smoothness
+- Issues #9, #10 - Minor gameplay inconsistencies
+
+**LOW PRIORITY** (Optimization):
+- Issues #7, #11, #12 - Performance improvements
+- Issue #13 - Edge case handling
+
+Generated on: October 26, 2025
