@@ -4,7 +4,7 @@
     "slug": "snaki",
     "version": "1.5.0",
     "orientation": "portrait",
-    "icon": "./assets/android-icon.jpeg",
+    "icon": "./assets/icon.png",
     "scheme": "snaki",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -27,7 +27,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/android-icon.jpeg"
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-router",
