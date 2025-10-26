@@ -1,17 +1,16 @@
 import { Audio } from "expo-av";
 import { settings_backgroundMusic } from "./settings";
 
+export let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally
 
-export let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally 
- 
-export const backgroundMusic = async () => {
-  // Checks if background music setting is enabled
-  if (!settings_backgroundMusic()) {
+export const backgroundMusic = async (forcePlay: boolean = false) => {
+  // Checks if background music setting is enabled (unless forced)
+  if (!forcePlay && !settings_backgroundMusic()) {
     return;
   }
 
-  if(soundInstance){
-    return //Not playing the audio twice while the other instance is still playing
+  if (soundInstance) {
+    return; //Not playing the audio twice while the other instance is still playing
   }
   try {
     // Creates and load the sound
@@ -23,14 +22,12 @@ export const backgroundMusic = async () => {
     // Keeps track of the sound instance for unmounting later
     soundInstance = sound;
 
-    
     await sound.setVolumeAsync(0.25);
     await sound.playAsync();
   } catch (error) {
     console.error("Error playing background music:", error);
   }
 };
-
 
 export const stopBackgroundMusic = async () => {
   if (soundInstance) {

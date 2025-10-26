@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import useSettingStore from "@/lib/settings";
-import { stopBackgroundMusic } from "@/lib/utils";
+import { stopBackgroundMusic, backgroundMusic } from "@/lib/utils";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/styles/colors";
 import { LinearGradient } from "expo-linear-gradient";
@@ -39,6 +39,8 @@ export default function Settings() {
             setSoundEnabled(true);
             setVibrationEnabled(true);
             setTheme("light");
+            // Start background music since it's being reset to enabled
+            await backgroundMusic(true);
           },
           style: "destructive",
         },
@@ -73,12 +75,17 @@ export default function Settings() {
               <Switch
                 value={soundEnabled}
                 onValueChange={async () => {
-                  await updateSetting(
-                    "backgroundMusic",
-                    !settings.backgroundMusic
-                  );
+                  const newValue = !settings.backgroundMusic;
+                  await updateSetting("backgroundMusic", newValue);
                   setSoundEnabled((prev) => !prev);
-                  stopBackgroundMusic();
+
+                  if (newValue) {
+                    // Start background music when enabled (force play since setting just changed)
+                    await backgroundMusic(true);
+                  } else {
+                    // Stop background music when disabled
+                    await stopBackgroundMusic();
+                  }
                 }}
                 thumbColor={soundEnabled ? Colors.primary : "#f4f4f4"}
                 trackColor={{ false: "#d8d8d8", true: "#81c784" }}
