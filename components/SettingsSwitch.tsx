@@ -1,6 +1,8 @@
 import React from "react";
 import { View, Text, Switch, StyleSheet, TouchableOpacity } from "react-native";
+import * as Haptics from "expo-haptics";
 import { Colors } from "@/styles/colors";
+import { settings_Vibration } from "@/lib/settings";
 
 interface SettingsSwitchProps {
   title: string;
@@ -19,8 +21,16 @@ export default function SettingsSwitch({
   disabled = false,
   testID,
 }: SettingsSwitchProps) {
+  const triggerHaptic = async () => {
+    if (settings_Vibration()) {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  };
+
   const handlePress = async () => {
     if (!disabled) {
+      // Provide haptic feedback for switch interaction
+      await triggerHaptic();
       await onValueChange(!value);
     }
   };
@@ -43,7 +53,13 @@ export default function SettingsSwitch({
       <View style={styles.switchContainer}>
         <Switch
           value={value}
-          onValueChange={onValueChange}
+          onValueChange={async (newValue) => {
+            if (!disabled) {
+              // Provide haptic feedback when switch is toggled directly
+              await triggerHaptic();
+              await onValueChange(newValue);
+            }
+          }}
           disabled={disabled}
           thumbColor={disabled ? "#cccccc" : value ? Colors.primary : "#f4f4f4"}
           trackColor={{
