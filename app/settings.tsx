@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Platform } from "react-native";
-import { View, Text, Switch, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -8,6 +8,7 @@ import { stopBackgroundMusic, backgroundMusic } from "@/lib/utils";
 import { StatusBar } from "expo-status-bar";
 import { Colors } from "@/styles/colors";
 import { LinearGradient } from "expo-linear-gradient";
+import SettingsSwitch from "@/components/SettingsSwitch";
 
 export default function Settings() {
   const router = useRouter();
@@ -69,45 +70,39 @@ export default function Settings() {
         <View style={styles.optionContainer}>
           {/* Background Music */}
           <View style={styles.section}>
-            <Text style={styles.settingTitle}>Background Music</Text>
-            <View style={styles.settingRow}>
-              <Text style={styles.settingText}>Enable background music</Text>
-              <Switch
-                value={soundEnabled}
-                onValueChange={async () => {
-                  const newValue = !settings.backgroundMusic;
-                  await updateSetting("backgroundMusic", newValue);
-                  setSoundEnabled((prev) => !prev);
+            <SettingsSwitch
+              title="Background Music"
+              description="Enable background music while playing"
+              value={soundEnabled}
+              onValueChange={async () => {
+                const newValue = !settings.backgroundMusic;
+                await updateSetting("backgroundMusic", newValue);
+                setSoundEnabled((prev) => !prev);
 
-                  if (newValue) {
-                    // Start background music when enabled (force play since setting just changed)
-                    await backgroundMusic(true);
-                  } else {
-                    // Stop background music when disabled
-                    await stopBackgroundMusic();
-                  }
-                }}
-                thumbColor={soundEnabled ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
-              />
-            </View>
+                if (newValue) {
+                  // Start background music when enabled (force play since setting just changed)
+                  await backgroundMusic(true);
+                } else {
+                  // Stop background music when disabled
+                  await stopBackgroundMusic();
+                }
+              }}
+              testID="background-music-switch"
+            />
           </View>
 
           {/* Vibration */}
           <View style={[styles.section, styles.lastSection]}>
-            <Text style={styles.settingTitle}>Vibration</Text>
-            <View style={styles.settingRow}>
-              <Text style={styles.settingText}>Enable vibrations</Text>
-              <Switch
-                value={vibrationEnabled}
-                onValueChange={async () => {
-                  await updateSetting("vibration", !settings.vibration);
-                  setVibrationEnabled((prev) => !prev);
-                }}
-                thumbColor={vibrationEnabled ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
-              />
-            </View>
+            <SettingsSwitch
+              title="Vibration"
+              description="Enable haptic feedback during gameplay"
+              value={vibrationEnabled}
+              onValueChange={async () => {
+                await updateSetting("vibration", !settings.vibration);
+                setVibrationEnabled((prev) => !prev);
+              }}
+              testID="vibration-switch"
+            />
           </View>
         </View>
 
@@ -115,40 +110,30 @@ export default function Settings() {
         <Text style={styles.sectionHeader}>Appearance</Text>
         <View style={styles.optionContainer}>
           <View style={styles.section}>
-            <Text style={styles.settingTitle}>Rounded edges</Text>
-            <View style={styles.settingRow}>
-              <Text style={styles.settingText}>
-                Switch between sharp and rounded edges in the app ui
-              </Text>
-              <Switch
-                value={roundedEdges}
-                onValueChange={async () => {
-                  await updateSetting("roundEdges", !settings.roundEdges);
-                  setRoundedEdges((prev) => !prev);
-                }}
-                thumbColor={roundedEdges ? Colors.primary : "#f4f4f4"}
-                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
-              />
-            </View>
+            <SettingsSwitch
+              title="Rounded Edges"
+              description="Switch between sharp and rounded edges in the app UI"
+              value={roundedEdges}
+              onValueChange={async () => {
+                await updateSetting("roundEdges", !settings.roundEdges);
+                setRoundedEdges((prev) => !prev);
+              }}
+              testID="rounded-edges-switch"
+            />
           </View>
           <View style={styles.section}>
-            <Text style={styles.settingTitle}>Theme</Text>
-            <View style={styles.settingRow}>
-              <Text style={styles.settingText}>
-                Switch between Light and Dark mode
-              </Text>
-              <Switch
-                disabled //for now will enable this in a much later version
-                value={theme === "dark"}
-                onValueChange={async () => {
-                  const newTheme = theme === "light" ? "dark" : "light";
-                  await updateSetting("theme", newTheme);
-                  setTheme(newTheme);
-                }}
-                thumbColor={theme === "dark" ? Colors.primary : "#cccccc"}
-                trackColor={{ false: "#d8d8d8", true: "#81c784" }}
-              />
-            </View>
+            <SettingsSwitch
+              title="Dark Theme"
+              description="Switch between Light and Dark mode (Coming Soon)"
+              value={theme === "dark"}
+              onValueChange={async () => {
+                const newTheme = theme === "light" ? "dark" : "light";
+                await updateSetting("theme", newTheme);
+                setTheme(newTheme);
+              }}
+              disabled={true} // for now will enable this in a much later version
+              testID="theme-switch"
+            />
           </View>
         </View>
 
@@ -218,30 +203,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   section: {
-    paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#eeeeee",
   },
   lastSection: {
     borderBottomWidth: 0,
-  },
-  settingTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222222",
-    marginBottom: 8,
-  },
-  settingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  settingText: {
-    fontSize: 16,
-    color: "#333333",
-    flex: 1,
-    marginRight: 10,
-    lineHeight: 22,
   },
   buttonContainer: {
     marginTop: 30,
