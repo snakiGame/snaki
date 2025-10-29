@@ -96,15 +96,7 @@ export const useGameLoop = ({
     const snakeHead = snake[0];
     const newHead = { ...snakeHead };
 
-    if (checkGameOver(snakeHead, gameBounds, snake)) {
-      if (score > localHighScore) {
-        addScore(score);
-      }
-      setIsGameOver(true);
-      vibrate(VIBRATION_PATTERNS.gameOver);
-      return;
-    }
-
+    // NOTE: We Calculate the new head position based on direction
     switch (direction) {
       case Direction.Up:
         newHead.y -= 1;
@@ -118,6 +110,16 @@ export const useGameLoop = ({
       case Direction.Right:
         newHead.x += 1;
         break;
+    }
+
+    // Check for game over conditions with the NEW head position
+    if (checkGameOver(newHead, gameBounds, snake)) {
+      if (score > localHighScore) {
+        addScore(score);
+      }
+      setIsGameOver(true);
+      vibrate(VIBRATION_PATTERNS.gameOver);
+      return;
     }
 
     if (checkEatsFood(newHead, food, 2)) {
