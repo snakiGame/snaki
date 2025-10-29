@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Audio } from "expo-av";
 import { useGameState } from "./useGameState";
 import { useComboSystem } from "./useComboSystem";
@@ -13,16 +14,41 @@ import { backgroundMusic } from "@/lib/utils";
 
 export const useGame = () => {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const { settings } = useSettingStore();
   const { highScore, addScore } = useScoreStore();
 
-  // Calculate game bounds
-  const gameBounds: GameBounds = {
-    xMin: 0,
-    xMax: Math.floor((screenWidth - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
-    yMin: 0,
-    yMax: Math.floor((screenHeight - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
-  };
+  // actual game area dimensions accounting for UI elements
+  const calculateGameBounds = useCallback((): GameBounds => {
+    // Account for all the UI elements that reduce the actual game area
+    const HEADER_HEIGHT = 60; // Approximate header height
+    const GAMEBOARD_MARGIN = 15; // GameBoard margin from styles
+    const GAMEBOARD_BORDER = 2; // GameBoard border width
+    const BOTTOM_PADDING = 20; // Some padding at the bottom
+
+    // available width (full screen width minus GameBoard margins and borders)
+    const availableWidth =
+      screenWidth - GAMEBOARD_MARGIN * 2 - GAMEBOARD_BORDER * 2;
+
+    // available height (screen height minus safe areas, header, GameBoard margins/borders, and padding)
+    const availableHeight =
+      screenHeight -
+      insets.top -
+      insets.bottom -
+      HEADER_HEIGHT -
+      GAMEBOARD_MARGIN * 2 -
+      GAMEBOARD_BORDER * 2 -
+      BOTTOM_PADDING;
+
+    return {
+      xMin: 0,
+      xMax: Math.floor(availableWidth / GAME_UNIT_SIZE) - 1, // -1 to prevent edge collision
+      yMin: 0,
+      yMax: Math.floor(availableHeight / GAME_UNIT_SIZE) - 1, // -1 to prevent edge collision
+    };
+  }, [screenWidth, screenHeight, insets]);
+
+  const gameBounds = calculateGameBounds();
 
   // Initialize hooks
   const gameState = useGameState();
