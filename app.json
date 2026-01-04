@@ -14,7 +14,8 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tach.snaki"
+      "bundleIdentifier": "com.tach.snaki",
+       "icon": "./assets/icon/ios/AppIcon~ios-marketing.png"
     },
     "android": {
       "edgeToEdgeEnabled": true,
