@@ -20,7 +20,7 @@
     "android": {
       "edgeToEdgeEnabled": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon.jpeg",
+        "foregroundImage": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.tach.snaki"
