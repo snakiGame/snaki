@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Coordinate, FoodType } from '../types/types';
 import { Colors } from '../styles/colors';
+import { GAME_UNIT_SIZE } from '../lib/gameConstants';
 
 interface FoodProps extends Coordinate {
   type: FoodType;
@@ -52,8 +53,8 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
       style={[
         styles.food,
         {
-          left: x * 10,
-          top: y * 10,
+          left: x * GAME_UNIT_SIZE,
+          top: y * GAME_UNIT_SIZE,
           backgroundColor: getFoodColor(),
           width: getFoodSize(),
           height: getFoodSize(),

@@ -1,27 +1,34 @@
 import { useEffect, useCallback } from "react";
-import { useWindowDimensions } from "react-native";
 import { Audio } from "expo-av";
 import { useGameState } from "./useGameState";
 import { useComboSystem } from "./useComboSystem";
 import { useGestureHandler } from "./useGestureHandler";
 import { useGameLoop } from "./useGameLoop";
-import { GameBounds, BORDER_WIDTH, GAME_UNIT_SIZE } from "../lib/gameConstants";
+import { GameBounds, GAME_UNIT_SIZE } from "../lib/gameConstants";
 import { GestureEventType } from "../types/types";
 import { useScoreStore } from "@/lib/scoreStore";
 import useSettingStore from "@/lib/settings";
 import { backgroundMusic } from "@/lib/utils";
 
-export const useGame = () => {
-  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+interface UseGameOptions {
+  boardWidth: number;
+  boardHeight: number;
+}
+
+export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
   const { settings } = useSettingStore();
   const { highScore, addScore } = useScoreStore();
 
-  // Calculate game bounds
+  // Calculate game bounds from actual playable area dimensions.
+  // Fall back to 0 until the board has been measured so the game loop
+  // doesn't start with incorrect bounds.
+  // Grid cells are 0-indexed: a board that is N*GAME_UNIT_SIZE px wide
+  // contains cells 0..(N-1), so xMax = floor(boardWidth/GAME_UNIT_SIZE)-1.
   const gameBounds: GameBounds = {
     xMin: 0,
-    xMax: Math.floor((screenWidth - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
+    xMax: boardWidth > 0 ? Math.floor(boardWidth / GAME_UNIT_SIZE) - 1 : 0,
     yMin: 0,
-    yMax: Math.floor((screenHeight - BORDER_WIDTH * 2) / GAME_UNIT_SIZE),
+    yMax: boardHeight > 0 ? Math.floor(boardHeight / GAME_UNIT_SIZE) - 1 : 0,
   };
 
   // Initialize hooks
