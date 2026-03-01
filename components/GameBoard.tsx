@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet, Animated, LayoutChangeEvent } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Colors } from "../styles/colors";
 import { settings_isRondedEdges } from "@/lib/settings";
@@ -19,6 +19,7 @@ interface GameBoardProps {
   combo: number;
   comboAnimation: Animated.Value;
   poisonEffect: boolean;
+  onBoardLayout?: (width: number, height: number) => void;
 }
 
 const GameBoard: React.FC<GameBoardProps> = ({
@@ -29,9 +30,15 @@ const GameBoard: React.FC<GameBoardProps> = ({
   combo,
   comboAnimation,
   poisonEffect,
+  onBoardLayout,
 }) => {
+  const handleLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    onBoardLayout?.(width, height);
+  };
+
   return (
-    <View style={styles.boundaries}>
+    <View style={styles.boundaries} onLayout={handleLayout}>
       <LinearGradient
         colors={["rgba(255, 255, 255, 0.1)", "rgba(255, 255, 255, 0.05)"]}
         style={styles.gridBackground}

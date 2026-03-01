@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import { StyleSheet, View } from "react-native";
 import { Coordinate } from "../types/types";
+import { GAME_UNIT_SIZE } from "../lib/gameConstants";
 
 interface SnakeProps {
   snake: Coordinate[];
@@ -13,8 +14,8 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
     <Fragment>
       {snake.map((segment: any, index: number) => {
         const segmentStyle = {
-          left: segment.x * 10,
-          top: segment.y * 10,
+          left: segment.x * GAME_UNIT_SIZE,
+          top: segment.y * GAME_UNIT_SIZE,
         };
         return (
           <LinearGradient

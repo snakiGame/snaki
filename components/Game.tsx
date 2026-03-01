@@ -18,6 +18,15 @@ export default function Game(): JSX.Element {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isScoreModalVisible, setScoreModalVisible] = useState(false);
 
+  // Actual playable area dimensions measured at runtime
+  const [boardWidth, setBoardWidth] = useState(0);
+  const [boardHeight, setBoardHeight] = useState(0);
+
+  const handleBoardLayout = useCallback((w: number, h: number) => {
+    setBoardWidth(w);
+    setBoardHeight(h);
+  }, []);
+
   // Use the consolidated game hook
   const {
     snake,
@@ -35,7 +44,7 @@ export default function Game(): JSX.Element {
     handleGesture,
     resetGame,
     togglePause,
-  } = useGame();
+  } = useGame({ boardWidth, boardHeight });
 
   const toggleModal = useCallback(() => {
     setModalVisible(prev => !prev);
@@ -92,6 +101,7 @@ export default function Game(): JSX.Element {
           combo={combo}
           comboAnimation={comboAnimation}
           poisonEffect={poisonEffect}
+          onBoardLayout={handleBoardLayout}
         />
 
         <GameOverModal
