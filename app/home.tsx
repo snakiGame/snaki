@@ -129,7 +129,7 @@ async function scheduleDailyNotification() {
         minute: 0,
         repeats: true,
         channelId: 'daily-reminders',
-      },
+      } as Notifications.NotificationTriggerInput,
     });
   } else {
     return
