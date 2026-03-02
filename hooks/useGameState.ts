@@ -71,8 +71,8 @@ export const useGameState = () => {
     }
   }, []);
 
-  // Reset power-ups when they expire
-  useEffect(() => {
+  // Check and expire power-ups deterministically (called from game loop)
+  const checkPowerUpExpiration = useCallback(() => {
     if (powerUp.type && Date.now() > powerUp.endTime) {
       setPowerUp({ type: null, endTime: 0 });
       setSpeedMultiplier(1);
@@ -131,6 +131,7 @@ export const useGameState = () => {
 
     // Actions
     activatePowerUp,
+    checkPowerUpExpiration,
     resetGame,
     togglePause,
   };

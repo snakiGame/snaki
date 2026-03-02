@@ -49,6 +49,7 @@ interface UseGameLoopProps {
     powerUpType: PowerUp | null
   ) => number;
   activatePowerUp: (type: PowerUp) => void;
+  checkPowerUpExpiration: () => void;
   addScore: (score: number) => void;
   setCombo: (combo: number) => void;
   setLastFoodTime: (time: number) => void;
@@ -79,6 +80,7 @@ export const useGameLoop = ({
   resetCombo,
   calculateScore,
   activatePowerUp,
+  checkPowerUpExpiration,
   addScore,
   setCombo,
   setLastFoodTime,
@@ -114,15 +116,13 @@ export const useGameLoop = ({
 
     // Check for game over conditions with the NEW head position
     if (checkGameOver(newHead, gameBounds, snake)) {
-      if (score > localHighScore) {
-        addScore(score);
-      }
+      addScore(score);
       setIsGameOver(true);
       vibrate(VIBRATION_PATTERNS.gameOver);
       return;
     }
 
-    if (checkEatsFood(newHead, food, 2)) {
+    if (checkEatsFood(newHead, food)) {
       handleFoodEaten(newHead);
     } else {
       setSnake([newHead, ...snake.slice(0, -1)]);
@@ -209,7 +209,11 @@ export const useGameLoop = ({
         setFoodType(FoodType.Normal);
       }
 
-      setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax));
+      // Pass current snake (including new head) to avoid spawning food on the snake
+      const updatedSnake = foodType === FoodType.Poison
+        ? (snake.length > 1 ? [newHead, ...snake.slice(0, -2)] : [newHead])
+        : [newHead, ...snake];
+      setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax, updatedSnake));
     },
     [
       foodType,
@@ -233,15 +237,19 @@ export const useGameLoop = ({
     ]
   );
 
-  // Game loop effect
+  // Game loop effect — also check power-up expiration each tick
+  // Don't start the loop until the board has been measured (gameBounds > 0)
   useEffect(() => {
-    if (!isGameOver) {
+    if (!isGameOver && gameBounds.xMax > 0 && gameBounds.yMax > 0) {
       const intervalId = setInterval(() => {
-        !isPaused && moveSnake();
+        if (!isPaused) {
+          checkPowerUpExpiration();
+          moveSnake();
+        }
       }, getCurrentMoveInterval());
       return () => clearInterval(intervalId);
     }
-  }, [snake, isGameOver, isPaused, getCurrentMoveInterval, moveSnake]);
+  }, [snake, isGameOver, isPaused, gameBounds.xMax, gameBounds.yMax, getCurrentMoveInterval, moveSnake, checkPowerUpExpiration]);
 
   return {
     moveSnake,
