@@ -63,6 +63,7 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
     resetCombo: comboSystem.resetCombo,
     calculateScore: comboSystem.calculateScore,
     activatePowerUp: gameState.activatePowerUp,
+    checkPowerUpExpiration: gameState.checkPowerUpExpiration,
     addScore,
     setCombo: gameState.setCombo,
     setLastFoodTime: gameState.setLastFoodTime,

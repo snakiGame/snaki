@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { Coordinate, FoodType } from '../types/types';
-import { Colors } from '../styles/colors';
-import { GAME_UNIT_SIZE } from '../lib/gameConstants';
+import React from "react";
+import { View, StyleSheet, Animated } from "react-native";
+import { Coordinate, FoodType } from "../types/types";
+import { Colors } from "../styles/colors";
+import { GAME_UNIT_SIZE } from "../lib/gameConstants";
 
 interface FoodProps extends Coordinate {
   type: FoodType;
@@ -12,11 +12,11 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
   const getFoodColor = () => {
     switch (type) {
       case FoodType.Golden:
-        return '#FFD700'; // Gold
+        return "#FFD700"; // Gold
       case FoodType.Rainbow:
-        return '#FF69B4'; // Hot Pink
+        return "#FF69B4"; // Hot Pink
       case FoodType.Poison:
-        return '#FF0000'; // Red
+        return "#FF0000"; // Red
       default:
         return Colors.primary;
     }
@@ -36,29 +36,34 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
   };
 
   const getFoodSize = () => {
+    // All food uses the same grid-aligned size with slight variation
     switch (type) {
       case FoodType.Golden:
-        return 12;
+        return GAME_UNIT_SIZE;
       case FoodType.Rainbow:
-        return 14;
+        return GAME_UNIT_SIZE;
       case FoodType.Poison:
-        return 10;
+        return GAME_UNIT_SIZE - 2;
       default:
-        return 10;
+        return GAME_UNIT_SIZE - 2;
     }
   };
+
+  const foodSize = getFoodSize();
+  // Center the food within the grid cell
+  const offset = (GAME_UNIT_SIZE - foodSize) / 2;
 
   return (
     <View
       style={[
         styles.food,
         {
-          left: x * GAME_UNIT_SIZE,
-          top: y * GAME_UNIT_SIZE,
+          left: x * GAME_UNIT_SIZE + offset,
+          top: y * GAME_UNIT_SIZE + offset,
           backgroundColor: getFoodColor(),
-          width: getFoodSize(),
-          height: getFoodSize(),
-          borderRadius: getFoodSize() / 2,
+          width: foodSize,
+          height: foodSize,
+          borderRadius: foodSize / 2,
         },
         getFoodStyle(),
       ]}
@@ -68,12 +73,12 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
 
 const styles = StyleSheet.create({
   food: {
-    position: 'absolute',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: "absolute",
+    justifyContent: "center",
+    alignItems: "center",
   },
   normalFood: {
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -83,7 +88,7 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   goldenFood: {
-    shadowColor: '#FFD700',
+    shadowColor: "#FFD700",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -92,10 +97,10 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8,
     borderWidth: 2,
-    borderColor: '#FFA500',
+    borderColor: "#FFA500",
   },
   rainbowFood: {
-    shadowColor: '#FF69B4',
+    shadowColor: "#FF69B4",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -104,10 +109,10 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8,
     borderWidth: 2,
-    borderColor: '#FF1493',
+    borderColor: "#FF1493",
   },
   poisonFood: {
-    shadowColor: '#FF0000',
+    shadowColor: "#FF0000",
     shadowOffset: {
       width: 0,
       height: 0,
@@ -116,7 +121,7 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 8,
     borderWidth: 2,
-    borderColor: '#8B0000',
+    borderColor: "#8B0000",
   },
 });
 
