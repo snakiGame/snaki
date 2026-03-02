@@ -22,7 +22,7 @@ interface GameoverModalProps {
   highScore: number;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const GameOverModal = ({
   isModalVisible,
@@ -41,7 +41,7 @@ const GameOverModal = ({
       style={styles.modal}
     >
       <LinearGradient
-        colors={[Colors.primary, Colors.primary + 'CC']}
+        colors={[Colors.primary, Colors.primary + "CC"]}
         style={styles.modalContainer}
       >
         <View style={styles.header}>
@@ -61,7 +61,7 @@ const GameOverModal = ({
         </View>
 
         <Image
-          source={require("../assets/crash.png")} 
+          source={require("../assets/crash.png")}
           style={styles.crashImage}
           resizeMode="contain"
         />
@@ -69,12 +69,17 @@ const GameOverModal = ({
         <TouchableOpacity
           style={styles.playAgainButton}
           onPress={() => {
-            if(settings.vibration) Vibration.vibrate(15);
+            if (settings.vibration) Vibration.vibrate(15);
             toggleModal();
             reloadGame();
           }}
         >
-          <Ionicons name="refresh" size={20} color="#fff" style={styles.buttonIcon} />
+          <Ionicons
+            name="refresh"
+            size={20}
+            color="#fff"
+            style={styles.buttonIcon}
+          />
           <Text style={styles.playAgainButtonText}>Play Again</Text>
         </TouchableOpacity>
       </LinearGradient>
