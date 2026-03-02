@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  View,
   Text,
   StyleSheet,
+  Image,
   TouchableOpacity,
   Animated,
   Easing,
@@ -36,7 +38,9 @@ const HomePage: React.FC = () => {
     settingsInit();
   }, []);
   const [expoPushToken, setExpoPushToken] = useState("");
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
+  const notificationListener = useRef<Notifications.EventSubscription | null>(
+    null,
+  );
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
   useEffect(() => {
@@ -79,7 +83,10 @@ const HomePage: React.FC = () => {
   }, []);
 
   return (
-    <LinearGradient colors={["#ffffff", "#f2f8f9","#d8e9d8"]} style={styles.container}>
+    <LinearGradient
+      colors={["#ffffff", "#f2f8f9", "#d8e9d8"]}
+      style={styles.container}
+    >
       <SafeAreaView style={styles.content}>
         <StatusBar style="dark" backgroundColor={Colors.primary} />
         <Animated.Image
@@ -122,15 +129,15 @@ async function scheduleDailyNotification() {
         data: { screen: "play" },
       },
       trigger: {
-        type: 'daily',
+        type: "daily",
         hour: 8, // 8:00 AM
         minute: 0,
         repeats: true,
-        channelId: 'daily-reminders',
+        channelId: "daily-reminders",
       } as Notifications.NotificationTriggerInput,
     });
   } else {
-    return
+    return;
   }
 }
 
@@ -209,7 +216,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#1a1a1a",
     paddingVertical: 16,
     paddingHorizontal: 60,
-    borderRadius: settings_isRondedEdges()?10:0,
+    borderRadius: settings_isRondedEdges() ? 10 : 0,
     marginBottom: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
@@ -227,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.accents,
     paddingVertical: 16,
     paddingHorizontal: 60,
-    borderRadius: settings_isRondedEdges()?10:0,
+    borderRadius: settings_isRondedEdges() ? 10 : 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,

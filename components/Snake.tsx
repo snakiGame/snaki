@@ -39,10 +39,10 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
 
 const styles = StyleSheet.create({
   snake: {
-    width: 15,
-    height: 15,
+    width: GAME_UNIT_SIZE,
+    height: GAME_UNIT_SIZE,
     position: "absolute",
-    borderRadius: 4,
+    borderRadius: 3,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
   },
   eye: {
     position: "absolute",
-    width: 4,
-    height: 4,
+    width: Math.max(3, GAME_UNIT_SIZE * 0.25),
+    height: Math.max(3, GAME_UNIT_SIZE * 0.25),
     backgroundColor: "#fff",
-    borderRadius: 2,
+    borderRadius: Math.max(3, GAME_UNIT_SIZE * 0.25) / 2,
     top: 2,
     right: 2,
     shadowColor: "#000",
