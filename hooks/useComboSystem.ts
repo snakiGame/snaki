@@ -16,7 +16,7 @@ export const useComboSystem = () => {
       combo: number,
       lastFoodTime: number,
       setCombo: (combo: number) => void,
-      setLastFoodTime: (time: number) => void
+      setLastFoodTime: (time: number) => void,
     ) => {
       const now = Date.now();
       if (now - lastFoodTime < COMBO_TIMEOUT) {
@@ -43,7 +43,7 @@ export const useComboSystem = () => {
       }
       setLastFoodTime(now);
     },
-    [comboAnimation]
+    [comboAnimation],
   );
 
   const resetCombo = useCallback((setCombo: (combo: number) => void) => {
@@ -65,7 +65,7 @@ export const useComboSystem = () => {
 
       return finalScore;
     },
-    []
+    [],
   );
 
   return {

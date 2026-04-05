@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
 import {
-  SafeAreaView,
   StyleSheet,
   StatusBar,
 } from "react-native";
@@ -12,6 +11,7 @@ import GameOverModal from "@/components/GameoverModal";
 import ScoreModal from './ScoreModal';
 import GameBoard from './GameBoard';
 import { useGame } from '../hooks/useGame';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Game(): JSX.Element {
   // Modal states
