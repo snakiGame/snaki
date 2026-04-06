@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, Animated } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Coordinate, FoodType } from "../types/types";
 import { Colors } from "../styles/colors";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
@@ -12,46 +12,31 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
   const getFoodColor = () => {
     switch (type) {
       case FoodType.Golden:
-        return "#FFD700"; // Gold
+        return Colors.accent;
       case FoodType.Rainbow:
-        return "#FF69B4"; // Hot Pink
+        return "#c084fc"; // Purple
       case FoodType.Poison:
-        return "#FF0000"; // Red
+        return Colors.danger;
       default:
-        return Colors.primary;
+        return Colors.accent;
     }
   };
 
-  const getFoodStyle = () => {
+  const getShadowColor = () => {
     switch (type) {
       case FoodType.Golden:
-        return styles.goldenFood;
+        return Colors.accentDark;
       case FoodType.Rainbow:
-        return styles.rainbowFood;
+        return "#7c3aed";
       case FoodType.Poison:
-        return styles.poisonFood;
+        return Colors.dangerDark;
       default:
-        return styles.normalFood;
+        return Colors.accentDark;
     }
   };
 
-  const getFoodSize = () => {
-    // All food uses the same grid-aligned size with slight variation
-    switch (type) {
-      case FoodType.Golden:
-        return GAME_UNIT_SIZE;
-      case FoodType.Rainbow:
-        return GAME_UNIT_SIZE;
-      case FoodType.Poison:
-        return GAME_UNIT_SIZE - 2;
-      default:
-        return GAME_UNIT_SIZE - 2;
-    }
-  };
-
-  const foodSize = getFoodSize();
-  // Center the food within the grid cell
-  const offset = (GAME_UNIT_SIZE - foodSize) / 2;
+  const size = GAME_UNIT_SIZE - 2;
+  const offset = (GAME_UNIT_SIZE - size) / 2;
 
   return (
     <View
@@ -60,68 +45,42 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
         {
           left: x * GAME_UNIT_SIZE + offset,
           top: y * GAME_UNIT_SIZE + offset,
-          backgroundColor: getFoodColor(),
-          width: foodSize,
-          height: foodSize,
-          borderRadius: foodSize / 2,
+          width: size,
+          height: size,
         },
-        getFoodStyle(),
       ]}
-    />
+    >
+      {/* Shadow block */}
+      <View
+        style={[styles.foodShadow, { backgroundColor: getShadowColor() }]}
+      />
+      {/* Main block */}
+      <View
+        style={[
+          styles.foodBlock,
+          { backgroundColor: getFoodColor(), width: size, height: size },
+        ]}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   food: {
     position: "absolute",
-    justifyContent: "center",
-    alignItems: "center",
   },
-  normalFood: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  foodBlock: {
+    borderRadius: 3,
+    zIndex: 2,
   },
-  goldenFood: {
-    shadowColor: "#FFD700",
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: "#FFA500",
-  },
-  rainbowFood: {
-    shadowColor: "#FF69B4",
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: "#FF1493",
-  },
-  poisonFood: {
-    shadowColor: "#FF0000",
-    shadowOffset: {
-      width: 0,
-      height: 0,
-    },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 8,
-    borderWidth: 2,
-    borderColor: "#8B0000",
+  foodShadow: {
+    position: "absolute",
+    left: 1,
+    top: 2,
+    right: -1,
+    bottom: -2,
+    borderRadius: 3,
+    zIndex: 1,
   },
 });
 

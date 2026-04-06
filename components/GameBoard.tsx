@@ -1,10 +1,8 @@
 import React from "react";
 import { View, StyleSheet, Animated, LayoutChangeEvent } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "../styles/colors";
-import { settings_isRondedEdges } from "@/lib/settings";
+import { Colors, BLOCK_RADIUS } from "../styles/colors";
 import { Coordinate, FoodType, PowerUp } from "../types/types";
-import { PowerUpState } from "../lib/gameConstants";
+import { PowerUpState, GAME_UNIT_SIZE } from "../lib/gameConstants";
 import Snake from "./Snake";
 import Food from "./Food";
 import PowerUpIndicator from "./PowerUpIndicator";
@@ -38,56 +36,70 @@ const GameBoard: React.FC<GameBoardProps> = ({
   };
 
   return (
-    <View style={styles.boundaries} onLayout={handleLayout}>
-      <LinearGradient
-        colors={["rgba(255, 255, 255, 0.1)", "rgba(255, 255, 255, 0.05)"]}
-        style={styles.gridBackground}
-      />
+    <View style={styles.boardOuter}>
+      {/* Block shadow for the board */}
+      <View style={styles.boardShadow} />
+      <View style={styles.boundaries} onLayout={handleLayout}>
+        {/* Grid pattern */}
+        <GridLines />
 
-      <PoisonOverlay isVisible={poisonEffect} />
+        <PoisonOverlay isVisible={poisonEffect} />
+        <Snake snake={snake} />
+        <Food x={food.x} y={food.y} type={foodType} />
 
-      <Snake snake={snake} />
+        {powerUp.type && (
+          <PowerUpIndicator
+            type={powerUp.type}
+            timeLeft={Math.max(0, powerUp.endTime - Date.now())}
+          />
+        )}
 
-      <Food x={food.x} y={food.y} type={foodType} />
-
-      {powerUp.type && (
-        <PowerUpIndicator
-          type={powerUp.type}
-          timeLeft={Math.max(0, powerUp.endTime - Date.now())}
-        />
-      )}
-
-      <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
+        <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
+      </View>
     </View>
   );
 };
 
+// Subtle grid lines for the board
+const GridLines: React.FC = React.memo(() => {
+  // We render a pattern using border-based grid
+  return <View style={styles.gridOverlay} />;
+});
+
 const styles = StyleSheet.create({
+  boardOuter: {
+    flex: 1,
+    margin: 12,
+    position: "relative",
+  },
+  boardShadow: {
+    position: "absolute",
+    left: 2,
+    right: -2,
+    top: 4,
+    bottom: -4,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: BLOCK_RADIUS,
+  },
   boundaries: {
     flex: 1,
-    margin: 15,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderColor: Colors.surfaceLight,
     borderWidth: 2,
-    borderRadius: settings_isRondedEdges() ? 30 : 0,
-    backgroundColor: Colors.background,
+    borderRadius: BLOCK_RADIUS,
+    backgroundColor: Colors.surface,
     overflow: "hidden",
     position: "relative",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
   },
-  gridBackground: {
+  gridOverlay: {
     position: "absolute",
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    opacity: 0.3,
+    opacity: 0.06,
+    backgroundColor: "transparent",
+    borderColor: Colors.white,
+    // Use a repeating background pattern via borderWidth as visual hint
   },
 });
 

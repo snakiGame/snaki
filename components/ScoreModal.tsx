@@ -1,65 +1,72 @@
-import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, FlatList, Dimensions } from 'react-native';
-import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
-import { useScoreStore } from '@/lib/scoreStore';
-import { Colors } from '@/styles/colors';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Modal,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useScoreStore } from "@/lib/scoreStore";
+import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
 
 interface ScoreModalProps {
   isVisible: boolean;
   onClose: () => void;
 }
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
-export default function ScoreModal({ isVisible, onClose }: ScoreModalProps): JSX.Element {
+export default function ScoreModal({
+  isVisible,
+  onClose,
+}: ScoreModalProps): JSX.Element {
   const { highScore, scores } = useScoreStore();
 
-  const renderScoreItem = ({ item, index }: { item: { score: number; date: string }; index: number }) => (
-    <LinearGradient
-      colors={['rgba(255,255,255,0.1)', 'rgba(255,255,255,0.05)']}
-      style={styles.scoreItem}
-    >
+  const renderScoreItem = ({
+    item,
+    index,
+  }: {
+    item: { score: number; date: string };
+    index: number;
+  }) => (
+    <View style={styles.scoreItem}>
       <Text style={styles.scoreRank}>#{index + 1}</Text>
       <View style={styles.scoreDetails}>
         <Text style={styles.scoreValue}>{item.score}</Text>
-        <Text style={styles.scoreDate}>{new Date(item.date).toLocaleDateString()}</Text>
+        <Text style={styles.scoreDate}>
+          {new Date(item.date).toLocaleDateString()}
+        </Text>
       </View>
-    </LinearGradient>
+    </View>
   );
 
   return (
     <Modal
       visible={isVisible}
       transparent
-      animationType="fade"
+      animationType="slide"
       onRequestClose={onClose}
     >
-      <BlurView intensity={20} style={styles.modalContainer}>
-        <LinearGradient
-          colors={[Colors.primary, 'rgba(0,0,0,0.95)']}
-          style={styles.modalContent}
-        >
+      <View style={styles.overlay}>
+        <View style={styles.modalContent}>
           <View style={styles.handle} />
 
           <View style={styles.header}>
-            <LinearGradient
-              colors={[Colors.tertiary, '#FFD700']}
-              style={styles.iconBackground}
-            >
-              <Ionicons name="trophy" size={28} color="#fff" />
-            </LinearGradient>
-            <Text style={styles.title}>High Scores</Text>
+            <Text style={styles.trophyIcon}>🏆</Text>
+            <Text style={styles.title}>HIGH SCORES</Text>
           </View>
 
-          <LinearGradient
-            colors={['rgba(234,179,8,0.2)', 'rgba(234,179,8,0.05)']}
-            style={styles.highScoreContainer}
-          >
-            <Text style={styles.highScoreLabel}>Best Score</Text>
-            <Text style={styles.highScoreValue}>{highScore}</Text>
-          </LinearGradient>
+          {/* Best score block */}
+          <View style={styles.bestBlock}>
+            <View style={[styles.bestBlockShadow]} />
+            <View style={styles.bestBlockInner}>
+              <Text style={styles.bestLabel}>BEST</Text>
+              <Text style={styles.bestValue}>{highScore}</Text>
+            </View>
+          </View>
 
           <FlatList
             data={scores}
@@ -68,183 +75,150 @@ export default function ScoreModal({ isVisible, onClose }: ScoreModalProps): JSX
             style={styles.scoreList}
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No scores yet. Start playing!</Text>
+              <Text style={styles.emptyText}>
+                No scores yet. Start playing!
+              </Text>
             }
           />
 
           <TouchableOpacity
             style={styles.closeButton}
             onPress={onClose}
+            activeOpacity={0.7}
           >
-            <Ionicons name="close" size={24} color="#fff" />
+            <Ionicons name="close" size={22} color={Colors.white} />
           </TouchableOpacity>
-        </LinearGradient>
-      </BlurView>
+        </View>
+      </View>
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  modalContainer: {
+  overlay: {
     flex: 1,
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "flex-end",
   },
   modalContent: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
+    backgroundColor: Colors.background,
+    borderTopLeftRadius: BLOCK_RADIUS,
+    borderTopRightRadius: BLOCK_RADIUS,
     padding: 20,
     paddingTop: 10,
-    maxHeight: '80%',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: -3,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    maxHeight: "80%",
+    borderWidth: 2,
+    borderColor: Colors.surfaceLight,
+    borderBottomWidth: 0,
   },
   handle: {
     width: 40,
     height: 4,
-    backgroundColor: 'rgba(255,255,255,0.3)',
+    backgroundColor: Colors.surfaceLight,
     borderRadius: 2,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 20,
+    gap: 10,
   },
-  iconBackground: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
-    elevation: 5,
+  trophyIcon: {
+    fontSize: 28,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Colors.white,
-    marginLeft: 15,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 24,
+    fontWeight: "900",
+    color: Colors.accent,
+    letterSpacing: 3,
   },
-  highScoreContainer: {
-    alignItems: 'center',
+  bestBlock: {
+    position: "relative",
     marginBottom: 20,
-    padding: 15,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: Colors.tertiary,
   },
-  highScoreLabel: {
-    fontSize: 16,
-    color: Colors.tertiary,
-    marginBottom: 5,
-    fontWeight: '500',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  bestBlockShadow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: BLOCK_SHADOW_OFFSET,
+    bottom: -BLOCK_SHADOW_OFFSET,
+    backgroundColor: Colors.accentDark,
+    borderRadius: BLOCK_RADIUS,
   },
-  highScoreValue: {
-    fontSize: 42,
-    fontWeight: 'bold',
-    color: Colors.tertiary,
-    textShadowColor: 'rgba(0, 0, 0, 0.5)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 3,
+  bestBlockInner: {
+    alignItems: "center",
+    padding: 16,
+    borderRadius: BLOCK_RADIUS,
+    backgroundColor: Colors.accent,
+  },
+  bestLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: Colors.background,
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  bestValue: {
+    fontSize: 40,
+    fontWeight: "900",
+    color: Colors.background,
   },
   scoreList: {
     marginBottom: 20,
   },
   scoreItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 15,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 15,
-    marginBottom: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 14,
+    backgroundColor: Colors.surface,
+    borderRadius: BLOCK_RADIUS - 4,
+    marginBottom: 8,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    borderColor: Colors.surfaceLight,
   },
   scoreRank: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.tertiary,
+    fontSize: 16,
+    fontWeight: "900",
+    color: Colors.accent,
     width: 40,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    letterSpacing: 1,
   },
   scoreDetails: {
     flex: 1,
   },
   scoreValue: {
-    fontSize: 22,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: "900",
     color: Colors.white,
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   scoreDate: {
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.7)',
-    marginTop: 4,
-    fontWeight: '500',
+    fontSize: 11,
+    color: Colors.textDim,
+    marginTop: 2,
+    letterSpacing: 0.5,
   },
   closeButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: BLOCK_RADIUS - 4,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 3,
+    borderColor: Colors.surfaceLight,
   },
   emptyText: {
-    textAlign: 'center',
-    color: 'rgba(255,255,255,0.7)',
-    fontSize: 16,
+    textAlign: "center",
+    color: Colors.textDim,
+    fontSize: 15,
     marginTop: 20,
-    fontWeight: '500',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    fontWeight: "600",
+    letterSpacing: 1,
   },
 });
