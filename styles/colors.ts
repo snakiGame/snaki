@@ -3,8 +3,8 @@
 export const Colors = {
   // Core
   background: "#1a1a2e",   // Deep dark navy — the world
-  primary: "#4ade80",       // Bright green — snake / player color
-  primaryDark: "#22c55e",   // Darker green — block shadow
+  primary: "#889c77",       // Olive sage — snake / player color
+  primaryDark: "#6b7f5e",   // Darker olive — block shadow
   accent: "#facc15",        // Yellow — score, highlights, trophies
   accentDark: "#ca8a04",    // Darker yellow — block shadow for accent
 
@@ -19,9 +19,9 @@ export const Colors = {
   dangerDark: "#b91c1c",    // Darker red shadow
 
   // Legacy aliases (keep old code from breaking)
-  secondary: "#4ade80",
+  secondary: "#889c77",
   tertiary: "#facc15",
-  accents: "#4ade80",
+  accents: "#889c77",
   text: "#f0f0f0",
 };
 

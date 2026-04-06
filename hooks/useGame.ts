@@ -1,5 +1,4 @@
 import { useEffect, useCallback } from "react";
-import { Audio } from "expo-av";
 import { useGameState } from "./useGameState";
 import { useComboSystem } from "./useComboSystem";
 import { useGestureHandler } from "./useGestureHandler";
