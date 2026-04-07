@@ -1,16 +1,13 @@
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  StyleSheet,
-  StatusBar,
-} from "react-native";
+import { StyleSheet, StatusBar } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
 import Header from "./Header";
 import Score from "./Score";
 import GameOverModal from "@/components/GameoverModal";
-import ScoreModal from './ScoreModal';
-import GameBoard from './GameBoard';
-import { useGame } from '../hooks/useGame';
+import ScoreModal from "./ScoreModal";
+import GameBoard from "./GameBoard";
+import { useGame } from "../hooks/useGame";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Game(): JSX.Element {
@@ -47,7 +44,7 @@ export default function Game(): JSX.Element {
   } = useGame({ boardWidth, boardHeight });
 
   const toggleModal = useCallback(() => {
-    setModalVisible(prev => !prev);
+    setModalVisible((prev) => !prev);
   }, []);
 
   const handleGameOver = useCallback(() => {
@@ -78,7 +75,8 @@ export default function Game(): JSX.Element {
       <SafeAreaView style={styles.container}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={Colors.primary}
+          translucent
+          backgroundColor="transparent"
         />
         <Header
           reloadGame={resetGame}
