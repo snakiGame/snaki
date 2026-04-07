@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { StyleSheet, StatusBar } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
@@ -9,6 +9,7 @@ import ScoreModal from "./ScoreModal";
 import GameBoard from "./GameBoard";
 import { useGame } from "../hooks/useGame";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useSwipeTrail } from "./SwipeTrail";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -43,6 +44,24 @@ export default function Game(): JSX.Element {
     togglePause,
   } = useGame({ boardWidth, boardHeight });
 
+  // Swipe trail
+  const { addDot, TrailLayer } = useSwipeTrail();
+  const lastDotRef = useRef({ x: 0, y: 0 });
+
+  const handleGestureWithTrail = useCallback(
+    (event: any) => {
+      const { absoluteX, absoluteY } = event.nativeEvent;
+      const dx = absoluteX - lastDotRef.current.x;
+      const dy = absoluteY - lastDotRef.current.y;
+      if (dx * dx + dy * dy > 400) {
+        addDot(absoluteX, absoluteY);
+        lastDotRef.current = { x: absoluteX, y: absoluteY };
+      }
+      handleGesture(event);
+    },
+    [handleGesture, addDot],
+  );
+
   const toggleModal = useCallback(() => {
     setModalVisible((prev) => !prev);
   }, []);
@@ -71,13 +90,14 @@ export default function Game(): JSX.Element {
   }, [isGameOver, isModalVisible, handleGameOver]);
 
   return (
-    <PanGestureHandler onGestureEvent={handleGesture}>
+    <PanGestureHandler onGestureEvent={handleGestureWithTrail}>
       <SafeAreaView style={styles.container} edges={["bottom"]}>
         <StatusBar
           barStyle="light-content"
           translucent
           backgroundColor="transparent"
         />
+        <TrailLayer />
         <Header
           reloadGame={resetGame}
           pauseGame={togglePause}
