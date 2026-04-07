@@ -19,7 +19,7 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { Audio } from "expo-av";
+import { useAudioPlayer } from "expo-audio";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 const SNAKE_CELL = 16;
@@ -264,6 +264,7 @@ const IdleSnake: React.FC = React.memo(() => {
 
 // ─── Play Button (Physical Feel) ──────────────────────────────
 const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
+  const pickSound = useAudioPlayer(require("../assets/music/pick.mp3"));
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(BLOCK_SHADOW_OFFSET)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -326,17 +327,10 @@ const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
     ]).start();
   };
 
-  const handlePress = async () => {
+  const handlePress = () => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        require("../assets/music/pick.mp3"),
-        { shouldPlay: true },
-      );
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
+      pickSound.seekTo(0);
+      pickSound.play();
     } catch {}
     onPress();
   };
