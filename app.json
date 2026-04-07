@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon/android/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "foregroundImage": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundColor": "#e6e0e0"
       },
       "package": "com.tach.snaki"
