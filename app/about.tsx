@@ -40,7 +40,7 @@ export default function About() {
         {/* App identity */}
         <View style={styles.identityRow}>
           <Image
-            source={require("../assets/icon.png")}
+            source={require("../assets/icon/android/play_store_512.png")}
             style={styles.appIcon}
           />
           <View style={styles.identityText}>
