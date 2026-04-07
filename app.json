@@ -4,11 +4,11 @@
     "slug": "snaki",
     "version": "1.5.0",
     "orientation": "portrait",
-    "icon": "./assets/icon/ios/iTunesArtwork@3x.png",
+    "icon": "./assets/icon/ios/AppIcon~ios-marketing.png",
     "scheme": "snaki",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/icon/ios/iTunesArtwork@3x.png",
+      "image": "./assets/icon/ios/AppIcon~ios-marketing.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
