@@ -72,7 +72,7 @@ export default function Game(): JSX.Element {
 
   return (
     <PanGestureHandler onGestureEvent={handleGesture}>
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["bottom"]}>
         <StatusBar
           barStyle="light-content"
           translucent
