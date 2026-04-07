@@ -2,35 +2,35 @@ import { Fragment } from "react";
 import { StyleSheet, View } from "react-native";
 import { Coordinate } from "../types/types";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
+import { Colors, BLOCK_RADIUS } from "../styles/colors";
 
 interface SnakeProps {
   snake: Coordinate[];
 }
-import { Colors } from "../styles/colors";
-import { LinearGradient } from "expo-linear-gradient";
 
 export default function Snake({ snake }: SnakeProps): JSX.Element {
   return (
     <Fragment>
-      {snake.map((segment: any, index: number) => {
-        const segmentStyle = {
-          left: segment.x * GAME_UNIT_SIZE,
-          top: segment.y * GAME_UNIT_SIZE,
-        };
+      {snake.map((segment: Coordinate, index: number) => {
+        const isHead = index === 0;
         return (
-          <LinearGradient
+          <View
             key={index}
-            colors={
-              index === 0
-                ? ["#81c784", "#81c784CC"]
-                : ["#81c784CC", "#81c78499"]
-            }
-            style={[styles.snake, segmentStyle]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+            style={[
+              styles.segment,
+              {
+                left: segment.x * GAME_UNIT_SIZE,
+                top: segment.y * GAME_UNIT_SIZE,
+                backgroundColor: isHead ? Colors.primary : Colors.primaryDark,
+                opacity: Math.max(0.5, 1 - index * 0.03),
+              },
+            ]}
           >
-            {index === 0 && <View style={styles.eye} />}
-          </LinearGradient>
+            {/* Block shadow underneath each segment */}
+            <View style={styles.segmentShadow} />
+            {/* Head eye */}
+            {isHead && <View style={styles.eye} />}
+          </View>
         );
       })}
     </Fragment>
@@ -38,35 +38,29 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  snake: {
-    width: GAME_UNIT_SIZE,
-    height: GAME_UNIT_SIZE,
+  segment: {
+    width: GAME_UNIT_SIZE - 1,
+    height: GAME_UNIT_SIZE - 1,
     position: "absolute",
     borderRadius: 3,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  },
+  segmentShadow: {
+    position: "absolute",
+    left: 1,
+    top: 2,
+    right: -1,
+    bottom: -2,
+    backgroundColor: "rgba(0,0,0,0.25)",
+    borderRadius: 3,
+    zIndex: -1,
   },
   eye: {
     position: "absolute",
     width: Math.max(3, GAME_UNIT_SIZE * 0.25),
     height: Math.max(3, GAME_UNIT_SIZE * 0.25),
-    backgroundColor: "#fff",
+    backgroundColor: Colors.background,
     borderRadius: Math.max(3, GAME_UNIT_SIZE * 0.25) / 2,
     top: 2,
     right: 2,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-    elevation: 2,
   },
 });

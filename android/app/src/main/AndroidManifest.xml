@@ -27,6 +27,7 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="snaki"/>
+        <data android:scheme="exp+snaki"/>
       </intent-filter>
     </activity>
   </application>

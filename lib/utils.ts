@@ -1,7 +1,7 @@
-import { Audio } from "expo-av";
+import { createAudioPlayer, AudioPlayer } from "expo-audio";
 import { settings_backgroundMusic } from "./settings";
 
-export let soundInstance: Audio.Sound | null = null; // NOTE:Tracks the sound instance globally
+let playerInstance: AudioPlayer | null = null;
 
 export const backgroundMusic = async (forcePlay: boolean = false) => {
   // Checks if background music setting is enabled (unless forced)
@@ -9,36 +9,31 @@ export const backgroundMusic = async (forcePlay: boolean = false) => {
     return;
   }
 
-  if (soundInstance) {
+  if (playerInstance) {
     return; //Not playing the audio twice while the other instance is still playing
   }
   try {
-    // Creates and load the sound
-    const { sound } = await Audio.Sound.createAsync(
+    const player = createAudioPlayer(
       require("../assets/music/bg-music1.mp3"),
-      { shouldPlay: true, isLooping: true }
     );
-
-    // Keeps track of the sound instance for unmounting later
-    soundInstance = sound;
-
-    await sound.setVolumeAsync(0.25);
-    await sound.playAsync();
+    player.loop = true;
+    player.volume = 0.25;
+    playerInstance = player;
+    player.play();
   } catch (error) {
     console.error("Error playing background music:", error);
   }
 };
 
 export const stopBackgroundMusic = async () => {
-  if (soundInstance) {
+  if (playerInstance) {
     try {
-      // Stops and unloads the sound
-      await soundInstance.stopAsync();
-      await soundInstance.unloadAsync();
+      playerInstance.pause();
+      playerInstance.remove();
     } catch (error) {
       console.error("Error stopping background music:", error);
     } finally {
-      soundInstance = null; // Resetting the sound instance
+      playerInstance = null;
     }
   }
 };

@@ -4,11 +4,11 @@
     "slug": "snaki",
     "version": "1.5.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon/ios/iTunesArtwork@3x.png",
     "scheme": "snaki",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/android-icon.jpeg",
+      "image": "./assets/icon/ios/iTunesArtwork@3x.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
@@ -18,8 +18,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon.jpeg",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon/android/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "backgroundColor": "#e6e0e0"
       },
       "package": "com.tach.snaki"
     },
@@ -33,7 +33,8 @@
       "expo-font",
       "expo-sqlite",
       "expo-web-browser",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

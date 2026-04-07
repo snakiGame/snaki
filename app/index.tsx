@@ -1,24 +1,32 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   Animated,
   Easing,
   Platform,
+  Dimensions,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "@/styles/colors";
-import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
+import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
+import useSettingStore from "@/lib/settings";
+import { useScoreStore } from "@/lib/scoreStore";
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { useAudioPlayer } from "expo-audio";
 
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
+const SNAKE_CELL = 16;
+const SNAKE_AREA_W = Math.min(SCREEN_W * 0.7, 280);
+const SNAKE_AREA_H = 120;
+
+// ─── Notifications ─────────────────────────────────────────────
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
@@ -29,121 +37,518 @@ Notifications.setNotificationHandler({
   }),
 });
 
-const HomePage: React.FC = () => {
-  const router = useRouter();
-  const bounceAnim = new Animated.Value(0);
-  const { settingsInit, settings } = useSettingStore();
-
-  useEffect(() => {
-    settingsInit();
-  }, []);
-  const [expoPushToken, setExpoPushToken] = useState("");
-  const notificationListener = useRef<Notifications.EventSubscription | null>(
-    null,
-  );
-  const responseListener = useRef<Notifications.EventSubscription | null>(null);
-
-  useEffect(() => {
-    registerForPushNotificationsAsync().then(
-      (token) => token && setExpoPushToken(token),
-    );
-
-    notificationListener.current =
-      Notifications.addNotificationReceivedListener((notification) => {
-        console.log("Notification received:", notification);
-      });
-
-    responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((response) => {
-        console.log("Notification clicked:", response);
-      });
-    if (!settings.isNotificationSet) {
-      scheduleDailyNotification(); // Schedules the daily notification on load if not loaded yet
-    }
-
-    return () => {
-      notificationListener.current &&
-        Notifications.removeNotificationSubscription(
-          notificationListener.current,
-        );
-      responseListener.current &&
-        Notifications.removeNotificationSubscription(responseListener.current);
-    };
-  }, []);
+// ─── Animated Background ───────────────────────────────────────
+const AnimatedGrid: React.FC = React.memo(() => {
+  const opacity = useRef(new Animated.Value(0.15)).current;
+  const drift = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
-      Animated.timing(bounceAnim, {
-        toValue: 20,
-        duration: 2000,
-        easing: Easing.sin,
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.35,
+          duration: 3000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.15,
+          duration: 3000,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    Animated.loop(
+      Animated.timing(drift, {
+        toValue: -40,
+        duration: 8000,
+        easing: Easing.linear,
         useNativeDriver: true,
       }),
     ).start();
   }, []);
 
-  return (
-    <LinearGradient
-      colors={["#ffffff", "#f2f8f9", "#d8e9d8"]}
-      style={styles.container}
-    >
-      <SafeAreaView style={styles.content}>
-        <StatusBar style="dark" backgroundColor={Colors.primary} />
-        <Animated.Image
-          source={require("../assets/icon.png")}
-          style={[styles.logo, { transform: [{ translateY: bounceAnim }] }]}
-        />
-        <Text style={styles.title}>Welcome to Snaki!</Text>
-        <Text style={styles.subtitle}>The Classic Snake Game Reimagined</Text>
+  const lines: React.ReactElement[] = [];
+  const spacing = 40;
+  const lineCount = Math.ceil(SCREEN_H / spacing) + 2;
+  for (let i = 0; i < lineCount; i++) {
+    lines.push(
+      <View
+        key={`h-${i}`}
+        style={[styles.gridLine, { top: i * spacing, width: "100%" }]}
+      />,
+    );
+  }
+  const colCount = Math.ceil(SCREEN_W / spacing) + 1;
+  for (let i = 0; i < colCount; i++) {
+    lines.push(
+      <View
+        key={`v-${i}`}
+        style={[styles.gridLineV, { left: i * spacing, height: "120%" }]}
+      />,
+    );
+  }
 
-        <TouchableOpacity
-          style={styles.playButton}
-          onPress={() => router.push("/play")}
-        >
-          <Text style={styles.playButtonText}>Play Now</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.creditsButton}
-          onPress={() => router.push("/about")}
-        >
-          <Text style={styles.creditsButtonText}>Credits</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </LinearGradient>
+  return (
+    <Animated.View
+      style={[
+        StyleSheet.absoluteFill,
+        { opacity, transform: [{ translateY: drift }] },
+      ]}
+    >
+      {lines}
+    </Animated.View>
+  );
+});
+
+// ─── Idle Snake (Bigger, More Alive) ───────────────────────────
+const IdleSnake: React.FC = React.memo(() => {
+  const moveX = useRef(new Animated.Value(0)).current;
+  const moveY = useRef(new Animated.Value(0)).current;
+  const foodScale = useRef(new Animated.Value(1)).current;
+  const foodOpacity = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(moveX, {
+          toValue: 60,
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveY, {
+          toValue: 20,
+          duration: 500,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveX, {
+          toValue: 100,
+          duration: 600,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        // "eat" — food pop + vanish
+        Animated.parallel([
+          Animated.timing(moveX, {
+            toValue: 130,
+            duration: 300,
+            easing: Easing.in(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.sequence([
+            Animated.timing(foodScale, {
+              toValue: 1.4,
+              duration: 100,
+              useNativeDriver: true,
+            }),
+            Animated.timing(foodScale, {
+              toValue: 0,
+              duration: 150,
+              useNativeDriver: true,
+            }),
+          ]),
+        ]),
+        Animated.timing(moveY, {
+          toValue: -10,
+          duration: 500,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveX, {
+          toValue: 40,
+          duration: 700,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.timing(moveY, {
+          toValue: 0,
+          duration: 400,
+          easing: Easing.inOut(Easing.quad),
+          useNativeDriver: true,
+        }),
+        // food respawn
+        Animated.parallel([
+          Animated.timing(moveX, {
+            toValue: 0,
+            duration: 600,
+            easing: Easing.inOut(Easing.quad),
+            useNativeDriver: true,
+          }),
+          Animated.sequence([
+            Animated.timing(foodOpacity, {
+              toValue: 0,
+              duration: 0,
+              useNativeDriver: true,
+            }),
+            Animated.timing(foodScale, {
+              toValue: 0,
+              duration: 0,
+              useNativeDriver: true,
+            }),
+            Animated.delay(200),
+            Animated.timing(foodOpacity, {
+              toValue: 1,
+              duration: 200,
+              useNativeDriver: true,
+            }),
+            Animated.timing(foodScale, {
+              toValue: 1,
+              duration: 200,
+              easing: Easing.out(Easing.back(2)),
+              useNativeDriver: true,
+            }),
+          ]),
+        ]),
+      ]),
+    ).start();
+  }, []);
+
+  const segments = [
+    { dx: 0, dy: 0 },
+    { dx: -SNAKE_CELL, dy: 0 },
+    { dx: -SNAKE_CELL * 2, dy: 0 },
+    { dx: -SNAKE_CELL * 3, dy: 0 },
+    { dx: -SNAKE_CELL * 3, dy: -SNAKE_CELL },
+    { dx: -SNAKE_CELL * 3, dy: -SNAKE_CELL * 2 },
+    { dx: -SNAKE_CELL * 2, dy: -SNAKE_CELL * 2 },
+  ];
+
+  return (
+    <View style={styles.idleScene}>
+      <Animated.View
+        style={[
+          styles.idleSnakeWrap,
+          { transform: [{ translateX: moveX }, { translateY: moveY }] },
+        ]}
+      >
+        {segments.map((seg, i) => (
+          <View
+            key={i}
+            style={[
+              styles.idleSeg,
+              {
+                left: seg.dx + SNAKE_CELL * 4,
+                top: seg.dy + SNAKE_CELL * 3,
+                backgroundColor: i === 0 ? Colors.primary : Colors.primaryDark,
+                opacity: 1 - i * 0.1,
+              },
+            ]}
+          >
+            <View style={styles.idleSegShadow} />
+            {i === 0 && <View style={styles.idleEye} />}
+          </View>
+        ))}
+      </Animated.View>
+
+      <Animated.View
+        style={[
+          styles.idleFood,
+          {
+            left: SNAKE_CELL * 4 + 130,
+            top: SNAKE_CELL * 3 - 2,
+            opacity: foodOpacity,
+            transform: [{ scale: foodScale }],
+          },
+        ]}
+      >
+        <View style={styles.idleFoodShadow} />
+        <View style={styles.idleFoodBlock} />
+      </Animated.View>
+    </View>
+  );
+});
+
+// ─── Play Button (Physical Feel) ──────────────────────────────
+const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
+  const pickSound = useAudioPlayer(require("../assets/music/pick.mp3"));
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const shadowAnim = useRef(new Animated.Value(BLOCK_SHADOW_OFFSET)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.03,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1200,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+  }, []);
+
+  const handlePressIn = () => {
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 0.93,
+        duration: 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shadowAnim, {
+        toValue: 1,
+        duration: 80,
+        useNativeDriver: false,
+      }),
+    ]).start();
+  };
+
+  const handlePressOut = () => {
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1.06,
+          tension: 300,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shadowAnim, {
+          toValue: BLOCK_SHADOW_OFFSET,
+          duration: 100,
+          useNativeDriver: false,
+        }),
+      ]),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 200,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const handlePress = () => {
+    try {
+      pickSound.seekTo(0);
+      pickSound.play();
+    } catch {}
+    onPress();
+  };
+
+  return (
+    <Animated.View
+      style={{
+        transform: [
+          {
+            scale: Animated.multiply(scaleAnim, pulseAnim),
+          },
+        ],
+      }}
+    >
+      <Animated.View
+        style={[
+          styles.playBtnShadow,
+          {
+            top: shadowAnim,
+            bottom: Animated.multiply(shadowAnim, -1),
+          },
+        ]}
+      />
+      <TouchableOpacity
+        style={styles.playBtn}
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+      >
+        <Ionicons
+          name="play"
+          size={30}
+          color={Colors.background}
+          style={{ marginRight: 10 }}
+        />
+        <Text style={styles.playBtnText}>PLAY</Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
-async function scheduleDailyNotification() {
-  const existingNotifications =
-    await Notifications.getAllScheduledNotificationsAsync();
-  const hasScheduledNotification = existingNotifications.some(
-    (notification) => notification.identifier === "daily-snaki-reminder",
-  );
+// ─── Main Screen ──────────────────────────────────────────────
+const HomePage: React.FC = () => {
+  const router = useRouter();
+  const { settingsInit } = useSettingStore();
+  const { highScore, scores } = useScoreStore();
 
-  if (!hasScheduledNotification) {
+  const titleJitter = useRef(new Animated.Value(0)).current;
+  const titleScale = useRef(new Animated.Value(0.9)).current;
+
+  const lastScore = scores.length > 0 ? scores[0].score : null;
+
+  useEffect(() => {
+    settingsInit();
+  }, []);
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+    scheduleDailyNotification();
+  }, []);
+
+  // Title entrance + periodic jitter
+  useEffect(() => {
+    Animated.spring(titleScale, {
+      toValue: 1,
+      tension: 60,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(titleJitter, {
+          toValue: 3,
+          duration: 80,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(titleJitter, {
+          toValue: -2,
+          duration: 60,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(titleJitter, {
+          toValue: 0,
+          duration: 70,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.delay(3000),
+        Animated.timing(titleJitter, {
+          toValue: -3,
+          duration: 60,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(titleJitter, {
+          toValue: 1,
+          duration: 80,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.timing(titleJitter, {
+          toValue: 0,
+          duration: 60,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+        Animated.delay(5000),
+      ]),
+    ).start();
+  }, []);
+
+  const navigateToPlay = useCallback(() => {
+    router.push("/play");
+  }, [router]);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar style="light" />
+      <AnimatedGrid />
+
+      <View style={styles.content}>
+        {/* Title */}
+        <Animated.View
+          style={[
+            styles.titleWrap,
+            {
+              transform: [{ scale: titleScale }, { translateX: titleJitter }],
+            },
+          ]}
+        >
+          <Text style={styles.titleShadow}>SNAKI</Text>
+          <Text style={styles.title}>SNAKI</Text>
+        </Animated.View>
+
+        {/* Snake scene */}
+        <IdleSnake />
+
+        {/* Play */}
+        <PlayButton onPress={navigateToPlay} />
+
+        {/* Stats */}
+        <View style={styles.statsRow}>
+          {lastScore !== null && (
+            <View style={styles.statBlock}>
+              <Text style={styles.statLabel}>LAST</Text>
+              <Text style={styles.statValue}>{lastScore}</Text>
+            </View>
+          )}
+          {highScore > 0 && (
+            <View style={[styles.statBlock, styles.statBlockAccent]}>
+              <Text style={[styles.statLabel, styles.statLabelDark]}>BEST</Text>
+              <Text style={[styles.statValue, styles.statValueDark]}>
+                {highScore}
+              </Text>
+            </View>
+          )}
+          {scores.length > 1 && (
+            <View style={styles.statBlock}>
+              <Text style={styles.statLabel}>GAMES</Text>
+              <Text style={styles.statValue}>{scores.length}</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Bottom icons */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.bottomBtn}
+          onPress={() => router.push("/settings")}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="settings-sharp" size={20} color={Colors.textDim} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomBtn}
+          onPress={() => router.push("/about")}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="information-circle-outline"
+            size={22}
+            color={Colors.textDim}
+          />
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+};
+
+// ─── Notification helpers ─────────────────────────────────────
+async function scheduleDailyNotification() {
+  try {
+    const existing = await Notifications.getAllScheduledNotificationsAsync();
+    if (existing.some((n) => n.identifier === "daily-snaki-reminder")) return;
     await Notifications.scheduleNotificationAsync({
       identifier: "daily-snaki-reminder",
       content: {
-        title: "Play Snaki 🐍",
-        body: "It's time to play Snaki! Improve your skills and climb the leaderboard!",
+        title: "Play Snaki \u{1F40D}",
+        body: "Time to beat your high score!",
         data: { screen: "play" },
       },
       trigger: {
         type: "daily",
-        hour: 8, // 8:00 AM
+        hour: 8,
         minute: 0,
         repeats: true,
         channelId: "daily-reminders",
       } as Notifications.NotificationTriggerInput,
     });
-  } else {
-    return;
-  }
+  } catch {}
 }
 
 async function registerForPushNotificationsAsync() {
-  let token;
-
   if (Platform.OS === "android") {
     await Notifications.setNotificationChannelAsync("daily-reminders", {
       name: "Daily Reminders",
@@ -152,7 +557,6 @@ async function registerForPushNotificationsAsync() {
       lightColor: "#FF231F7C",
     });
   }
-
   if (Device.isDevice) {
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
@@ -161,91 +565,209 @@ async function registerForPushNotificationsAsync() {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
-    if (finalStatus !== "granted") {
-      alert("Failed to get push token for push notifications!");
-      return;
-    }
-    token = (
+    if (finalStatus !== "granted") return;
+    try {
       await Notifications.getExpoPushTokenAsync({
         projectId: Constants.expoConfig?.extra?.eas?.projectId,
-      })
-    ).data;
-    console.log("Push token:", token);
-  } else {
-    alert("Must use a physical device for push notifications.");
+      });
+    } catch {}
   }
-
-  return token;
 }
 
+// ─── Styles ───────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: Colors.background,
   },
   content: {
     flex: 1,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 20,
   },
-  logo: {
-    width: 180,
-    height: 180,
-    marginBottom: 30,
-    resizeMode: "contain",
+
+  // Grid
+  gridLine: {
+    position: "absolute",
+    height: 1,
+    backgroundColor: Colors.surfaceLight,
+  },
+  gridLineV: {
+    position: "absolute",
+    width: 1,
+    backgroundColor: Colors.surfaceLight,
+  },
+
+  // Title
+  titleWrap: {
+    position: "relative",
+    marginBottom: 8,
   },
   title: {
-    fontSize: 38,
-    color: "#000000",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 10,
-    letterSpacing: 1.5,
+    fontSize: 82,
+    fontWeight: "900",
+    color: Colors.primary,
+    letterSpacing: 12,
   },
-  subtitle: {
-    fontSize: 20,
-    color: "#555555",
-    textAlign: "center",
-    marginBottom: 40,
-    fontWeight: "300",
-    letterSpacing: 1,
+  titleShadow: {
+    position: "absolute",
+    fontSize: 82,
+    fontWeight: "900",
+    color: Colors.primaryDark,
+    letterSpacing: 12,
+    left: 5,
+    top: 6,
   },
-  playButton: {
-    backgroundColor: "#1a1a1a",
-    paddingVertical: 16,
-    paddingHorizontal: 60,
-    borderRadius: settings_isRondedEdges() ? 10 : 0,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 10,
+
+  // Idle Snake
+  idleScene: {
+    width: SNAKE_AREA_W,
+    height: SNAKE_AREA_H,
+    marginBottom: 32,
+    marginTop: 8,
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: BLOCK_RADIUS,
+    borderWidth: 1,
+    borderColor: Colors.surfaceLight,
+    backgroundColor: Colors.surface,
   },
-  playButtonText: {
-    fontSize: 20,
-    color: "#ffffff",
-    fontWeight: "bold",
-    textAlign: "center",
+  idleSnakeWrap: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
   },
-  creditsButton: {
-    backgroundColor: Colors.accents,
-    paddingVertical: 16,
-    paddingHorizontal: 60,
-    borderRadius: settings_isRondedEdges() ? 10 : 0,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 10,
+  idleSeg: {
+    position: "absolute",
+    width: SNAKE_CELL - 2,
+    height: SNAKE_CELL - 2,
+    borderRadius: 3,
   },
-  creditsButtonText: {
-    fontSize: 20,
-    color: "#000000",
-    fontWeight: "bold",
-    textAlign: "center",
+  idleSegShadow: {
+    position: "absolute",
+    left: 1,
+    top: 2,
+    right: -1,
+    bottom: -2,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 3,
+    zIndex: -1,
+  },
+  idleEye: {
+    position: "absolute",
+    top: 2,
+    right: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    backgroundColor: Colors.background,
+  },
+  idleFood: {
+    position: "absolute",
+    width: SNAKE_CELL - 2,
+    height: SNAKE_CELL - 2,
+  },
+  idleFoodBlock: {
+    width: SNAKE_CELL - 2,
+    height: SNAKE_CELL - 2,
+    borderRadius: 3,
+    backgroundColor: Colors.accent,
+    zIndex: 2,
+  },
+  idleFoodShadow: {
+    position: "absolute",
+    left: 1,
+    top: 2,
+    right: -1,
+    bottom: -2,
+    borderRadius: 3,
+    backgroundColor: Colors.accentDark,
+    zIndex: 1,
+  },
+
+  // Play Button
+  playBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.primary,
+    paddingVertical: 20,
+    paddingHorizontal: 72,
+    borderRadius: BLOCK_RADIUS,
+    zIndex: 2,
+  },
+  playBtnShadow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.primaryDark,
+    borderRadius: BLOCK_RADIUS,
+    zIndex: 1,
+  },
+  playBtnText: {
+    fontSize: 28,
+    fontWeight: "900",
+    color: Colors.background,
+    letterSpacing: 6,
+  },
+
+  // Stats
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 28,
+  },
+  statBlock: {
+    backgroundColor: Colors.surface,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: BLOCK_RADIUS - 4,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: Colors.surfaceLight,
+    minWidth: 72,
+  },
+  statBlockAccent: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accentDark,
+  },
+  statLabel: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: Colors.textDim,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
+  statLabelDark: {
+    color: Colors.background,
+  },
+  statValue: {
+    fontSize: 22,
+    fontWeight: "900",
+    color: Colors.white,
+  },
+  statValueDark: {
+    color: Colors.background,
+  },
+
+  // Bottom Bar
+  bottomBar: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 16,
+    paddingBottom: Platform.OS === "ios" ? 4 : 12,
+    paddingTop: 8,
+  },
+  bottomBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: BLOCK_RADIUS,
+    backgroundColor: Colors.surface,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: Colors.surfaceLight,
   },
 });
 

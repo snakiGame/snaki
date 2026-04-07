@@ -1,17 +1,15 @@
-import React, { useState, useCallback, useEffect } from "react";
-import {
-  SafeAreaView,
-  StyleSheet,
-  StatusBar,
-} from "react-native";
+import React, { useState, useCallback, useEffect, useRef } from "react";
+import { StyleSheet, StatusBar } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
 import Header from "./Header";
 import Score from "./Score";
 import GameOverModal from "@/components/GameoverModal";
-import ScoreModal from './ScoreModal';
-import GameBoard from './GameBoard';
-import { useGame } from '../hooks/useGame';
+import ScoreModal from "./ScoreModal";
+import GameBoard from "./GameBoard";
+import { useGame } from "../hooks/useGame";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useSwipeTrail } from "./SwipeTrail";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -46,8 +44,26 @@ export default function Game(): JSX.Element {
     togglePause,
   } = useGame({ boardWidth, boardHeight });
 
+  // Swipe trail
+  const { addDot, TrailLayer } = useSwipeTrail();
+  const lastDotRef = useRef({ x: 0, y: 0 });
+
+  const handleGestureWithTrail = useCallback(
+    (event: any) => {
+      const { absoluteX, absoluteY } = event.nativeEvent;
+      const dx = absoluteX - lastDotRef.current.x;
+      const dy = absoluteY - lastDotRef.current.y;
+      if (dx * dx + dy * dy > 400) {
+        addDot(absoluteX, absoluteY);
+        lastDotRef.current = { x: absoluteX, y: absoluteY };
+      }
+      handleGesture(event);
+    },
+    [handleGesture, addDot],
+  );
+
   const toggleModal = useCallback(() => {
-    setModalVisible(prev => !prev);
+    setModalVisible((prev) => !prev);
   }, []);
 
   const handleGameOver = useCallback(() => {
@@ -74,12 +90,14 @@ export default function Game(): JSX.Element {
   }, [isGameOver, isModalVisible, handleGameOver]);
 
   return (
-    <PanGestureHandler onGestureEvent={handleGesture}>
-      <SafeAreaView style={styles.container}>
+    <PanGestureHandler onGestureEvent={handleGestureWithTrail}>
+      <SafeAreaView style={styles.container} edges={["bottom"]}>
         <StatusBar
           barStyle="light-content"
-          backgroundColor={Colors.primary}
+          translucent
+          backgroundColor="transparent"
         />
+        <TrailLayer />
         <Header
           reloadGame={resetGame}
           pauseGame={togglePause}
@@ -124,6 +142,6 @@ export default function Game(): JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.background,
   },
 });

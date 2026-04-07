@@ -61,10 +61,12 @@ export default function SettingsSwitch({
             }
           }}
           disabled={disabled}
-          thumbColor={disabled ? "#cccccc" : value ? Colors.primary : "#f4f4f4"}
+          thumbColor={
+            disabled ? Colors.textDim : value ? Colors.primary : Colors.white
+          }
           trackColor={{
-            false: disabled ? "#e0e0e0" : "#d8d8d8",
-            true: disabled ? "#b0b0b0" : "#81c784",
+            false: disabled ? Colors.surfaceLight : Colors.surfaceLight,
+            true: disabled ? Colors.surfaceLight : Colors.primaryDark,
           }}
           style={styles.switch}
         />
@@ -91,20 +93,20 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#222222",
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.white,
     marginBottom: 4,
     lineHeight: 22,
   },
   description: {
-    fontSize: 14,
-    color: "#666666",
+    fontSize: 13,
+    color: Colors.textDim,
     lineHeight: 20,
     flexWrap: "wrap",
   },
   disabledText: {
-    color: "#999999",
+    color: Colors.surfaceLight,
   },
   switchContainer: {
     justifyContent: "center",

@@ -1,18 +1,19 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
-  Image,
   Vibration,
   Dimensions,
+  Animated,
+  Easing,
 } from "react-native";
 import Modal from "react-native-modal";
-import { LinearGradient } from "expo-linear-gradient";
-import { Colors } from "@/styles/colors";
-import useSettingStore, { settings_isRondedEdges } from "@/lib/settings";
+import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
+import useSettingStore from "@/lib/settings";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
@@ -32,142 +33,251 @@ const GameOverModal = ({
   highScore,
 }: GameoverModalProps) => {
   const { settings } = useSettingStore();
+  const router = useRouter();
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const isNewBest = score > 0 && score >= highScore;
+
+  useEffect(() => {
+    if (isModalVisible) {
+      scaleAnim.setValue(0);
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 80,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [isModalVisible]);
+
   return (
     <Modal
       isVisible={isModalVisible}
-      animationIn="wobble"
-      animationOut="zoomOut"
+      animationIn="fadeIn"
+      animationOut="fadeOut"
       backdropTransitionOutTiming={0}
+      backdropOpacity={0.85}
       style={styles.modal}
     >
-      <LinearGradient
-        colors={[Colors.primary, Colors.primary + "CC"]}
-        style={styles.modalContainer}
+      <Animated.View
+        style={[styles.container, { transform: [{ scale: scaleAnim }] }]}
       >
-        <View style={styles.header}>
-          <Ionicons name="game-controller" size={40} color="#fff" />
-          <Text style={styles.modalTitle}>Game Over</Text>
+        {/* Title */}
+        <Text style={styles.title}>GAME OVER</Text>
+
+        {/* New best badge */}
+        {isNewBest && (
+          <View style={styles.newBestBadge}>
+            <View style={styles.newBestShadow} />
+            <View style={styles.newBestInner}>
+              <Text style={styles.newBestText}>NEW BEST!</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Score blocks */}
+        <View style={styles.scoreRow}>
+          <View style={styles.scoreBlock}>
+            <View
+              style={[
+                styles.scoreBlockShadow,
+                { backgroundColor: Colors.accentDark },
+              ]}
+            />
+            <View
+              style={[
+                styles.scoreBlockInner,
+                { backgroundColor: Colors.accent },
+              ]}
+            >
+              <Text style={styles.scoreLabel}>SCORE</Text>
+              <Text style={styles.scoreValue}>{score}</Text>
+            </View>
+          </View>
+          <View style={styles.scoreBlock}>
+            <View
+              style={[
+                styles.scoreBlockShadow,
+                { backgroundColor: Colors.surfaceLight },
+              ]}
+            />
+            <View
+              style={[
+                styles.scoreBlockInner,
+                { backgroundColor: Colors.surface },
+              ]}
+            >
+              <Text style={styles.scoreLabel}>BEST</Text>
+              <Text style={styles.scoreValue}>
+                {Math.max(score, highScore)}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View style={styles.scoreContainer}>
-          <View style={styles.scoreBox}>
-            <Text style={styles.scoreLabel}>Score</Text>
-            <Text style={styles.scoreValue}>{score}</Text>
-          </View>
-          <View style={styles.scoreBox}>
-            <Text style={styles.scoreLabel}>Best</Text>
-            <Text style={styles.scoreValue}>{highScore}</Text>
-          </View>
-        </View>
-
-        <Image
-          source={require("../assets/crash.png")}
-          style={styles.crashImage}
-          resizeMode="contain"
-        />
-
-        <TouchableOpacity
-          style={styles.playAgainButton}
-          onPress={() => {
-            if (settings.vibration) Vibration.vibrate(15);
-            toggleModal();
-            reloadGame();
-          }}
-        >
-          <Ionicons
-            name="refresh"
-            size={20}
-            color="#fff"
-            style={styles.buttonIcon}
+        {/* Play Again button */}
+        <View style={styles.buttonWrapper}>
+          <View
+            style={[
+              styles.buttonShadow,
+              { backgroundColor: Colors.primaryDark },
+            ]}
           />
-          <Text style={styles.playAgainButtonText}>Play Again</Text>
+          <TouchableOpacity
+            style={styles.playAgainButton}
+            onPress={() => {
+              if (settings.vibration) Vibration.vibrate(15);
+              toggleModal();
+              reloadGame();
+            }}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name="reload"
+              size={20}
+              color={Colors.background}
+              style={{ marginRight: 8 }}
+            />
+            <Text style={styles.playAgainText}>PLAY AGAIN</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Home button */}
+        <TouchableOpacity
+          style={styles.homeButton}
+          onPress={() => {
+            toggleModal();
+            router.replace("/");
+          }}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.homeButtonText}>HOME</Text>
         </TouchableOpacity>
-      </LinearGradient>
+      </Animated.View>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
   modal: {
-    height: "100%",
     margin: 0,
     justifyContent: "center",
     alignItems: "center",
   },
-  modalContainer: {
-    width: width * 0.85,
-    padding: 25,
+  container: {
+    width: width * 0.82,
+    padding: 28,
     alignItems: "center",
-    borderRadius: settings_isRondedEdges() ? 25 : 0,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
+    backgroundColor: Colors.background,
+    borderRadius: BLOCK_RADIUS,
+    borderWidth: 2,
+    borderColor: Colors.surfaceLight,
   },
-  header: {
-    alignItems: "center",
+  title: {
+    fontSize: 40,
+    fontWeight: "900",
+    color: Colors.danger,
+    letterSpacing: 4,
+    marginBottom: 16,
+    textShadowColor: Colors.dangerDark,
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 0,
+  },
+  newBestBadge: {
+    position: "relative",
     marginBottom: 20,
   },
-  modalTitle: {
-    fontSize: 32,
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-    marginTop: 10,
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+  newBestShadow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: BLOCK_SHADOW_OFFSET,
+    bottom: -BLOCK_SHADOW_OFFSET,
+    backgroundColor: Colors.accentDark,
+    borderRadius: BLOCK_RADIUS,
   },
-  scoreContainer: {
+  newBestInner: {
+    backgroundColor: Colors.accent,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: BLOCK_RADIUS,
+  },
+  newBestText: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: Colors.background,
+    letterSpacing: 3,
+  },
+  scoreRow: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    marginBottom: 20,
+    gap: 12,
+    marginBottom: 24,
   },
-  scoreBox: {
+  scoreBlock: {
+    flex: 1,
+    position: "relative",
+  },
+  scoreBlockShadow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: BLOCK_SHADOW_OFFSET,
+    bottom: -BLOCK_SHADOW_OFFSET,
+    borderRadius: BLOCK_RADIUS,
+  },
+  scoreBlockInner: {
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    padding: 15,
-    borderRadius: 15,
-    minWidth: 100,
+    paddingVertical: 16,
+    borderRadius: BLOCK_RADIUS,
   },
   scoreLabel: {
-    fontSize: 14,
-    color: "#fff",
-    opacity: 0.8,
-    marginBottom: 5,
+    fontSize: 12,
+    fontWeight: "800",
+    color: Colors.textDim,
+    letterSpacing: 2,
+    marginBottom: 4,
   },
   scoreValue: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#fff",
-    textShadowColor: "rgba(0, 0, 0, 0.3)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 32,
+    fontWeight: "900",
+    color: Colors.white,
   },
-  crashImage: {
-    width: 120,
-    height: 120,
-    marginBottom: 25,
+  buttonWrapper: {
+    width: "100%",
+    position: "relative",
+    marginBottom: 12,
+  },
+  buttonShadow: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: BLOCK_SHADOW_OFFSET,
+    bottom: -BLOCK_SHADOW_OFFSET,
+    borderRadius: BLOCK_RADIUS,
   },
   playAgainButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: Colors.accents,
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 15,
-    width: "100%",
     justifyContent: "center",
+    backgroundColor: Colors.primary,
+    paddingVertical: 16,
+    borderRadius: BLOCK_RADIUS,
+    width: "100%",
   },
-  buttonIcon: {
-    marginRight: 8,
-  },
-  playAgainButtonText: {
-    color: "#fff",
+  playAgainText: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "900",
+    color: Colors.background,
+    letterSpacing: 3,
+  },
+  homeButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  homeButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Colors.textDim,
+    letterSpacing: 2,
   },
 });
 
