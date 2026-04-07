@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Animated, LayoutChangeEvent } from "react-native";
 import { Colors, BLOCK_RADIUS } from "../styles/colors";
 import { Coordinate, FoodType, PowerUp } from "../types/types";
@@ -20,6 +20,8 @@ interface GameBoardProps {
   onBoardLayout?: (width: number, height: number) => void;
 }
 
+const BOARD_BORDER = 2;
+
 const GameBoard: React.FC<GameBoardProps> = ({
   snake,
   food,
@@ -30,32 +32,53 @@ const GameBoard: React.FC<GameBoardProps> = ({
   poisonEffect,
   onBoardLayout,
 }) => {
-  const handleLayout = (event: LayoutChangeEvent) => {
-    const { width, height } = event.nativeEvent.layout;
-    onBoardLayout?.(width, height);
-  };
+  const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
+
+  // Measure outer space then snap board to exact grid multiples
+  // so the snake can reach every wall with no gap
+  const handleOuterLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const { width, height } = event.nativeEvent.layout;
+      const innerW = width - BOARD_BORDER * 2;
+      const innerH = height - BOARD_BORDER * 2;
+      const cols = Math.floor(innerW / GAME_UNIT_SIZE);
+      const rows = Math.floor(innerH / GAME_UNIT_SIZE);
+      const gridW = cols * GAME_UNIT_SIZE;
+      const gridH = rows * GAME_UNIT_SIZE;
+      setBoardSize({
+        w: gridW + BOARD_BORDER * 2,
+        h: gridH + BOARD_BORDER * 2,
+      });
+      onBoardLayout?.(gridW, gridH);
+    },
+    [onBoardLayout],
+  );
 
   return (
-    <View style={styles.boardOuter}>
-      {/* Block shadow for the board */}
-      <View style={styles.boardShadow} />
-      <View style={styles.boundaries} onLayout={handleLayout}>
-        {/* Grid pattern */}
-        <GridLines />
-
-        <PoisonOverlay isVisible={poisonEffect} />
-        <Snake snake={snake} />
-        <Food x={food.x} y={food.y} type={foodType} />
-
-        {powerUp.type && (
-          <PowerUpIndicator
-            type={powerUp.type}
-            timeLeft={Math.max(0, powerUp.endTime - Date.now())}
-          />
-        )}
-
-        <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
-      </View>
+    <View style={styles.boardOuter} onLayout={handleOuterLayout}>
+      {boardSize.w > 0 && (
+        <View
+          style={[
+            styles.boardContainer,
+            { width: boardSize.w, height: boardSize.h },
+          ]}
+        >
+          <View style={styles.boardShadow} />
+          <View style={styles.boundaries}>
+            <GridLines />
+            <PoisonOverlay isVisible={poisonEffect} />
+            <Snake snake={snake} />
+            <Food x={food.x} y={food.y} type={foodType} />
+            {powerUp.type && (
+              <PowerUpIndicator
+                type={powerUp.type}
+                timeLeft={Math.max(0, powerUp.endTime - Date.now())}
+              />
+            )}
+            <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -70,7 +93,10 @@ const styles = StyleSheet.create({
   boardOuter: {
     flex: 1,
     margin: 12,
-    position: "relative",
+    alignItems: "center",
+  },
+  boardContainer: {
+    // Explicit size set inline; children position relative to this
   },
   boardShadow: {
     position: "absolute",
@@ -82,13 +108,16 @@ const styles = StyleSheet.create({
     borderRadius: BLOCK_RADIUS,
   },
   boundaries: {
-    flex: 1,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
     borderColor: Colors.surfaceLight,
-    borderWidth: 2,
+    borderWidth: BOARD_BORDER,
     borderRadius: BLOCK_RADIUS,
     backgroundColor: Colors.surface,
     overflow: "hidden",
-    position: "relative",
   },
   gridOverlay: {
     position: "absolute",
@@ -99,7 +128,6 @@ const styles = StyleSheet.create({
     opacity: 0.06,
     backgroundColor: "transparent",
     borderColor: Colors.white,
-    // Use a repeating background pattern via borderWidth as visual hint
   },
 });
 
