@@ -1,5 +1,3 @@
-// Block World Design System
-// 3 roles: Background (dark), Primary (green/player), Accent (yellow/score)
 export const Colors = {
   // Core
   background: "#1c1c24",   // Deep dark navy — the world
