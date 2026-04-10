@@ -9,7 +9,7 @@ import ScoreModal from "./ScoreModal";
 import GameBoard from "./GameBoard";
 import { useGame } from "../hooks/useGame";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useSwipeTrail } from "./SwipeTrail";
+import SwipeTrail, { SwipeTrailHandle } from "./SwipeTrail";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -44,8 +44,8 @@ export default function Game(): JSX.Element {
     togglePause,
   } = useGame({ boardWidth, boardHeight });
 
-  // Swipe trail
-  const { addDot, TrailLayer } = useSwipeTrail();
+  // Swipe trail (ref-based to avoid re-rendering Game)
+  const trailRef = useRef<SwipeTrailHandle>(null);
   const lastDotRef = useRef({ x: 0, y: 0 });
 
   const handleGestureWithTrail = useCallback(
@@ -54,12 +54,12 @@ export default function Game(): JSX.Element {
       const dx = absoluteX - lastDotRef.current.x;
       const dy = absoluteY - lastDotRef.current.y;
       if (dx * dx + dy * dy > 400) {
-        addDot(absoluteX, absoluteY);
+        trailRef.current?.addDot(absoluteX, absoluteY);
         lastDotRef.current = { x: absoluteX, y: absoluteY };
       }
       handleGesture(event);
     },
-    [handleGesture, addDot],
+    [handleGesture],
   );
 
   const toggleModal = useCallback(() => {
@@ -97,7 +97,7 @@ export default function Game(): JSX.Element {
           translucent
           backgroundColor="transparent"
         />
-        <TrailLayer />
+        <SwipeTrail ref={trailRef} />
         <Header
           reloadGame={resetGame}
           pauseGame={togglePause}
