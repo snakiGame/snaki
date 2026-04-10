@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useImperativeHandle, forwardRef } from "react";
 import { View, Animated, StyleSheet } from "react-native";
 import { Colors } from "../styles/colors";
 
@@ -11,18 +11,22 @@ interface TrailDot {
 
 const MAX_DOTS = 8;
 const DOT_SIZE = 6;
-const FADE_DURATION = 400;
+const FADE_DURATION = 350;
 
-export const useSwipeTrail = () => {
+export interface SwipeTrailHandle {
+  addDot: (x: number, y: number) => void;
+}
+
+const SwipeTrail = forwardRef<SwipeTrailHandle>((_, ref) => {
   const dotsRef = useRef<TrailDot[]>([]);
   const idRef = useRef(0);
-  const [, forceUpdate] = React.useState(0);
+  const [, bump] = React.useState(0);
 
   const addDot = useCallback((x: number, y: number) => {
     const opacity = new Animated.Value(0.15);
     const dot: TrailDot = { id: idRef.current++, x, y, opacity };
     dotsRef.current = [...dotsRef.current.slice(-(MAX_DOTS - 1)), dot];
-    forceUpdate((n) => n + 1);
+    bump((n) => n + 1);
 
     Animated.timing(opacity, {
       toValue: 0,
@@ -30,35 +34,30 @@ export const useSwipeTrail = () => {
       useNativeDriver: true,
     }).start(() => {
       dotsRef.current = dotsRef.current.filter((d) => d.id !== dot.id);
-      forceUpdate((n) => n + 1);
+      bump((n) => n + 1);
     });
   }, []);
 
-  const dots = dotsRef.current;
+  useImperativeHandle(ref, () => ({ addDot }), [addDot]);
 
-  const TrailLayer = useCallback(
-    () => (
-      <View style={styles.container} pointerEvents="none">
-        {dots.map((dot) => (
-          <Animated.View
-            key={dot.id}
-            style={[
-              styles.dot,
-              {
-                left: dot.x - DOT_SIZE / 2,
-                top: dot.y - DOT_SIZE / 2,
-                opacity: dot.opacity,
-              },
-            ]}
-          />
-        ))}
-      </View>
-    ),
-    [dots],
+  return (
+    <View style={styles.container} pointerEvents="none">
+      {dotsRef.current.map((dot) => (
+        <Animated.View
+          key={dot.id}
+          style={[
+            styles.dot,
+            {
+              left: dot.x - DOT_SIZE / 2,
+              top: dot.y - DOT_SIZE / 2,
+              opacity: dot.opacity,
+            },
+          ]}
+        />
+      ))}
+    </View>
   );
-
-  return { addDot, TrailLayer };
-};
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -73,3 +72,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary,
   },
 });
+
+export default SwipeTrail;
