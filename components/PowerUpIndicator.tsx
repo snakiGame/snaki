@@ -8,43 +8,45 @@ interface PowerUpIndicatorProps {
   timeLeft: number;
 }
 
-const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = ({
-  type,
-  timeLeft,
-}) => {
-  const getPowerUpColor = () => {
-    switch (type) {
-      case PowerUp.Speed:
-        return Colors.primary;
-      case PowerUp.Slow:
-        return "#60a5fa"; // Blue
-      case PowerUp.DoublePoints:
-        return Colors.accent;
-      default:
-        return Colors.primary;
-    }
-  };
+const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = React.memo(
+  ({ type, timeLeft }) => {
+    const getPowerUpColor = () => {
+      switch (type) {
+        case PowerUp.Speed:
+          return Colors.primary;
+        case PowerUp.Slow:
+          return "#60a5fa"; // Blue
+        case PowerUp.DoublePoints:
+          return Colors.accent;
+        default:
+          return Colors.primary;
+      }
+    };
 
-  const getLabel = () => {
-    switch (type) {
-      case PowerUp.Speed:
-        return "FAST";
-      case PowerUp.Slow:
-        return "SLOW";
-      case PowerUp.DoublePoints:
-        return "2X";
-      default:
-        return type;
-    }
-  };
+    const getLabel = () => {
+      switch (type) {
+        case PowerUp.Speed:
+          return "FAST";
+        case PowerUp.Slow:
+          return "SLOW";
+        case PowerUp.DoublePoints:
+          return "2X";
+        default:
+          return type;
+      }
+    };
 
-  return (
-    <View style={[styles.container, { backgroundColor: getPowerUpColor() }]}>
-      <Text style={styles.text}>{getLabel()}</Text>
-      <Text style={styles.timeLeft}>{Math.ceil(timeLeft / 1000)}s</Text>
-    </View>
-  );
-};
+    return (
+      <View style={[styles.container, { backgroundColor: getPowerUpColor() }]}>
+        <Text style={styles.text}>{getLabel()}</Text>
+        <Text style={styles.timeLeft}>{Math.ceil(timeLeft / 1000)}s</Text>
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.type === next.type &&
+    Math.ceil(prev.timeLeft / 1000) === Math.ceil(next.timeLeft / 1000),
+);
 
 const styles = StyleSheet.create({
   container: {

@@ -22,66 +22,68 @@ interface GameBoardProps {
 
 const BOARD_BORDER = 2;
 
-const GameBoard: React.FC<GameBoardProps> = ({
-  snake,
-  food,
-  foodType,
-  powerUp,
-  combo,
-  comboAnimation,
-  poisonEffect,
-  onBoardLayout,
-}) => {
-  const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
+const GameBoard: React.FC<GameBoardProps> = React.memo(
+  ({
+    snake,
+    food,
+    foodType,
+    powerUp,
+    combo,
+    comboAnimation,
+    poisonEffect,
+    onBoardLayout,
+  }) => {
+    const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
 
-  // Measure outer space then snap board to exact grid multiples
-  // so the snake can reach every wall with no gap
-  const handleOuterLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const { width, height } = event.nativeEvent.layout;
-      const innerW = width - BOARD_BORDER * 2;
-      const innerH = height - BOARD_BORDER * 2;
-      const cols = Math.floor(innerW / GAME_UNIT_SIZE);
-      const rows = Math.floor(innerH / GAME_UNIT_SIZE);
-      const gridW = cols * GAME_UNIT_SIZE;
-      const gridH = rows * GAME_UNIT_SIZE;
-      setBoardSize({
-        w: gridW + BOARD_BORDER * 2,
-        h: gridH + BOARD_BORDER * 2,
-      });
-      onBoardLayout?.(gridW, gridH);
-    },
-    [onBoardLayout],
-  );
+    // Measure outer space then snap board to exact grid multiples
+    // so the snake can reach every wall with no gap
+    const handleOuterLayout = useCallback(
+      (event: LayoutChangeEvent) => {
+        const { width, height } = event.nativeEvent.layout;
+        const innerW = width - BOARD_BORDER * 2;
+        const innerH = height - BOARD_BORDER * 2;
+        const cols = Math.floor(innerW / GAME_UNIT_SIZE);
+        const rows = Math.floor(innerH / GAME_UNIT_SIZE);
+        const gridW = cols * GAME_UNIT_SIZE;
+        const gridH = rows * GAME_UNIT_SIZE;
+        setBoardSize({
+          w: gridW + BOARD_BORDER * 2,
+          h: gridH + BOARD_BORDER * 2,
+        });
+        onBoardLayout?.(gridW, gridH);
+      },
+      [onBoardLayout],
+    );
 
-  return (
-    <View style={styles.boardOuter} onLayout={handleOuterLayout}>
-      {boardSize.w > 0 && (
-        <View
-          style={[
-            styles.boardContainer,
-            { width: boardSize.w, height: boardSize.h },
-          ]}
-        >
-          <View style={styles.boardShadow} />
-          <View style={styles.boundaries}>
-            <GridLines />
-            <PoisonOverlay isVisible={poisonEffect} />
-            <Snake snake={snake} />
-            <Food x={food.x} y={food.y} type={foodType} />
-            {powerUp.type && (
-              <PowerUpIndicator
-                type={powerUp.type}
-                timeLeft={Math.max(0, powerUp.endTime - Date.now())}
-              />
-            )}
-            <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
+    return (
+      <View style={styles.boardOuter} onLayout={handleOuterLayout}>
+        {boardSize.w > 0 && (
+          <View
+            style={[
+              styles.boardContainer,
+              { width: boardSize.w, height: boardSize.h },
+            ]}
+          >
+            <View style={styles.boardShadow} />
+            <View style={styles.boundaries}>
+              <GridLines />
+              <PoisonOverlay isVisible={poisonEffect} />
+              <Snake snake={snake} />
+              <Food x={food.x} y={food.y} type={foodType} />
+              {powerUp.type && (
+                <PowerUpIndicator
+                  type={powerUp.type}
+                  timeLeft={Math.max(0, powerUp.endTime - Date.now())}
+                />
+              )}
+              <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
+            </View>
           </View>
-        </View>
-      )}
-    </View>
-  );
-};
+        )}
+      </View>
+    );
+  },
+);
 
 // Subtle grid lines for the board
 const GridLines: React.FC = React.memo(() => {

@@ -1,6 +1,7 @@
 import { SplashScreen } from "expo-router";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
+import { Toaster } from "yooo-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,15 +14,18 @@ export default function RootLayout() {
     return () => clearTimeout(timer);
   }, []);
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Stack.Screen name="index" />
-      <Stack.Screen name="play" />
-      <Stack.Screen name="about" />
-      <Stack.Screen name="settings" />
-    </Stack>
+    <>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      >
+        <Stack.Screen name="index" />
+        <Stack.Screen name="play" />
+        <Stack.Screen name="about" />
+        <Stack.Screen name="settings" />
+      </Stack>
+      <Toaster />
+    </>
   );
 }

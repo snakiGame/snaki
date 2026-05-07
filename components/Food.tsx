@@ -8,62 +8,66 @@ interface FoodProps extends Coordinate {
   type: FoodType;
 }
 
-const Food: React.FC<FoodProps> = ({ x, y, type }) => {
-  const getFoodColor = () => {
-    switch (type) {
-      case FoodType.Golden:
-        return Colors.accent;
-      case FoodType.Rainbow:
-        return "#c084fc"; // Purple
-      case FoodType.Poison:
-        return Colors.danger;
-      default:
-        return Colors.accent;
-    }
-  };
+const Food: React.FC<FoodProps> = React.memo(
+  ({ x, y, type }) => {
+    const getFoodColor = () => {
+      switch (type) {
+        case FoodType.Golden:
+          return Colors.accent;
+        case FoodType.Rainbow:
+          return "#c084fc"; // Purple
+        case FoodType.Poison:
+          return Colors.danger;
+        default:
+          return Colors.accent;
+      }
+    };
 
-  const getShadowColor = () => {
-    switch (type) {
-      case FoodType.Golden:
-        return Colors.accentDark;
-      case FoodType.Rainbow:
-        return "#7c3aed";
-      case FoodType.Poison:
-        return Colors.dangerDark;
-      default:
-        return Colors.accentDark;
-    }
-  };
+    const getShadowColor = () => {
+      switch (type) {
+        case FoodType.Golden:
+          return Colors.accentDark;
+        case FoodType.Rainbow:
+          return "#7c3aed";
+        case FoodType.Poison:
+          return Colors.dangerDark;
+        default:
+          return Colors.accentDark;
+      }
+    };
 
-  const size = GAME_UNIT_SIZE - 2;
-  const offset = (GAME_UNIT_SIZE - size) / 2;
+    const size = GAME_UNIT_SIZE - 2;
+    const offset = (GAME_UNIT_SIZE - size) / 2;
 
-  return (
-    <View
-      style={[
-        styles.food,
-        {
-          left: x * GAME_UNIT_SIZE + offset,
-          top: y * GAME_UNIT_SIZE + offset,
-          width: size,
-          height: size,
-        },
-      ]}
-    >
-      {/* Shadow block */}
-      <View
-        style={[styles.foodShadow, { backgroundColor: getShadowColor() }]}
-      />
-      {/* Main block */}
+    return (
       <View
         style={[
-          styles.foodBlock,
-          { backgroundColor: getFoodColor(), width: size, height: size },
+          styles.food,
+          {
+            left: x * GAME_UNIT_SIZE + offset,
+            top: y * GAME_UNIT_SIZE + offset,
+            width: size,
+            height: size,
+          },
         ]}
-      />
-    </View>
-  );
-};
+      >
+        {/* Shadow block */}
+        <View
+          style={[styles.foodShadow, { backgroundColor: getShadowColor() }]}
+        />
+        {/* Main block */}
+        <View
+          style={[
+            styles.foodBlock,
+            { backgroundColor: getFoodColor(), width: size, height: size },
+          ]}
+        />
+      </View>
+    );
+  },
+  (prev, next) =>
+    prev.x === next.x && prev.y === next.y && prev.type === next.type,
+);
 
 const styles = StyleSheet.create({
   food: {
