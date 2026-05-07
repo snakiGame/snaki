@@ -211,26 +211,31 @@ export const useGameLoop = ({
     vibrate, resetCombo, updateCombo, calculateScore, activatePowerUp,
   ]);
 
-  // ── Interval ref for speed changes without recreating the loop ──
-  const intervalMsRef = useRef(getCurrentMoveInterval());
+  // ── Ref for current speed — updated without restarting the loop ──
+  const getCurrentMoveIntervalRef = useRef(getCurrentMoveInterval);
+  getCurrentMoveIntervalRef.current = getCurrentMoveInterval;
 
-  useEffect(() => {
-    intervalMsRef.current = getCurrentMoveInterval();
-  }, [getCurrentMoveInterval]);
-
-  // ── The actual game loop — minimal deps, stable ──
+  // ── The actual game loop — uses setTimeout so each tick reads latest speed ──
   useEffect(() => {
     if (isGameOver || gameBounds.xMax <= 0 || gameBounds.yMax <= 0) return;
 
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let cancelled = false;
+
     const tick = () => {
+      if (cancelled) return;
       if (!isPausedRef.current) {
         checkPowerUpExpiration();
         moveSnake();
       }
+      timeoutId = setTimeout(tick, getCurrentMoveIntervalRef.current());
     };
 
-    const intervalId = setInterval(tick, intervalMsRef.current);
-    return () => clearInterval(intervalId);
+    timeoutId = setTimeout(tick, getCurrentMoveIntervalRef.current());
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [isGameOver, gameBounds.xMax, gameBounds.yMax, moveSnake, checkPowerUpExpiration]);
 
   return { vibrate };
