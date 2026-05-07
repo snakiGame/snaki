@@ -504,6 +504,28 @@ const HomePage: React.FC = () => {
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.bottomBtn}
+          onPress={() => router.push("/howtoplay" as any)}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="help-circle-outline"
+            size={22}
+            color={Colors.textDim}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomBtn}
+          onPress={() => router.push("/skins" as any)}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="color-palette-outline"
+            size={20}
+            color={Colors.textDim}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomBtn}
           onPress={() => router.push("/settings")}
           activeOpacity={0.7}
         >

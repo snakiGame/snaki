@@ -24,6 +24,8 @@ export default function RootLayout() {
         <Stack.Screen name="play" />
         <Stack.Screen name="about" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="skins" />
+        <Stack.Screen name="howtoplay" />
       </Stack>
       <Toaster />
     </>

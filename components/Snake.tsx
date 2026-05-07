@@ -3,12 +3,17 @@ import { StyleSheet, View } from "react-native";
 import { Coordinate } from "../types/types";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
 import { Colors, BLOCK_RADIUS } from "../styles/colors";
+import { useSkinStore, SNAKE_SKINS } from "../lib/skinStore";
 
 interface SnakeProps {
   snake: Coordinate[];
 }
 
 function Snake({ snake }: SnakeProps): JSX.Element {
+  const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
+  const skin =
+    SNAKE_SKINS.find((s) => s.id === selectedSkinId) ?? SNAKE_SKINS[0];
+
   return (
     <Fragment>
       {snake.map((segment: Coordinate, index: number) => {
@@ -21,7 +26,7 @@ function Snake({ snake }: SnakeProps): JSX.Element {
               {
                 left: segment.x * GAME_UNIT_SIZE,
                 top: segment.y * GAME_UNIT_SIZE,
-                backgroundColor: isHead ? Colors.primary : Colors.primaryDark,
+                backgroundColor: isHead ? skin.head : skin.body,
                 opacity: Math.max(0.5, 1 - index * 0.03),
               },
             ]}
