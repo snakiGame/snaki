@@ -101,7 +101,7 @@ export default function About() {
         {/* About card */}
         <View style={styles.card}>
           <Text style={styles.cardText}>
-            Hey there! I'm Tachera Sasi — you can call me Tach — the
+            Hey there! I'm Tachera Sasi {"=>"} you can call me Tach  the
             troublemaker behind Snaki. It's the classic snake game you know and
             love, just cooler. Like, sunglasses cool.
           </Text>
@@ -127,14 +127,14 @@ export default function About() {
               "If you're not growing, you're just a snake hitting walls."
             </Text>
             <Text style={styles.quoteAuthor}>
-              — Me, probably while procrastinating
+              {"->"} Me, probably while procrastinating
             </Text>
           </View>
         </View>
 
         {/* Footer */}
         <Text style={styles.footer}>
-          {"\u00A9"} 2025 Tachera Sasi. Built with code, snacks, and
+          {"\u00A9"} 2026 Tachera Sasi. Built with code, snacks, and
           questionable life choices.
         </Text>
       </ScrollView>

@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
-import { StyleSheet, StatusBar } from "react-native";
+import { StyleSheet, StatusBar, Animated } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
 import Header from "./Header";
@@ -15,11 +15,13 @@ import { useAchievementStore } from "@/lib/achievementStore";
 import { useScoreStore } from "@/lib/scoreStore";
 import { SNAKE_SKINS } from "@/lib/skinStore";
 import { FoodType } from "@/types/types";
+import NewHighScoreModal from "./NewHighScoreModal";
 
 export default function Game(): JSX.Element {
   // Modal states
   const [isModalVisible, setModalVisible] = useState(false);
   const [isScoreModalVisible, setScoreModalVisible] = useState(false);
+  const [showHighScoreModal, setShowHighScoreModal] = useState(false);
 
   // Actual playable area dimensions measured at runtime
   const [boardWidth, setBoardWidth] = useState(0);
@@ -29,6 +31,41 @@ export default function Game(): JSX.Element {
     setBoardWidth(w);
     setBoardHeight(h);
   }, []);
+
+  // ── Screen shake ──
+  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const triggerShake = useCallback(
+    (intensity: number = 6) => {
+      Animated.sequence([
+        Animated.timing(shakeAnim, {
+          toValue: intensity,
+          duration: 40,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -intensity,
+          duration: 40,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: intensity * 0.6,
+          duration: 35,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: -intensity * 0.6,
+          duration: 35,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shakeAnim, {
+          toValue: 0,
+          duration: 30,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    },
+    [shakeAnim],
+  );
 
   // Use the consolidated game hook
   const {
@@ -78,8 +115,9 @@ export default function Game(): JSX.Element {
     if (shrank) {
       gameStatsRef.current.poisonEaten++;
       gameStatsRef.current.atePoison = true;
+      triggerShake(5);
     }
-  }, [snake.length, isGameOver]);
+  }, [snake.length, isGameOver, triggerShake]);
 
   // Track food type changes for next detection
   useEffect(() => {
@@ -189,8 +227,9 @@ export default function Game(): JSX.Element {
   }, []);
 
   const handleGameOver = useCallback(() => {
+    triggerShake(10);
     setModalVisible(true);
-  }, []);
+  }, [triggerShake]);
 
   const handleHighScorePress = useCallback(() => {
     togglePause();

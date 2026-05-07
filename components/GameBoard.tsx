@@ -17,6 +17,7 @@ interface GameBoardProps {
   combo: number;
   comboAnimation: Animated.Value;
   poisonEffect: boolean;
+  shakeTranslateX?: Animated.Value;
   onBoardLayout?: (width: number, height: number) => void;
 }
 
@@ -31,6 +32,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
     combo,
     comboAnimation,
     poisonEffect,
+    shakeTranslateX,
     onBoardLayout,
   }) => {
     const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
@@ -58,10 +60,13 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
     return (
       <View style={styles.boardOuter} onLayout={handleOuterLayout}>
         {boardSize.w > 0 && (
-          <View
+          <Animated.View
             style={[
               styles.boardContainer,
               { width: boardSize.w, height: boardSize.h },
+              shakeTranslateX
+                ? { transform: [{ translateX: shakeTranslateX }] }
+                : undefined,
             ]}
           >
             <View style={styles.boardShadow} />
@@ -78,7 +83,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
               )}
               <ComboIndicator combo={combo} comboAnimation={comboAnimation} />
             </View>
-          </View>
+          </Animated.View>
         )}
       </View>
     );
