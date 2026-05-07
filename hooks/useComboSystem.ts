@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { Animated } from "react-native";
 import { PowerUp } from "../types/types";
 import {
@@ -9,8 +9,8 @@ import {
 
 export const useComboSystem = () => {
   const [comboAnimation] = useState(new Animated.Value(0));
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
 
-  // Handle combo system
   const updateCombo = useCallback(
     (
       combo: number,
@@ -19,38 +19,40 @@ export const useComboSystem = () => {
       setLastFoodTime: (time: number) => void,
     ) => {
       const now = Date.now();
-      if (now - lastFoodTime < COMBO_TIMEOUT) {
-        setCombo(combo + 1);
-        const newCombo = combo + 1;
-
-        if (newCombo >= COMBO_THRESHOLD) {
-          // Trigger combo animation
-          Animated.sequence([
-            Animated.timing(comboAnimation, {
-              toValue: 1,
-              duration: 200,
-              useNativeDriver: true,
-            }),
-            Animated.timing(comboAnimation, {
-              toValue: 0,
-              duration: 200,
-              useNativeDriver: true,
-            }),
-          ]).start();
-        }
-      } else {
-        setCombo(1);
-      }
+      const newCombo = now - lastFoodTime < COMBO_TIMEOUT ? combo + 1 : 1;
+      setCombo(newCombo);
       setLastFoodTime(now);
+
+      if (newCombo >= COMBO_THRESHOLD) {
+        // Stop any running animation before starting a new one
+        animationRef.current?.stop();
+        animationRef.current = Animated.sequence([
+          Animated.timing(comboAnimation, {
+            toValue: 1,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+          Animated.timing(comboAnimation, {
+            toValue: 0,
+            duration: 150,
+            useNativeDriver: true,
+          }),
+        ]);
+        animationRef.current.start();
+      }
     },
     [comboAnimation],
   );
 
-  const resetCombo = useCallback((setCombo: (combo: number) => void) => {
-    setCombo(0);
-  }, []);
+  const resetCombo = useCallback(
+    (setCombo: (combo: number) => void) => {
+      setCombo(0);
+      animationRef.current?.stop();
+      comboAnimation.setValue(0);
+    },
+    [comboAnimation],
+  );
 
-  // Calculate score with combo and power-up multipliers
   const calculateScore = useCallback(
     (baseScore: number, combo: number, powerUpType: PowerUp | null) => {
       let finalScore = baseScore;

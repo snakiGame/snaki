@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import React, { Fragment } from "react";
 import { StyleSheet, View } from "react-native";
 import { Coordinate } from "../types/types";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
@@ -8,14 +8,14 @@ interface SnakeProps {
   snake: Coordinate[];
 }
 
-export default function Snake({ snake }: SnakeProps): JSX.Element {
+function Snake({ snake }: SnakeProps): JSX.Element {
   return (
     <Fragment>
       {snake.map((segment: Coordinate, index: number) => {
         const isHead = index === 0;
         return (
           <View
-            key={index}
+            key={`${segment.x}-${segment.y}`}
             style={[
               styles.segment,
               {
@@ -26,9 +26,7 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
               },
             ]}
           >
-            {/* Block shadow underneath each segment */}
             <View style={styles.segmentShadow} />
-            {/* Head eye */}
             {isHead && <View style={styles.eye} />}
           </View>
         );
@@ -36,6 +34,8 @@ export default function Snake({ snake }: SnakeProps): JSX.Element {
     </Fragment>
   );
 }
+
+export default React.memo(Snake);
 
 const styles = StyleSheet.create({
   segment: {

@@ -22,7 +22,7 @@ interface GameBoardProps {
 
 const BOARD_BORDER = 2;
 
-const GameBoard: React.FC<GameBoardProps> = ({
+const GameBoard: React.FC<GameBoardProps> = React.memo(({
   snake,
   food,
   foodType,
@@ -81,7 +81,7 @@ const GameBoard: React.FC<GameBoardProps> = ({
       )}
     </View>
   );
-};
+});
 
 // Subtle grid lines for the board
 const GridLines: React.FC = React.memo(() => {

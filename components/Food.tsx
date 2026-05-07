@@ -8,7 +8,7 @@ interface FoodProps extends Coordinate {
   type: FoodType;
 }
 
-const Food: React.FC<FoodProps> = ({ x, y, type }) => {
+const Food: React.FC<FoodProps> = React.memo(({ x, y, type }) => {
   const getFoodColor = () => {
     switch (type) {
       case FoodType.Golden:
@@ -63,7 +63,7 @@ const Food: React.FC<FoodProps> = ({ x, y, type }) => {
       />
     </View>
   );
-};
+}, (prev, next) => prev.x === next.x && prev.y === next.y && prev.type === next.type);
 
 const styles = StyleSheet.create({
   food: {

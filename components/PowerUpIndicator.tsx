@@ -8,10 +8,7 @@ interface PowerUpIndicatorProps {
   timeLeft: number;
 }
 
-const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = ({
-  type,
-  timeLeft,
-}) => {
+const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = React.memo(({ type, timeLeft }) => {
   const getPowerUpColor = () => {
     switch (type) {
       case PowerUp.Speed:
@@ -44,7 +41,7 @@ const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = ({
       <Text style={styles.timeLeft}>{Math.ceil(timeLeft / 1000)}s</Text>
     </View>
   );
-};
+}, (prev, next) => prev.type === next.type && Math.ceil(prev.timeLeft / 1000) === Math.ceil(next.timeLeft / 1000));
 
 const styles = StyleSheet.create({
   container: {

@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { Vibration } from "react-native";
 import { Direction, Coordinate, FoodType, PowerUp } from "../types/types";
 import { GameBounds } from "../lib/gameConstants";
@@ -86,20 +86,48 @@ export const useGameLoop = ({
   setLastFoodTime,
   lastFoodTime,
 }: UseGameLoopProps) => {
-  const vibrate = useCallback(
-    async (length: number) => {
-      if (!vibrationEnabled) return;
-      Vibration.vibrate(length);
-    },
-    [vibrationEnabled]
-  );
+  // ── Refs: keep latest values accessible without recreating callbacks ──
+  const snakeRef = useRef(snake);
+  const directionRef = useRef(direction);
+  const foodRef = useRef(food);
+  const foodTypeRef = useRef(foodType);
+  const scoreRef = useRef(score);
+  const comboRef = useRef(combo);
+  const powerUpTypeRef = useRef(powerUpType);
+  const gameBoundsRef = useRef(gameBounds);
+  const lastFoodTimeRef = useRef(lastFoodTime);
+  const isPausedRef = useRef(isPaused);
+  const vibrationEnabledRef = useRef(vibrationEnabled);
 
+  // Sync refs on every render (cheap — just assignments)
+  snakeRef.current = snake;
+  directionRef.current = direction;
+  foodRef.current = food;
+  foodTypeRef.current = foodType;
+  scoreRef.current = score;
+  comboRef.current = combo;
+  powerUpTypeRef.current = powerUpType;
+  gameBoundsRef.current = gameBounds;
+  lastFoodTimeRef.current = lastFoodTime;
+  isPausedRef.current = isPaused;
+  vibrationEnabledRef.current = vibrationEnabled;
+
+  const vibrate = useCallback((length: number) => {
+    if (!vibrationEnabledRef.current) return;
+    Vibration.vibrate(length);
+  }, []);
+
+  // ── Stable moveSnake — reads refs, never recreated ──
   const moveSnake = useCallback(() => {
-    const snakeHead = snake[0];
+    const currentSnake = snakeRef.current;
+    const snakeHead = currentSnake[0];
     const newHead = { ...snakeHead };
+    const dir = directionRef.current;
+    const bounds = gameBoundsRef.current;
+    const currentFood = foodRef.current;
+    const currentFoodType = foodTypeRef.current;
 
-    // NOTE: We Calculate the new head position based on direction
-    switch (direction) {
+    switch (dir) {
       case Direction.Up:
         newHead.y -= 1;
         break;
@@ -114,94 +142,51 @@ export const useGameLoop = ({
         break;
     }
 
-    // Check for game over conditions with the NEW head position
-    if (checkGameOver(newHead, gameBounds, snake)) {
-      addScore(score);
+    // Check for game over
+    if (checkGameOver(newHead, bounds, currentSnake)) {
+      addScore(scoreRef.current);
       setIsGameOver(true);
       vibrate(VIBRATION_PATTERNS.gameOver);
       return;
     }
 
-    if (checkEatsFood(newHead, food)) {
-      handleFoodEaten(newHead);
-    } else {
-      setSnake([newHead, ...snake.slice(0, -1)]);
-    }
-  }, [
-    snake,
-    direction,
-    food,
-    foodType,
-    gameBounds,
-    score,
-    localHighScore,
-    combo,
-    powerUpType,
-    vibrate,
-    setSnake,
-    setFood,
-    setFoodType,
-    setScore,
-    setIsGameOver,
-    setPoisonEffect,
-    updateCombo,
-    resetCombo,
-    calculateScore,
-    activatePowerUp,
-    addScore,
-    setCombo,
-    setLastFoodTime,
-    lastFoodTime,
-  ]);
-
-  const handleFoodEaten = useCallback(
-    (newHead: Coordinate) => {
-      if (foodType === FoodType.Poison) {
-        // Poison food has negative effects
+    if (checkEatsFood(newHead, currentFood)) {
+      // ── Handle food eaten inline (avoids another unstable callback) ──
+      if (currentFoodType === FoodType.Poison) {
         vibrate(VIBRATION_PATTERNS.poison);
-
-        // Reduce score
         setScore((prev) => Math.max(0, prev + SCORE_MULTIPLIERS.poison));
 
-        // Shrink snake if possible (don't go below length 1)
-        if (snake.length > 1) {
-          setSnake([newHead, ...snake.slice(0, -2)]);
+        if (currentSnake.length > 1) {
+          setSnake([newHead, ...currentSnake.slice(0, -2)]);
         } else {
           setSnake([newHead]);
         }
 
-        // Reset combo
         resetCombo(setCombo);
-
-        // Show poison effect
         setPoisonEffect(true);
         setTimeout(() => setPoisonEffect(false), 1000);
       } else {
-        // Normal food behavior
-        setSnake([newHead, ...snake]);
+        setSnake([newHead, ...currentSnake]);
         vibrate(VIBRATION_PATTERNS.foodEaten);
-        updateCombo(combo, lastFoodTime, setCombo, setLastFoodTime);
+        updateCombo(comboRef.current, lastFoodTimeRef.current, setCombo, setLastFoodTime);
 
-        // Different score based on food type
         let scoreIncrement = SCORE_INCREMENT;
-        if (foodType === FoodType.Golden) {
+        if (currentFoodType === FoodType.Golden) {
           scoreIncrement = SCORE_MULTIPLIERS.golden;
-        } else if (foodType === FoodType.Rainbow) {
+        } else if (currentFoodType === FoodType.Rainbow) {
           scoreIncrement = SCORE_MULTIPLIERS.rainbow;
         }
 
         setScore(
-          (prev) => prev + calculateScore(scoreIncrement, combo, powerUpType)
+          (prev) => prev + calculateScore(scoreIncrement, comboRef.current, powerUpTypeRef.current)
         );
       }
 
-      // Random chance for special food or power-up
+      // Spawn new food & possible power-ups
       const random = Math.random();
       if (random < FOOD_PROBABILITIES.powerUp) {
         const powerUps = Object.values(PowerUp);
-        const randomPowerUp =
-          powerUps[Math.floor(Math.random() * powerUps.length)];
-        activatePowerUp(randomPowerUp);
+        activatePowerUp(powerUps[Math.floor(Math.random() * powerUps.length)]);
       } else if (random < FOOD_PROBABILITIES.special) {
         const foodTypes = Object.values(FoodType);
         setFoodType(foodTypes[Math.floor(Math.random() * foodTypes.length)]);
@@ -209,50 +194,44 @@ export const useGameLoop = ({
         setFoodType(FoodType.Normal);
       }
 
-      // Pass current snake (including new head) to avoid spawning food on the snake
-      const updatedSnake = foodType === FoodType.Poison
-        ? (snake.length > 1 ? [newHead, ...snake.slice(0, -2)] : [newHead])
-        : [newHead, ...snake];
-      setFood(randomFoodPosition(gameBounds.xMax, gameBounds.yMax, updatedSnake));
-    },
-    [
-      foodType,
-      snake,
-      combo,
-      powerUpType,
-      gameBounds,
-      vibrate,
-      setSnake,
-      setFood,
-      setFoodType,
-      setScore,
-      setPoisonEffect,
-      updateCombo,
-      resetCombo,
-      calculateScore,
-      activatePowerUp,
-      setCombo,
-      setLastFoodTime,
-      lastFoodTime,
-    ]
-  );
-
-  // Game loop effect — also check power-up expiration each tick
-  // Don't start the loop until the board has been measured (gameBounds > 0)
-  useEffect(() => {
-    if (!isGameOver && gameBounds.xMax > 0 && gameBounds.yMax > 0) {
-      const intervalId = setInterval(() => {
-        if (!isPaused) {
-          checkPowerUpExpiration();
-          moveSnake();
-        }
-      }, getCurrentMoveInterval());
-      return () => clearInterval(intervalId);
+      const updatedSnake =
+        currentFoodType === FoodType.Poison
+          ? currentSnake.length > 1
+            ? [newHead, ...currentSnake.slice(0, -2)]
+            : [newHead]
+          : [newHead, ...currentSnake];
+      setFood(randomFoodPosition(bounds.xMax, bounds.yMax, updatedSnake));
+    } else {
+      setSnake([newHead, ...currentSnake.slice(0, -1)]);
     }
-  }, [snake, isGameOver, isPaused, gameBounds.xMax, gameBounds.yMax, getCurrentMoveInterval, moveSnake, checkPowerUpExpiration]);
+  }, [
+    // Only stable setter functions — never change identity
+    addScore, setIsGameOver, setSnake, setFood, setFoodType,
+    setScore, setPoisonEffect, setCombo, setLastFoodTime,
+    vibrate, resetCombo, updateCombo, calculateScore, activatePowerUp,
+  ]);
 
-  return {
-    moveSnake,
-    vibrate,
-  };
+  // ── Interval ref for speed changes without recreating the loop ──
+  const intervalMsRef = useRef(getCurrentMoveInterval());
+
+  useEffect(() => {
+    intervalMsRef.current = getCurrentMoveInterval();
+  }, [getCurrentMoveInterval]);
+
+  // ── The actual game loop — minimal deps, stable ──
+  useEffect(() => {
+    if (isGameOver || gameBounds.xMax <= 0 || gameBounds.yMax <= 0) return;
+
+    const tick = () => {
+      if (!isPausedRef.current) {
+        checkPowerUpExpiration();
+        moveSnake();
+      }
+    };
+
+    const intervalId = setInterval(tick, intervalMsRef.current);
+    return () => clearInterval(intervalId);
+  }, [isGameOver, gameBounds.xMax, gameBounds.yMax, moveSnake, checkPowerUpExpiration]);
+
+  return { vibrate };
 };
