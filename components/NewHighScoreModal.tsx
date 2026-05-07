@@ -164,9 +164,7 @@ const NewHighScoreModal: React.FC<NewHighScoreModalProps> = ({
 const AnimatedScore: React.FC<{ value: Animated.Value }> = ({ value }) => {
   const [display, setDisplay] = React.useState(0);
   useEffect(() => {
-    const id = value.addListener(({ value: v }) =>
-      setDisplay(Math.round(v)),
-    );
+    const id = value.addListener(({ value: v }) => setDisplay(Math.round(v)));
     return () => value.removeListener(id);
   }, [value]);
   return <Text style={styles.scoreValue}>{display}</Text>;
