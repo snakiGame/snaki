@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Dimensions,
   Animated,
   Easing,
+  Platform,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
@@ -17,6 +18,8 @@ import { useRouter } from "expo-router";
 import { SNAKE_SKINS } from "@/lib/skinStore";
 import { useAchievementStore, ACHIEVEMENTS } from "@/lib/achievementStore";
 import { useDailyChallengeStore, xpForLevel } from "@/lib/challengeStore";
+import ViewShot, { captureRef } from "react-native-view-shot";
+import * as Sharing from "expo-sharing";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
@@ -38,7 +41,25 @@ const GameOverModal = ({
   const { settings } = useSettingStore();
   const router = useRouter();
   const scaleAnim = useRef(new Animated.Value(0)).current;
+  const shareCardRef = useRef<any>(null);
   const isNewBest = score > 0 && score >= highScore;
+
+  const handleShare = useCallback(async () => {
+    try {
+      const uri = await captureRef(shareCardRef, {
+        format: "png",
+        quality: 1,
+      });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "image/png",
+          dialogTitle: "Share your Snaki score!",
+        });
+      }
+    } catch (e) {
+      console.warn("Share failed:", e);
+    }
+  }, []);
 
   const { newlyUnlocked, markSeen } = useAchievementStore();
   const { challenges, definitions, xp, level, streak } =
@@ -238,18 +259,53 @@ const GameOverModal = ({
           </TouchableOpacity>
         </View>
 
-        {/* Home button */}
-        <TouchableOpacity
-          style={styles.homeButton}
-          onPress={() => {
-            toggleModal();
-            router.replace("/");
-          }}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.homeButtonText}>HOME</Text>
-        </TouchableOpacity>
+        {/* Home & Share row */}
+        <View style={styles.bottomRow}>
+          <TouchableOpacity
+            style={styles.homeButton}
+            onPress={() => {
+              toggleModal();
+              router.replace("/");
+            }}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.homeButtonText}>HOME</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.shareButton}
+            onPress={handleShare}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="share-outline" size={16} color={Colors.accent} />
+            <Text style={styles.shareButtonText}>SHARE</Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
+
+      {/* Hidden share card — rendered offscreen for capture */}
+      <View style={styles.shareCardWrapper} pointerEvents="none">
+        <ViewShot ref={shareCardRef} options={{ format: "png", quality: 1 }}>
+          <View style={styles.shareCard}>
+            <Text style={styles.shareCardTitle}>SNAKI</Text>
+            <Text style={styles.shareCardSubtitle}>
+              {isNewBest ? "NEW HIGH SCORE!" : "GAME OVER"}
+            </Text>
+            <View style={styles.shareScoreBox}>
+              <Text style={styles.shareScoreLabel}>SCORE</Text>
+              <Text style={styles.shareScoreValue}>{score}</Text>
+            </View>
+            {isNewBest && (
+              <Text style={styles.shareNewBest}>
+                {"\u{1F3C6}"} Personal Best!
+              </Text>
+            )}
+            <Text style={styles.shareFooter}>
+              Can you beat me? {"\u{1F40D}"} Play Snaki!
+            </Text>
+          </View>
+        </ViewShot>
+      </View>
     </Modal>
   );
 };
@@ -375,6 +431,86 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.textDim,
     letterSpacing: 2,
+  },
+  bottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  shareButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  shareButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: Colors.accent,
+    letterSpacing: 2,
+  },
+  // Hidden share card
+  shareCardWrapper: {
+    position: "absolute",
+    left: -9999,
+    top: -9999,
+  },
+  shareCard: {
+    width: 360,
+    padding: 32,
+    alignItems: "center",
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    borderWidth: 3,
+    borderColor: Colors.accent,
+  },
+  shareCardTitle: {
+    fontSize: 36,
+    fontWeight: "900",
+    color: Colors.primary,
+    letterSpacing: 8,
+    marginBottom: 4,
+  },
+  shareCardSubtitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.textDim,
+    letterSpacing: 3,
+    marginBottom: 20,
+  },
+  shareScoreBox: {
+    backgroundColor: Colors.accent,
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  shareScoreLabel: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: Colors.background,
+    letterSpacing: 2,
+    marginBottom: 2,
+  },
+  shareScoreValue: {
+    fontSize: 48,
+    fontWeight: "900",
+    color: Colors.background,
+  },
+  shareNewBest: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: Colors.accent,
+    marginBottom: 12,
+  },
+  shareFooter: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.textDim,
+    marginTop: 8,
   },
   // XP section
   xpSection: {

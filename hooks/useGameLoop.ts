@@ -10,6 +10,7 @@ import {
   SCORE_MULTIPLIERS,
   FOOD_PROBABILITIES,
   VIBRATION_PATTERNS,
+  COMBO_THRESHOLD,
 } from "../lib/gameConstants";
 
 interface UseGameLoopProps {
@@ -167,8 +168,19 @@ export const useGameLoop = ({
         setTimeout(() => setPoisonEffect(false), 1000);
       } else {
         setSnake([newHead, ...currentSnake]);
-        vibrate(VIBRATION_PATTERNS.foodEaten);
         updateCombo(comboRef.current, lastFoodTimeRef.current, setCombo, setLastFoodTime);
+
+        // Combo-specific haptics
+        const nextCombo = Date.now() - lastFoodTimeRef.current < 2000 ? comboRef.current + 1 : 1;
+        if (nextCombo >= 5) {
+          Vibration.vibrate(VIBRATION_PATTERNS.combo5);
+        } else if (nextCombo >= 4) {
+          Vibration.vibrate(VIBRATION_PATTERNS.combo4);
+        } else if (nextCombo >= COMBO_THRESHOLD) {
+          Vibration.vibrate(VIBRATION_PATTERNS.combo3);
+        } else {
+          vibrate(VIBRATION_PATTERNS.foodEaten);
+        }
 
         let scoreIncrement = SCORE_INCREMENT;
         if (currentFoodType === FoodType.Golden) {

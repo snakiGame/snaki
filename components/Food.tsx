@@ -1,5 +1,5 @@
-import React from "react";
-import { View, StyleSheet } from "react-native";
+import React, { useEffect, useRef } from "react";
+import { View, StyleSheet, Animated, Easing } from "react-native";
 import { Coordinate, FoodType } from "../types/types";
 import { Colors } from "../styles/colors";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
@@ -10,6 +10,56 @@ interface FoodProps extends Coordinate {
 
 const Food: React.FC<FoodProps> = React.memo(
   ({ x, y, type }) => {
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    const glowAnim = useRef(new Animated.Value(0.3)).current;
+    const isSpecial = type === FoodType.Golden || type === FoodType.Rainbow;
+
+    useEffect(() => {
+      if (!isSpecial) {
+        pulseAnim.setValue(1);
+        glowAnim.setValue(0);
+        return;
+      }
+      const pulse = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 1.25,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      const glow = Animated.loop(
+        Animated.sequence([
+          Animated.timing(glowAnim, {
+            toValue: 0.7,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(glowAnim, {
+            toValue: 0.3,
+            duration: 600,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      pulse.start();
+      glow.start();
+      return () => {
+        pulse.stop();
+        glow.stop();
+      };
+    }, [isSpecial]);
+
     const getFoodColor = () => {
       switch (type) {
         case FoodType.Golden:
@@ -40,7 +90,7 @@ const Food: React.FC<FoodProps> = React.memo(
     const offset = (GAME_UNIT_SIZE - size) / 2;
 
     return (
-      <View
+      <Animated.View
         style={[
           styles.food,
           {
@@ -48,9 +98,26 @@ const Food: React.FC<FoodProps> = React.memo(
             top: y * GAME_UNIT_SIZE + offset,
             width: size,
             height: size,
+            transform: [{ scale: pulseAnim }],
           },
         ]}
       >
+        {/* Glow ring for special food */}
+        {isSpecial && (
+          <Animated.View
+            style={[
+              styles.glowRing,
+              {
+                backgroundColor: getFoodColor(),
+                opacity: glowAnim,
+                width: size + 8,
+                height: size + 8,
+                left: -4,
+                top: -4,
+              },
+            ]}
+          />
+        )}
         {/* Shadow block */}
         <View
           style={[styles.foodShadow, { backgroundColor: getShadowColor() }]}
@@ -62,7 +129,7 @@ const Food: React.FC<FoodProps> = React.memo(
             { backgroundColor: getFoodColor(), width: size, height: size },
           ]}
         />
-      </View>
+      </Animated.View>
     );
   },
   (prev, next) =>
@@ -85,6 +152,11 @@ const styles = StyleSheet.create({
     bottom: -2,
     borderRadius: 3,
     zIndex: 1,
+  },
+  glowRing: {
+    position: "absolute",
+    borderRadius: 6,
+    zIndex: 0,
   },
 });
 

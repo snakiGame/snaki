@@ -246,9 +246,14 @@ export default function Game(): JSX.Element {
   // Show game over modal when game ends
   useEffect(() => {
     if (isGameOver && !isModalVisible) {
-      handleGameOver();
+      // Check if it's a new high score
+      if (score > 0 && score >= localHighScore) {
+        setShowHighScoreModal(true);
+      } else {
+        handleGameOver();
+      }
     }
-  }, [isGameOver, isModalVisible, handleGameOver]);
+  }, [isGameOver, isModalVisible, handleGameOver, score, localHighScore]);
 
   return (
     <PanGestureHandler onGestureEvent={handleGestureWithTrail}>
@@ -280,6 +285,7 @@ export default function Game(): JSX.Element {
           combo={combo}
           comboAnimation={comboAnimation}
           poisonEffect={poisonEffect}
+          shakeTranslateX={shakeAnim}
           onBoardLayout={handleBoardLayout}
         />
 
@@ -289,6 +295,15 @@ export default function Game(): JSX.Element {
           reloadGame={handleResetGame}
           score={score}
           highScore={localHighScore}
+        />
+
+        <NewHighScoreModal
+          visible={showHighScoreModal}
+          score={score}
+          onContinue={() => {
+            setShowHighScoreModal(false);
+            handleGameOver();
+          }}
         />
 
         <ScoreModal

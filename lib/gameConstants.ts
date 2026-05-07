@@ -69,4 +69,7 @@ export const VIBRATION_PATTERNS = {
   foodEaten: 25,
   poison: 100,
   gameOver: 300,
+  combo3: [0, 30, 30, 30] as number[],
+  combo4: [0, 25, 25, 25, 25, 25] as number[],
+  combo5: [0, 20, 20, 20, 20, 20, 20, 20] as number[],
 };
