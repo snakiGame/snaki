@@ -14,6 +14,9 @@ import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
 import useSettingStore from "@/lib/settings";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { SNAKE_SKINS } from "@/lib/skinStore";
+import { useAchievementStore, ACHIEVEMENTS } from "@/lib/achievementStore";
+import { useDailyChallengeStore, xpForLevel } from "@/lib/challengeStore";
 
 interface GameoverModalProps {
   isModalVisible: boolean;
@@ -37,6 +40,26 @@ const GameOverModal = ({
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const isNewBest = score > 0 && score >= highScore;
 
+  const { newlyUnlocked, markSeen } = useAchievementStore();
+  const { challenges, definitions, xp, level, streak } =
+    useDailyChallengeStore();
+
+  // Next locked skin
+  const bestScore = Math.max(score, highScore);
+  const nextSkin = SNAKE_SKINS.find((s) => s.unlockScore > bestScore);
+  const xpNeeded = xpForLevel(level);
+  const xpProgress = xpNeeded > 0 ? Math.min(xp / xpNeeded, 1) : 0;
+
+  // Achievement names for newly unlocked
+  const unlockedAchievements = newlyUnlocked
+    .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
+    .filter(Boolean);
+
+  // Challenge progress for completed this game
+  const completedChallenges = challenges.filter(
+    (c) => c.completed && !c.claimed,
+  );
+
   useEffect(() => {
     if (isModalVisible) {
       scaleAnim.setValue(0);
@@ -46,6 +69,9 @@ const GameOverModal = ({
         friction: 8,
         useNativeDriver: true,
       }).start();
+    } else {
+      // Mark achievements as seen when modal closes
+      if (newlyUnlocked.length > 0) markSeen();
     }
   }, [isModalVisible]);
 
@@ -113,6 +139,77 @@ const GameOverModal = ({
             </View>
           </View>
         </View>
+
+        {/* XP & Level progress */}
+        <View style={styles.xpSection}>
+          <View style={styles.xpHeader}>
+            <Text style={styles.xpLevelText}>LVL {level}</Text>
+            <Text style={styles.xpText}>
+              {xp}/{xpNeeded} XP
+            </Text>
+          </View>
+          <View style={styles.xpBarBg}>
+            <View
+              style={[styles.xpBarFill, { width: `${xpProgress * 100}%` }]}
+            />
+          </View>
+          {streak > 0 && (
+            <Text style={styles.streakText}>
+              {"\u{1F525}"} {streak} day streak
+            </Text>
+          )}
+        </View>
+
+        {/* Newly unlocked achievements */}
+        {unlockedAchievements.length > 0 && (
+          <View style={styles.achievementSection}>
+            {unlockedAchievements.map((a) => (
+              <View key={a!.id} style={styles.achievementRow}>
+                <Ionicons
+                  name={a!.icon as any}
+                  size={18}
+                  color={Colors.accent}
+                />
+                <Text style={styles.achievementText}>{a!.title}</Text>
+                <Text style={styles.achievementBadge}>NEW</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* Challenge progress */}
+        {completedChallenges.length > 0 && (
+          <View style={styles.challengeSection}>
+            <Text style={styles.challengeSectionTitle}>CHALLENGES</Text>
+            {completedChallenges.map((c) => {
+              const def = definitions.find((d) => d.id === c.challengeId);
+              if (!def) return null;
+              return (
+                <View key={c.challengeId} style={styles.challengeRow}>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={16}
+                    color={Colors.primary}
+                  />
+                  <Text style={styles.challengeText}>{def.title}</Text>
+                  <Text style={styles.challengeXp}>+{def.xpReward} XP</Text>
+                </View>
+              );
+            })}
+          </View>
+        )}
+
+        {/* Next skin unlock hint */}
+        {nextSkin && (
+          <View style={styles.nextSkinHint}>
+            <View
+              style={[styles.nextSkinDot, { backgroundColor: nextSkin.head }]}
+            />
+            <Text style={styles.nextSkinText}>
+              {nextSkin.unlockScore - bestScore} more to unlock {nextSkin.name}
+            </Text>
+          </View>
+        )}
 
         {/* Play Again button */}
         <View style={styles.buttonWrapper}>
@@ -278,6 +375,118 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: Colors.textDim,
     letterSpacing: 2,
+  },
+  // XP section
+  xpSection: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  xpHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  xpLevelText: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: Colors.primary,
+    letterSpacing: 2,
+  },
+  xpText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.textDim,
+  },
+  xpBarBg: {
+    width: "100%",
+    height: 8,
+    backgroundColor: Colors.surface,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  xpBarFill: {
+    height: "100%",
+    backgroundColor: Colors.primary,
+    borderRadius: 4,
+  },
+  streakText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.accent,
+    marginTop: 6,
+    textAlign: "center",
+  },
+  // Achievements
+  achievementSection: {
+    width: "100%",
+    backgroundColor: Colors.surface,
+    borderRadius: BLOCK_RADIUS - 4,
+    padding: 10,
+    marginBottom: 12,
+    gap: 6,
+  },
+  achievementRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  achievementText: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: "700",
+    color: Colors.white,
+  },
+  achievementBadge: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: Colors.accent,
+    letterSpacing: 1,
+  },
+  // Challenge progress
+  challengeSection: {
+    width: "100%",
+    marginBottom: 12,
+    gap: 4,
+  },
+  challengeSectionTitle: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: Colors.textDim,
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  challengeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  challengeText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "700",
+    color: Colors.white,
+  },
+  challengeXp: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: Colors.primary,
+  },
+  // Next skin hint
+  nextSkinHint: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 16,
+  },
+  nextSkinDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 3,
+  },
+  nextSkinText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: Colors.textDim,
   },
 });
 

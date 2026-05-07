@@ -10,6 +10,11 @@ import GameBoard from "./GameBoard";
 import { useGame } from "../hooks/useGame";
 import { SafeAreaView } from "react-native-safe-area-context";
 import SwipeTrail, { SwipeTrailHandle } from "./SwipeTrail";
+import { useDailyChallengeStore } from "@/lib/challengeStore";
+import { useAchievementStore } from "@/lib/achievementStore";
+import { useScoreStore } from "@/lib/scoreStore";
+import { SNAKE_SKINS } from "@/lib/skinStore";
+import { FoodType } from "@/types/types";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -43,6 +48,123 @@ export default function Game(): JSX.Element {
     resetGame,
     togglePause,
   } = useGame({ boardWidth, boardHeight });
+
+  // ── Per-game stats tracking for challenges & achievements ──
+  const gameStatsRef = useRef({
+    goldenEaten: 0,
+    rainbowEaten: 0,
+    poisonEaten: 0,
+    totalFoodEaten: 0,
+    maxCombo: 0,
+    atePoison: false,
+  });
+  const prevSnakeLenRef = useRef(snake.length);
+  const prevFoodTypeRef = useRef(foodType);
+
+  // Track food eating by watching snake length changes
+  useEffect(() => {
+    if (isGameOver) return;
+    const prevLen = prevSnakeLenRef.current;
+    const grew = snake.length > prevLen;
+    const shrank = snake.length < prevLen;
+    prevSnakeLenRef.current = snake.length;
+
+    if (grew) {
+      gameStatsRef.current.totalFoodEaten++;
+      const eaten = prevFoodTypeRef.current;
+      if (eaten === FoodType.Golden) gameStatsRef.current.goldenEaten++;
+      if (eaten === FoodType.Rainbow) gameStatsRef.current.rainbowEaten++;
+    }
+    if (shrank) {
+      gameStatsRef.current.poisonEaten++;
+      gameStatsRef.current.atePoison = true;
+    }
+  }, [snake.length, isGameOver]);
+
+  // Track food type changes for next detection
+  useEffect(() => {
+    prevFoodTypeRef.current = foodType;
+  }, [foodType]);
+
+  // Track max combo
+  useEffect(() => {
+    if (combo > gameStatsRef.current.maxCombo) {
+      gameStatsRef.current.maxCombo = combo;
+    }
+  }, [combo]);
+
+  // ── Fire challenges + achievements on game over ──
+  const { updateProgress, refreshIfNeeded } = useDailyChallengeStore();
+  const { unlock } = useAchievementStore();
+  const { scores, highScore: storeHighScore } = useScoreStore();
+
+  useEffect(() => {
+    refreshIfNeeded();
+  }, []);
+
+  const processedGameOverRef = useRef(false);
+
+  useEffect(() => {
+    if (!isGameOver || processedGameOverRef.current) return;
+    processedGameOverRef.current = true;
+
+    const stats = gameStatsRef.current;
+
+    // Update daily challenge progress
+    if (score > 0) updateProgress("score", score);
+    if (stats.maxCombo > 0) updateProgress("combo", stats.maxCombo);
+    if (stats.goldenEaten > 0) updateProgress("golden", stats.goldenEaten);
+    if (stats.rainbowEaten > 0) updateProgress("rainbow", stats.rainbowEaten);
+    if (stats.totalFoodEaten > 0)
+      updateProgress("food_count", stats.totalFoodEaten);
+    if (!stats.atePoison && score > 0) updateProgress("no_poison", score);
+
+    // Check achievements
+    unlock("first_game");
+    if (score >= 10) unlock("score_10");
+    if (score >= 50) unlock("score_50");
+    if (score >= 100) unlock("score_100");
+    if (score >= 200) unlock("score_200");
+    if (stats.maxCombo >= 3) unlock("combo_3");
+    if (stats.maxCombo >= 5) unlock("combo_5");
+    if (stats.goldenEaten > 0) unlock("golden_eat");
+    if (stats.rainbowEaten > 0) unlock("rainbow_eat");
+    if (stats.atePoison) unlock("poison_survive");
+
+    // Games played achievements
+    const gamesPlayed = scores.length;
+    if (gamesPlayed >= 10) unlock("games_10");
+    if (gamesPlayed >= 50) unlock("games_50");
+
+    // Streak achievements
+    const { streak } = useDailyChallengeStore.getState();
+    if (streak >= 3) unlock("streak_3");
+    if (streak >= 7) unlock("streak_7");
+
+    // Level achievements
+    const { level } = useDailyChallengeStore.getState();
+    if (level >= 5) unlock("level_5");
+
+    // All skins unlocked
+    const best = Math.max(score, storeHighScore);
+    const allSkinsUnlocked = SNAKE_SKINS.every((s) => s.unlockScore <= best);
+    if (allSkinsUnlocked) unlock("all_skins");
+  }, [isGameOver]);
+
+  // Reset per-game stats when game restarts
+  const handleResetGame = useCallback(() => {
+    gameStatsRef.current = {
+      goldenEaten: 0,
+      rainbowEaten: 0,
+      poisonEaten: 0,
+      totalFoodEaten: 0,
+      maxCombo: 0,
+      atePoison: false,
+    };
+    prevSnakeLenRef.current = 1;
+    processedGameOverRef.current = false;
+    resetGame();
+  }, [resetGame]);
 
   // Swipe trail (ref-based to avoid re-rendering Game)
   const trailRef = useRef<SwipeTrailHandle>(null);
@@ -99,7 +221,7 @@ export default function Game(): JSX.Element {
         />
         <SwipeTrail ref={trailRef} />
         <Header
-          reloadGame={resetGame}
+          reloadGame={handleResetGame}
           pauseGame={togglePause}
           isPaused={isPaused}
         >
@@ -125,7 +247,7 @@ export default function Game(): JSX.Element {
         <GameOverModal
           isModalVisible={isModalVisible}
           toggleModal={toggleModal}
-          reloadGame={resetGame}
+          reloadGame={handleResetGame}
           score={score}
           highScore={localHighScore}
         />

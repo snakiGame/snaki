@@ -504,14 +504,17 @@ const HomePage: React.FC = () => {
       <View style={styles.bottomBar}>
         <TouchableOpacity
           style={styles.bottomBtn}
-          onPress={() => router.push("/howtoplay" as any)}
+          onPress={() => router.push("/challenges" as any)}
           activeOpacity={0.7}
         >
-          <Ionicons
-            name="help-circle-outline"
-            size={22}
-            color={Colors.textDim}
-          />
+          <Ionicons name="calendar-outline" size={20} color={Colors.textDim} />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomBtn}
+          onPress={() => router.push("/achievements" as any)}
+          activeOpacity={0.7}
+        >
+          <Ionicons name="trophy-outline" size={20} color={Colors.textDim} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.bottomBtn}
@@ -520,6 +523,17 @@ const HomePage: React.FC = () => {
         >
           <Ionicons
             name="color-palette-outline"
+            size={20}
+            color={Colors.textDim}
+          />
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.bottomBtn}
+          onPress={() => router.push("/howtoplay" as any)}
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="help-circle-outline"
             size={20}
             color={Colors.textDim}
           />
@@ -538,7 +552,7 @@ const HomePage: React.FC = () => {
         >
           <Ionicons
             name="information-circle-outline"
-            size={22}
+            size={20}
             color={Colors.textDim}
           />
         </TouchableOpacity>

@@ -9,6 +9,8 @@ import { StatusBar } from "expo-status-bar";
 import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
 import SettingsSwitch from "@/components/SettingsSwitch";
 import { Ionicons } from "@expo/vector-icons";
+import { alert } from "yooo-native";
+import { HapticFeedback } from "@/lib/haptics";
 
 export default function Settings() {
   const router = useRouter();
@@ -23,7 +25,8 @@ export default function Settings() {
   }, [settings]);
 
   const resetSettings = async () => {
-    Alert.alert(
+    HapticFeedback("selection")
+    alert.dialog(
       "Reset Settings",
       "Are you sure you want to reset all settings to default?",
       [
