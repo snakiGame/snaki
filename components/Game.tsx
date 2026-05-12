@@ -80,6 +80,7 @@ export default function Game(): JSX.Element {
     currentDifficulty,
     poisonEffect,
     localHighScore,
+    obstacles,
     comboAnimation,
     handleGesture,
     resetGame,
@@ -286,6 +287,7 @@ export default function Game(): JSX.Element {
           comboAnimation={comboAnimation}
           poisonEffect={poisonEffect}
           shakeTranslateX={shakeAnim}
+          obstacles={obstacles}
           onBoardLayout={handleBoardLayout}
         />
 

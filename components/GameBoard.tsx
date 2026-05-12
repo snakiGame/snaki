@@ -5,6 +5,7 @@ import { Coordinate, FoodType, PowerUp } from "../types/types";
 import { PowerUpState, GAME_UNIT_SIZE } from "../lib/gameConstants";
 import Snake from "./Snake";
 import Food from "./Food";
+import Obstacles from "./Obstacles";
 import PowerUpIndicator from "./PowerUpIndicator";
 import ComboIndicator from "./ComboIndicator";
 import PoisonOverlay from "./PoisonOverlay";
@@ -18,6 +19,7 @@ interface GameBoardProps {
   comboAnimation: Animated.Value;
   poisonEffect: boolean;
   shakeTranslateX?: Animated.Value;
+  obstacles: Coordinate[];
   onBoardLayout?: (width: number, height: number) => void;
 }
 
@@ -33,6 +35,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
     comboAnimation,
     poisonEffect,
     shakeTranslateX,
+    obstacles,
     onBoardLayout,
   }) => {
     const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
@@ -73,6 +76,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
             <View style={styles.boundaries}>
               <GridLines />
               <PoisonOverlay isVisible={poisonEffect} />
+              <Obstacles obstacles={obstacles} />
               <Snake snake={snake} />
               <Food x={food.x} y={food.y} type={foodType} />
               {powerUp.type && (
