@@ -11,6 +11,7 @@ import {
   FOOD_PROBABILITIES,
   VIBRATION_PATTERNS,
   COMBO_THRESHOLD,
+  OBSTACLE_THRESHOLDS,
 } from "../lib/gameConstants";
 
 interface UseGameLoopProps {
@@ -26,6 +27,7 @@ interface UseGameLoopProps {
   gameBounds: GameBounds;
   localHighScore: number;
   vibrationEnabled: boolean;
+  obstacles: Coordinate[];
 
   // State setters
   setSnake: (snake: Coordinate[]) => void;
@@ -34,6 +36,7 @@ interface UseGameLoopProps {
   setScore: (score: number | ((prev: number) => number)) => void;
   setIsGameOver: (gameOver: boolean) => void;
   setPoisonEffect: (effect: boolean) => void;
+  setObstacles: (obstacles: Coordinate[] | ((prev: Coordinate[]) => Coordinate[])) => void;
 
   // Actions
   getCurrentMoveInterval: () => number;
@@ -70,12 +73,14 @@ export const useGameLoop = ({
   gameBounds,
   localHighScore,
   vibrationEnabled,
+  obstacles,
   setSnake,
   setFood,
   setFoodType,
   setScore,
   setIsGameOver,
   setPoisonEffect,
+  setObstacles,
   getCurrentMoveInterval,
   updateCombo,
   resetCombo,
@@ -99,6 +104,7 @@ export const useGameLoop = ({
   const lastFoodTimeRef = useRef(lastFoodTime);
   const isPausedRef = useRef(isPaused);
   const vibrationEnabledRef = useRef(vibrationEnabled);
+  const obstaclesRef = useRef(obstacles);
 
   // Sync refs on every render (cheap — just assignments)
   snakeRef.current = snake;
@@ -112,6 +118,7 @@ export const useGameLoop = ({
   lastFoodTimeRef.current = lastFoodTime;
   isPausedRef.current = isPaused;
   vibrationEnabledRef.current = vibrationEnabled;
+  obstaclesRef.current = obstacles;
 
   const vibrate = useCallback((length: number) => {
     if (!vibrationEnabledRef.current) return;
@@ -144,7 +151,7 @@ export const useGameLoop = ({
     }
 
     // Check for game over
-    if (checkGameOver(newHead, bounds, currentSnake)) {
+    if (checkGameOver(newHead, bounds, currentSnake, obstaclesRef.current)) {
       addScore(scoreRef.current);
       setIsGameOver(true);
       vibrate(VIBRATION_PATTERNS.gameOver);
@@ -212,7 +219,7 @@ export const useGameLoop = ({
             ? [newHead, ...currentSnake.slice(0, -2)]
             : [newHead]
           : [newHead, ...currentSnake];
-      setFood(randomFoodPosition(bounds.xMax, bounds.yMax, updatedSnake));
+      setFood(randomFoodPosition(bounds.xMax, bounds.yMax, updatedSnake, obstaclesRef.current));
     } else {
       setSnake([newHead, ...currentSnake.slice(0, -1)]);
     }
@@ -220,12 +227,68 @@ export const useGameLoop = ({
     // Only stable setter functions — never change identity
     addScore, setIsGameOver, setSnake, setFood, setFoodType,
     setScore, setPoisonEffect, setCombo, setLastFoodTime,
-    vibrate, resetCombo, updateCombo, calculateScore, activatePowerUp,
+    vibrate, resetCombo, updateCombo, calculateScore, activatePowerUp, setObstacles,
   ]);
 
   // ── Ref for current speed — updated without restarting the loop ──
   const getCurrentMoveIntervalRef = useRef(getCurrentMoveInterval);
   getCurrentMoveIntervalRef.current = getCurrentMoveInterval;
+
+  // ── Spawn obstacles when score crosses thresholds ──
+  const spawnedThresholdsRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (isGameOver) return;
+
+    for (const threshold of OBSTACLE_THRESHOLDS) {
+      if (score >= threshold.score && !spawnedThresholdsRef.current.has(threshold.score)) {
+        spawnedThresholdsRef.current.add(threshold.score);
+
+        // Generate new obstacle positions
+        const currentSnake = snakeRef.current;
+        const currentFood = foodRef.current;
+        const bounds = gameBoundsRef.current;
+        const currentObstacles = obstaclesRef.current;
+        const PADDING = 2; // Keep obstacles away from edges
+
+        const newObstacles: Coordinate[] = [];
+        let attempts = 0;
+        while (newObstacles.length < threshold.count && attempts < 200) {
+          attempts++;
+          const x = Math.floor(Math.random() * (bounds.xMax - PADDING * 2 + 1)) + PADDING;
+          const y = Math.floor(Math.random() * (bounds.yMax - PADDING * 2 + 1)) + PADDING;
+
+          // Don't place on snake
+          const onSnake = currentSnake.some((s) => s.x === x && s.y === y);
+          // Don't place on food
+          const onFood = currentFood.x === x && currentFood.y === y;
+          // Don't place on existing obstacles
+          const onExisting = currentObstacles.some((o) => o.x === x && o.y === y);
+          // Don't place on already-chosen new obstacles
+          const onNew = newObstacles.some((o) => o.x === x && o.y === y);
+          // Don't place adjacent to snake head (give player breathing room)
+          const head = currentSnake[0];
+          const tooCloseToHead =
+            Math.abs(x - head.x) <= 2 && Math.abs(y - head.y) <= 2;
+
+          if (!onSnake && !onFood && !onExisting && !onNew && !tooCloseToHead) {
+            newObstacles.push({ x, y });
+          }
+        }
+
+        if (newObstacles.length > 0) {
+          setObstacles((prev: Coordinate[]) => [...prev, ...newObstacles]);
+        }
+      }
+    }
+  }, [score, isGameOver, setObstacles]);
+
+  // Reset spawned thresholds when game resets
+  useEffect(() => {
+    if (!isGameOver && score === 0) {
+      spawnedThresholdsRef.current.clear();
+    }
+  }, [isGameOver, score]);
 
   // ── The actual game loop — uses setTimeout so each tick reads latest speed ──
   useEffect(() => {

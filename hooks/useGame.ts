@@ -49,6 +49,7 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
     gameBounds,
     localHighScore: highScore,
     vibrationEnabled: settings.vibration,
+    obstacles: gameState.obstacles,
 
     setSnake: gameState.setSnake,
     setFood: gameState.setFood,
@@ -56,6 +57,7 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
     setScore: gameState.setScore,
     setIsGameOver: gameState.setIsGameOver,
     setPoisonEffect: gameState.setPoisonEffect,
+    setObstacles: gameState.setObstacles,
 
     getCurrentMoveInterval: gameState.getCurrentMoveInterval,
     updateCombo: comboSystem.updateCombo,

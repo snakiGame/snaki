@@ -39,6 +39,7 @@ export const useGameState = () => {
     INITIAL_GAME_STATE.poisonEffect
   );
   const [lastFoodTime, setLastFoodTime] = useState<number>(0);
+  const [obstacles, setObstacles] = useState<Coordinate[]>([]);
 
   // Calculate current move interval based on score and difficulty levels
   const getCurrentMoveInterval = useCallback(() => {
@@ -93,6 +94,7 @@ export const useGameState = () => {
     setCurrentDifficulty(INITIAL_GAME_STATE.currentDifficulty);
     setPoisonEffect(INITIAL_GAME_STATE.poisonEffect);
     setLastFoodTime(0);
+    setObstacles([]);
   }, []);
 
   const togglePause = useCallback(() => {
@@ -114,6 +116,7 @@ export const useGameState = () => {
     currentDifficulty,
     poisonEffect,
     lastFoodTime,
+    obstacles,
 
     // State setters
     setDirection,
@@ -125,6 +128,7 @@ export const useGameState = () => {
     setCombo,
     setPoisonEffect,
     setLastFoodTime,
+    setObstacles,
 
     // Computed values
     getCurrentMoveInterval,

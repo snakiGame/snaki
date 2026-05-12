@@ -64,6 +64,16 @@ export const FOOD_PROBABILITIES = {
   special: 0.3, // 30% chance for special food (includes power-up chance)
 };
 
+// Dynamic obstacle thresholds — score → number of new obstacles to add
+export const OBSTACLE_THRESHOLDS = [
+  { score: 15, count: 2 },
+  { score: 30, count: 2 },
+  { score: 50, count: 3 },
+  { score: 80, count: 3 },
+  { score: 120, count: 4 },
+  { score: 170, count: 4 },
+];
+
 // Vibration patterns
 export const VIBRATION_PATTERNS = {
   foodEaten: 25,

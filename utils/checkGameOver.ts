@@ -10,7 +10,8 @@ interface GameBounds {
 export const checkGameOver = (
   snakeHead: Coordinate,
   boundaries: GameBounds,
-  snakeBody: Coordinate[] = []
+  snakeBody: Coordinate[] = [],
+  obstacles: Coordinate[] = []
 ): boolean => {
   // Check if snake is out of bounds
   const outOfBounds = (
@@ -26,5 +27,10 @@ export const checkGameOver = (
     return index > 0 && segment.x === snakeHead.x && segment.y === snakeHead.y;
   });
 
-  return outOfBounds || selfCollision;
+  // Check if snake collides with an obstacle
+  const obstacleCollision = obstacles.some(
+    (obs) => obs.x === snakeHead.x && obs.y === snakeHead.y
+  );
+
+  return outOfBounds || selfCollision || obstacleCollision;
 };
