@@ -9,6 +9,8 @@ import Obstacles from "./Obstacles";
 import PowerUpIndicator from "./PowerUpIndicator";
 import ComboIndicator from "./ComboIndicator";
 import PoisonOverlay from "./PoisonOverlay";
+import { RunMissionProgress } from "@/lib/runMissions";
+import RunMissionsPanel from "./RunMissionsPanel";
 
 interface GameBoardProps {
   snake: Coordinate[];
@@ -20,6 +22,7 @@ interface GameBoardProps {
   poisonEffect: boolean;
   shakeTranslateX?: Animated.Value;
   obstacles: Coordinate[];
+  runMissions: RunMissionProgress[];
   onBoardLayout?: (width: number, height: number) => void;
 }
 
@@ -36,6 +39,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
     poisonEffect,
     shakeTranslateX,
     obstacles,
+    runMissions,
     onBoardLayout,
   }) => {
     const [boardSize, setBoardSize] = useState({ w: 0, h: 0 });
@@ -75,6 +79,7 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
             <View style={styles.boardShadow} />
             <View style={styles.boundaries}>
               <GridLines />
+              <RunMissionsPanel missions={runMissions} />
               <PoisonOverlay isVisible={poisonEffect} />
               <Obstacles obstacles={obstacles} />
               <Snake snake={snake} />

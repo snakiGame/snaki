@@ -16,6 +16,7 @@ import { useScoreStore } from "@/lib/scoreStore";
 import { SNAKE_SKINS } from "@/lib/skinStore";
 import { FoodType } from "@/types/types";
 import NewHighScoreModal from "./NewHighScoreModal";
+import { applyMissionProgress, createRunMissions } from "@/lib/runMissions";
 
 export default function Game(): JSX.Element {
   // Modal states
@@ -98,6 +99,8 @@ export default function Game(): JSX.Element {
   });
   const prevSnakeLenRef = useRef(snake.length);
   const prevFoodTypeRef = useRef(foodType);
+  const [runMissions, setRunMissions] = useState(() => createRunMissions());
+  const [survivalSeconds, setSurvivalSeconds] = useState(0);
 
   // Track food eating by watching snake length changes
   useEffect(() => {
@@ -110,7 +113,12 @@ export default function Game(): JSX.Element {
     if (grew) {
       gameStatsRef.current.totalFoodEaten++;
       const eaten = prevFoodTypeRef.current;
-      if (eaten === FoodType.Golden) gameStatsRef.current.goldenEaten++;
+      if (eaten === FoodType.Golden) {
+        gameStatsRef.current.goldenEaten++;
+        setRunMissions((prev) =>
+          applyMissionProgress(prev, "golden", 1, "increment"),
+        );
+      }
       if (eaten === FoodType.Rainbow) gameStatsRef.current.rainbowEaten++;
     }
     if (shrank) {
@@ -130,12 +138,18 @@ export default function Game(): JSX.Element {
     if (combo > gameStatsRef.current.maxCombo) {
       gameStatsRef.current.maxCombo = combo;
     }
+    setRunMissions((prev) => applyMissionProgress(prev, "combo", combo));
   }, [combo]);
 
   // ── Fire challenges + achievements on game over ──
   const { updateProgress, refreshIfNeeded } = useDailyChallengeStore();
   const { unlock } = useAchievementStore();
-  const { scores, highScore: storeHighScore } = useScoreStore();
+  const {
+    scores,
+    highScore: storeHighScore,
+    bestCombo,
+    recordBestCombo,
+  } = useScoreStore();
 
   useEffect(() => {
     refreshIfNeeded();
@@ -148,6 +162,11 @@ export default function Game(): JSX.Element {
     processedGameOverRef.current = true;
 
     const stats = gameStatsRef.current;
+
+    // Save all-time combo progression
+    if (stats.maxCombo > 0) {
+      recordBestCombo(stats.maxCombo);
+    }
 
     // Update daily challenge progress
     if (score > 0) updateProgress("score", score);
@@ -188,7 +207,15 @@ export default function Game(): JSX.Element {
     const best = Math.max(score, storeHighScore);
     const allSkinsUnlocked = SNAKE_SKINS.every((s) => s.unlockScore <= best);
     if (allSkinsUnlocked) unlock("all_skins");
-  }, [isGameOver]);
+  }, [
+    isGameOver,
+    recordBestCombo,
+    score,
+    scores.length,
+    storeHighScore,
+    unlock,
+    updateProgress,
+  ]);
 
   // Reset per-game stats when game restarts
   const handleResetGame = useCallback(() => {
@@ -202,6 +229,8 @@ export default function Game(): JSX.Element {
     };
     prevSnakeLenRef.current = 1;
     processedGameOverRef.current = false;
+    setRunMissions(createRunMissions());
+    setSurvivalSeconds(0);
     resetGame();
   }, [resetGame]);
 
@@ -243,6 +272,21 @@ export default function Game(): JSX.Element {
       togglePause();
     }
   }, [isPaused, togglePause]);
+
+  // Run timer mission progress
+  useEffect(() => {
+    if (isGameOver || isPaused) return;
+    const id = setInterval(() => {
+      setSurvivalSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isGameOver, isPaused]);
+
+  useEffect(() => {
+    setRunMissions((prev) =>
+      applyMissionProgress(prev, "survive", survivalSeconds),
+    );
+  }, [survivalSeconds]);
 
   // Show game over modal when game ends
   useEffect(() => {
@@ -288,6 +332,7 @@ export default function Game(): JSX.Element {
           poisonEffect={poisonEffect}
           shakeTranslateX={shakeAnim}
           obstacles={obstacles}
+          runMissions={runMissions}
           onBoardLayout={handleBoardLayout}
         />
 
@@ -297,6 +342,8 @@ export default function Game(): JSX.Element {
           reloadGame={handleResetGame}
           score={score}
           highScore={localHighScore}
+          runMaxCombo={gameStatsRef.current.maxCombo}
+          bestCombo={bestCombo}
         />
 
         <NewHighScoreModal

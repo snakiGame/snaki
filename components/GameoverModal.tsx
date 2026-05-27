@@ -7,8 +7,6 @@ import {
   Vibration,
   Dimensions,
   Animated,
-  Easing,
-  Platform,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
@@ -27,6 +25,8 @@ interface GameoverModalProps {
   reloadGame: () => void;
   score: number;
   highScore: number;
+  runMaxCombo: number;
+  bestCombo: number;
 }
 
 const { width } = Dimensions.get("window");
@@ -37,6 +37,8 @@ const GameOverModal = ({
   reloadGame,
   score,
   highScore,
+  runMaxCombo,
+  bestCombo,
 }: GameoverModalProps) => {
   const { settings } = useSettingStore();
   const router = useRouter();
@@ -76,10 +78,14 @@ const GameOverModal = ({
     .map((id) => ACHIEVEMENTS.find((a) => a.id === id))
     .filter(Boolean);
 
-  // Challenge progress for completed this game
+  // Challenge progress that can be claimed now
   const completedChallenges = challenges.filter(
     (c) => c.completed && !c.claimed,
   );
+  const claimableXp = completedChallenges.reduce((sum, challenge) => {
+    const def = definitions.find((d) => d.id === challenge.challengeId);
+    return sum + (def?.xpReward ?? 0);
+  }, 0);
 
   useEffect(() => {
     if (isModalVisible) {
@@ -161,6 +167,18 @@ const GameOverModal = ({
           </View>
         </View>
 
+        {/* Combo feedback */}
+        <View style={styles.comboCompareCard}>
+          <View style={styles.comboCompareRow}>
+            <Text style={styles.comboCompareLabel}>RUN COMBO</Text>
+            <Text style={styles.comboCompareValue}>{runMaxCombo}x</Text>
+          </View>
+          <View style={styles.comboCompareRow}>
+            <Text style={styles.comboCompareLabel}>BEST COMBO</Text>
+            <Text style={styles.comboCompareValue}>{bestCombo}x</Text>
+          </View>
+        </View>
+
         {/* XP & Level progress */}
         <View style={styles.xpSection}>
           <View style={styles.xpHeader}>
@@ -219,6 +237,15 @@ const GameOverModal = ({
             })}
           </View>
         )}
+
+        {/* XP breakdown */}
+        <View style={styles.xpBreakdownSection}>
+          <Text style={styles.challengeSectionTitle}>XP BREAKDOWN</Text>
+          <View style={styles.challengeRow}>
+            <Text style={styles.challengeText}>Claimable from challenges</Text>
+            <Text style={styles.challengeXp}>+{claimableXp} XP</Text>
+          </View>
+        </View>
 
         {/* Next skin unlock hint */}
         {nextSkin && (
@@ -363,7 +390,7 @@ const styles = StyleSheet.create({
   scoreRow: {
     flexDirection: "row",
     gap: 12,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   scoreBlock: {
     flex: 1,
@@ -578,6 +605,32 @@ const styles = StyleSheet.create({
     color: Colors.accent,
     letterSpacing: 1,
   },
+  // Combo compare
+  comboCompareCard: {
+    width: "100%",
+    backgroundColor: Colors.surface,
+    borderRadius: BLOCK_RADIUS - 4,
+    padding: 10,
+    marginBottom: 12,
+    gap: 6,
+  },
+  comboCompareRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  comboCompareLabel: {
+    fontSize: 11,
+    fontWeight: "800",
+    color: Colors.textDim,
+    letterSpacing: 1,
+  },
+  comboCompareValue: {
+    fontSize: 13,
+    fontWeight: "900",
+    color: Colors.primary,
+    letterSpacing: 1,
+  },
   // Challenge progress
   challengeSection: {
     width: "100%",
@@ -606,6 +659,11 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "800",
     color: Colors.primary,
+  },
+  xpBreakdownSection: {
+    width: "100%",
+    marginBottom: 12,
+    gap: 4,
   },
   // Next skin hint
   nextSkinHint: {
