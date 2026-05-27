@@ -14,12 +14,10 @@ import { StatusBar } from "expo-status-bar";
 import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
 import useSettingStore from "@/lib/settings";
 import { useScoreStore } from "@/lib/scoreStore";
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
-import Constants from "expo-constants";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useAudioPlayer } from "expo-audio";
+import { setDailyReminderEnabled } from "@/lib/notifications";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 const SNAKE_CELL = 16;
@@ -371,7 +369,7 @@ const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
 // ─── Main Screen ──────────────────────────────────────────────
 const HomePage: React.FC = () => {
   const router = useRouter();
-  const { settingsInit } = useSettingStore();
+  const { settings, settingsInit } = useSettingStore();
   const { highScore, scores } = useScoreStore();
 
   const titleJitter = useRef(new Animated.Value(0)).current;
@@ -384,9 +382,8 @@ const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    registerForPushNotificationsAsync();
-    scheduleDailyNotification();
-  }, []);
+    void setDailyReminderEnabled(settings.isNotificationSet);
+  }, [settings.isNotificationSet]);
 
   // Title entrance + periodic jitter
   useEffect(() => {
@@ -555,55 +552,6 @@ const HomePage: React.FC = () => {
     </SafeAreaView>
   );
 };
-
-// ─── Notification helpers ─────────────────────────────────────
-async function scheduleDailyNotification() {
-  try {
-    const existing = await Notifications.getAllScheduledNotificationsAsync();
-    if (existing.some((n) => n.identifier === "daily-snaki-reminder")) return;
-    await Notifications.scheduleNotificationAsync({
-      identifier: "daily-snaki-reminder",
-      content: {
-        title: "Play Snaki \u{1F40D}",
-        body: "Time to beat your high score!",
-        data: { screen: "play" },
-      },
-      trigger: {
-        type: "daily",
-        hour: 8,
-        minute: 0,
-        repeats: true,
-        channelId: "daily-reminders",
-      } as Notifications.NotificationTriggerInput,
-    });
-  } catch {}
-}
-
-async function registerForPushNotificationsAsync() {
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("daily-reminders", {
-      name: "Daily Reminders",
-      importance: Notifications.AndroidImportance.MAX,
-      vibrationPattern: [0, 250, 250, 250],
-      lightColor: "#FF231F7C",
-    });
-  }
-  if (Device.isDevice) {
-    const { status: existingStatus } =
-      await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-    if (finalStatus !== "granted") return;
-    try {
-      await Notifications.getExpoPushTokenAsync({
-        projectId: Constants.expoConfig?.extra?.eas?.projectId,
-      });
-    } catch {}
-  }
-}
 
 // ─── Styles ───────────────────────────────────────────────────
 const styles = StyleSheet.create({

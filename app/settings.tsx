@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Platform } from "react-native";
-import { View, Text, TouchableOpacity, Alert } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -11,21 +11,39 @@ import SettingsSwitch from "@/components/SettingsSwitch";
 import { Ionicons } from "@expo/vector-icons";
 import { alert } from "yooo-native";
 import { HapticFeedback } from "@/lib/haptics";
+import { DifficultyMode } from "@/types/types";
+import { setDailyReminderEnabled } from "@/lib/notifications";
+
+const DIFFICULTY_OPTIONS: { key: DifficultyMode; label: string }[] = [
+  { key: "casual", label: "CASUAL" },
+  { key: "normal", label: "NORMAL" },
+  { key: "hardcore", label: "HARDCORE" },
+];
 
 export default function Settings() {
   const router = useRouter();
   const { settings, updateSetting } = useSettingStore();
+
   const [soundEnabled, setSoundEnabled] = useState(settings.backgroundMusic);
   const [vibrationEnabled, setVibrationEnabled] = useState(settings.vibration);
   const [roundedEdges, setRoundedEdges] = useState(settings.roundEdges);
+  const [reminderEnabled, setReminderEnabled] = useState(
+    settings.isNotificationSet,
+  );
+  const [difficultyMode, setDifficultyMode] = useState<DifficultyMode>(
+    settings.difficultyMode,
+  );
 
   useEffect(() => {
     setSoundEnabled(settings.backgroundMusic);
     setVibrationEnabled(settings.vibration);
+    setRoundedEdges(settings.roundEdges);
+    setReminderEnabled(settings.isNotificationSet);
+    setDifficultyMode(settings.difficultyMode);
   }, [settings]);
 
   const resetSettings = async () => {
-    HapticFeedback("selection")
+    HapticFeedback("selection");
     alert.dialog(
       "Reset Settings",
       "Are you sure you want to reset all settings to default?",
@@ -36,8 +54,17 @@ export default function Settings() {
           onPress: async () => {
             await updateSetting("vibration", true);
             await updateSetting("backgroundMusic", true);
+            await updateSetting("roundEdges", false);
+            await updateSetting("isNotificationSet", false);
+            await updateSetting("difficultyMode", "normal");
+
             setSoundEnabled(true);
             setVibrationEnabled(true);
+            setRoundedEdges(false);
+            setReminderEnabled(false);
+            setDifficultyMode("normal");
+
+            await setDailyReminderEnabled(false);
             await backgroundMusic(true);
           },
           style: "destructive",
@@ -73,10 +100,9 @@ export default function Settings() {
             title="Background Music"
             description="Ambient music while playing"
             value={soundEnabled}
-            onValueChange={async () => {
-              const newValue = !settings.backgroundMusic;
+            onValueChange={async (newValue) => {
               await updateSetting("backgroundMusic", newValue);
-              setSoundEnabled((prev) => !prev);
+              setSoundEnabled(newValue);
               if (newValue) {
                 await backgroundMusic(true);
               } else {
@@ -90,12 +116,59 @@ export default function Settings() {
             title="Vibration"
             description="Haptic feedback during gameplay"
             value={vibrationEnabled}
-            onValueChange={async () => {
-              await updateSetting("vibration", !settings.vibration);
-              setVibrationEnabled((prev) => !prev);
+            onValueChange={async (newValue) => {
+              await updateSetting("vibration", newValue);
+              setVibrationEnabled(newValue);
             }}
             testID="vibration-switch"
           />
+          <View style={styles.divider} />
+          <SettingsSwitch
+            title="Daily Reminder"
+            description="Get a morning nudge to keep your streak alive"
+            value={reminderEnabled}
+            onValueChange={async (newValue) => {
+              await updateSetting("isNotificationSet", newValue);
+              setReminderEnabled(newValue);
+              await setDailyReminderEnabled(newValue);
+            }}
+            testID="daily-reminder-switch"
+          />
+        </View>
+
+        {/* Gameplay */}
+        <Text style={styles.sectionLabel}>GAMEPLAY</Text>
+        <View style={styles.card}>
+          <Text style={styles.modeTitle}>Difficulty</Text>
+          <Text style={styles.modeDescription}>
+            Casual is more forgiving, Hardcore is much faster.
+          </Text>
+          <View style={styles.modeRow}>
+            {DIFFICULTY_OPTIONS.map((option) => {
+              const isActive = difficultyMode === option.key;
+              return (
+                <TouchableOpacity
+                  key={option.key}
+                  style={[styles.modeBtn, isActive && styles.modeBtnActive]}
+                  activeOpacity={0.8}
+                  onPress={async () => {
+                    await updateSetting("difficultyMode", option.key);
+                    setDifficultyMode(option.key);
+                    HapticFeedback("selection");
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.modeBtnText,
+                      isActive && styles.modeBtnTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
         </View>
 
         {/* Appearance */}
@@ -105,9 +178,9 @@ export default function Settings() {
             title="Rounded Edges"
             description="Rounded vs sharp corners on game elements"
             value={roundedEdges}
-            onValueChange={async () => {
-              await updateSetting("roundEdges", !settings.roundEdges);
-              setRoundedEdges((prev) => !prev);
+            onValueChange={async (newValue) => {
+              await updateSetting("roundEdges", newValue);
+              setRoundedEdges(newValue);
             }}
             testID="rounded-edges-switch"
           />
@@ -196,6 +269,46 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: Colors.surfaceLight,
     marginVertical: 4,
+  },
+
+  // Difficulty mode
+  modeTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: Colors.white,
+    marginBottom: 4,
+  },
+  modeDescription: {
+    fontSize: 13,
+    color: Colors.textDim,
+    marginBottom: 12,
+    lineHeight: 18,
+  },
+  modeRow: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  modeBtn: {
+    flex: 1,
+    backgroundColor: Colors.surfaceLight,
+    paddingVertical: 10,
+    borderRadius: BLOCK_RADIUS - 4,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "transparent",
+  },
+  modeBtnActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primaryDark,
+  },
+  modeBtnText: {
+    fontSize: 11,
+    fontWeight: "900",
+    color: Colors.textDim,
+    letterSpacing: 1,
+  },
+  modeBtnTextActive: {
+    color: Colors.background,
   },
 
   // Reset
