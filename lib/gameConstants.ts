@@ -1,9 +1,16 @@
-import { Coordinate, Direction, FoodType } from "../types/types";
+import {
+  Coordinate,
+  Direction,
+  FoodType,
+  DifficultyMode,
+} from "../types/types";
 
 // Game configuration constants
 export const SNAKE_INITIAL_POSITION: Coordinate[] = [{ x: 5, y: 5 }];
 export const FOOD_INITIAL_POSITION: Coordinate = { x: 5, y: 20 };
-export const BASE_MOVE_INTERVAL = 55; // Base speed in milliseconds
+
+// Base speed in milliseconds for NORMAL mode level 1
+export const BASE_MOVE_INTERVAL = 110;
 export const SCORE_INCREMENT = 1;
 export const BORDER_WIDTH = 12;
 export const GAME_UNIT_SIZE = 18;
@@ -11,13 +18,38 @@ export const COMBO_THRESHOLD = 3;
 export const COMBO_TIMEOUT = 2000; // 2 seconds
 export const POWER_UP_DURATION = 5000; // 5 seconds
 
-// Difficulty progression
-export const DIFFICULTY_LEVELS = [
-  { score: 0, interval: 55 }, // Level 1: Normal speed
-  { score: 20, interval: 45 }, // Level 2: Faster
-  { score: 50, interval: 35 }, // Level 3: Even faster
-  { score: 100, interval: 25 }, // Level 4: Very fast
-];
+export interface DifficultyLevel {
+  score: number;
+  interval: number;
+}
+
+// Difficulty progression per mode (higher interval = slower movement)
+export const DIFFICULTY_CURVES: Record<DifficultyMode, DifficultyLevel[]> = {
+  casual: [
+    { score: 0, interval: 130 },
+    { score: 20, interval: 118 },
+    { score: 50, interval: 106 },
+    { score: 100, interval: 95 },
+    { score: 160, interval: 86 },
+  ],
+  normal: [
+    { score: 0, interval: 110 },
+    { score: 20, interval: 96 },
+    { score: 50, interval: 84 },
+    { score: 100, interval: 72 },
+    { score: 160, interval: 64 },
+  ],
+  hardcore: [
+    { score: 0, interval: 95 },
+    { score: 20, interval: 82 },
+    { score: 50, interval: 70 },
+    { score: 100, interval: 58 },
+    { score: 160, interval: 48 },
+  ],
+};
+
+// Backward-compatible alias (normal curve)
+export const DIFFICULTY_LEVELS = DIFFICULTY_CURVES.normal;
 
 // Initial game state
 export const INITIAL_GAME_STATE = {
@@ -58,10 +90,17 @@ export const SCORE_MULTIPLIERS = {
   maxCombo: 5,
 };
 
-// Food spawn probabilities
+// Food + power-up spawn helpers
 export const FOOD_PROBABILITIES = {
-  powerUp: 0.1, // 10% chance for power-up
-  special: 0.3, // 30% chance for special food (includes power-up chance)
+  powerUp: 0.1, // 10% chance for power-up roll
+};
+
+// Keep special food away from snake head for fairness
+export const SPECIAL_FOOD_MIN_DISTANCE = {
+  normal: 0,
+  golden: 3,
+  rainbow: 4,
+  poison: 5,
 };
 
 // Dynamic obstacle thresholds — score → number of new obstacles to add
