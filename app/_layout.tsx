@@ -2,7 +2,7 @@ import { SplashScreen } from "expo-router";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { Toaster } from "yooo-native";
-import { useOTAUpdates } from "@/components/useOTAUpdates";
+import { useOTAUpdates } from "@/hooks/useOTAUpdates";
 
 SplashScreen.preventAutoHideAsync();
 
