@@ -264,7 +264,6 @@ const IdleSnake: React.FC = React.memo(() => {
 
 // ─── Play Button (Physical Feel) ──────────────────────────────
 const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
-  const pickSound = useAudioPlayer(require("../assets/music/pick.mp3"));
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const shadowAnim = useRef(new Animated.Value(BLOCK_SHADOW_OFFSET)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -328,10 +327,6 @@ const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
   };
 
   const handlePress = () => {
-    try {
-      pickSound.seekTo(0);
-      pickSound.play();
-    } catch {}
     onPress();
   };
 

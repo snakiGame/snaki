@@ -92,7 +92,7 @@ export default function About() {
                 color={Colors.background}
               />
               <Text style={[styles.linkText, { color: Colors.background }]}>
-                Buy Coffee
+                BuyMeACoffee
               </Text>
             </View>
           </TouchableOpacity>
