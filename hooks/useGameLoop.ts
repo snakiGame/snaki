@@ -1,7 +1,7 @@
 import { useEffect, useCallback, useRef } from "react";
 import { Vibration } from "react-native";
 import { Direction, Coordinate, FoodType, PowerUp } from "../types/types";
-import { GameBounds } from "../lib/gameConstants";
+import { GameBounds, SPECIAL_FOOD_MIN_DISTANCE } from "../lib/gameConstants";
 import { checkEatsFood } from "../utils/checkEatsFood";
 import { checkGameOver } from "../utils/checkGameOver";
 import { randomFoodPosition } from "../utils/randomFoodPosition";
@@ -17,6 +17,7 @@ import {
 interface UseGameLoopProps {
   snake: Coordinate[];
   direction: Direction;
+  queuedDirection: Direction | null;
   food: Coordinate;
   foodType: FoodType;
   score: number;
@@ -25,18 +26,21 @@ interface UseGameLoopProps {
   combo: number;
   powerUpType: PowerUp | null;
   gameBounds: GameBounds;
-  localHighScore: number;
   vibrationEnabled: boolean;
   obstacles: Coordinate[];
 
   // State setters
   setSnake: (snake: Coordinate[]) => void;
+  setDirection: (direction: Direction) => void;
+  setQueuedDirection: (direction: Direction | null) => void;
   setFood: (food: Coordinate) => void;
   setFoodType: (type: FoodType) => void;
   setScore: (score: number | ((prev: number) => number)) => void;
   setIsGameOver: (gameOver: boolean) => void;
   setPoisonEffect: (effect: boolean) => void;
-  setObstacles: (obstacles: Coordinate[] | ((prev: Coordinate[]) => Coordinate[])) => void;
+  setObstacles: (
+    obstacles: Coordinate[] | ((prev: Coordinate[]) => Coordinate[]),
+  ) => void;
 
   // Actions
   getCurrentMoveInterval: () => number;
@@ -44,13 +48,13 @@ interface UseGameLoopProps {
     combo: number,
     lastFoodTime: number,
     setCombo: (combo: number) => void,
-    setLastFoodTime: (time: number) => void
+    setLastFoodTime: (time: number) => void,
   ) => void;
   resetCombo: (setCombo: (combo: number) => void) => void;
   calculateScore: (
     baseScore: number,
     combo: number,
-    powerUpType: PowerUp | null
+    powerUpType: PowerUp | null,
   ) => number;
   activatePowerUp: (type: PowerUp) => void;
   checkPowerUpExpiration: () => void;
@@ -60,9 +64,33 @@ interface UseGameLoopProps {
   lastFoodTime: number;
 }
 
+const isOppositeDirection = (a: Direction, b: Direction) => {
+  return (
+    (a === Direction.Up && b === Direction.Down) ||
+    (a === Direction.Down && b === Direction.Up) ||
+    (a === Direction.Left && b === Direction.Right) ||
+    (a === Direction.Right && b === Direction.Left)
+  );
+};
+
+const pickNextFoodType = (currentScore: number): FoodType => {
+  const poisonChance =
+    currentScore < 30 ? 0.04 : currentScore < 80 ? 0.08 : 0.12;
+  const rainbowChance = currentScore < 50 ? 0.06 : 0.08;
+  const goldenChance = 0.16;
+
+  const roll = Math.random();
+  if (roll < poisonChance) return FoodType.Poison;
+  if (roll < poisonChance + rainbowChance) return FoodType.Rainbow;
+  if (roll < poisonChance + rainbowChance + goldenChance)
+    return FoodType.Golden;
+  return FoodType.Normal;
+};
+
 export const useGameLoop = ({
   snake,
   direction,
+  queuedDirection,
   food,
   foodType,
   score,
@@ -71,10 +99,11 @@ export const useGameLoop = ({
   combo,
   powerUpType,
   gameBounds,
-  localHighScore,
   vibrationEnabled,
   obstacles,
   setSnake,
+  setDirection,
+  setQueuedDirection,
   setFood,
   setFoodType,
   setScore,
@@ -95,6 +124,7 @@ export const useGameLoop = ({
   // ── Refs: keep latest values accessible without recreating callbacks ──
   const snakeRef = useRef(snake);
   const directionRef = useRef(direction);
+  const queuedDirectionRef = useRef(queuedDirection);
   const foodRef = useRef(food);
   const foodTypeRef = useRef(foodType);
   const scoreRef = useRef(score);
@@ -109,6 +139,7 @@ export const useGameLoop = ({
   // Sync refs on every render (cheap — just assignments)
   snakeRef.current = snake;
   directionRef.current = direction;
+  queuedDirectionRef.current = queuedDirection;
   foodRef.current = food;
   foodTypeRef.current = foodType;
   scoreRef.current = score;
@@ -120,9 +151,9 @@ export const useGameLoop = ({
   vibrationEnabledRef.current = vibrationEnabled;
   obstaclesRef.current = obstacles;
 
-  const vibrate = useCallback((length: number) => {
+  const vibrate = useCallback((pattern: number | number[]) => {
     if (!vibrationEnabledRef.current) return;
-    Vibration.vibrate(length);
+    Vibration.vibrate(pattern);
   }, []);
 
   // ── Stable moveSnake — reads refs, never recreated ──
@@ -130,12 +161,22 @@ export const useGameLoop = ({
     const currentSnake = snakeRef.current;
     const snakeHead = currentSnake[0];
     const newHead = { ...snakeHead };
-    const dir = directionRef.current;
     const bounds = gameBoundsRef.current;
     const currentFood = foodRef.current;
     const currentFoodType = foodTypeRef.current;
 
-    switch (dir) {
+    // Consume one buffered turn on each tick
+    let effectiveDirection = directionRef.current;
+    const buffered = queuedDirectionRef.current;
+    if (buffered) {
+      if (!isOppositeDirection(effectiveDirection, buffered)) {
+        effectiveDirection = buffered;
+        setDirection(buffered);
+      }
+      setQueuedDirection(null);
+    }
+
+    switch (effectiveDirection) {
       case Direction.Up:
         newHead.y -= 1;
         break;
@@ -175,16 +216,24 @@ export const useGameLoop = ({
         setTimeout(() => setPoisonEffect(false), 1000);
       } else {
         setSnake([newHead, ...currentSnake]);
-        updateCombo(comboRef.current, lastFoodTimeRef.current, setCombo, setLastFoodTime);
+        updateCombo(
+          comboRef.current,
+          lastFoodTimeRef.current,
+          setCombo,
+          setLastFoodTime,
+        );
 
         // Combo-specific haptics
-        const nextCombo = Date.now() - lastFoodTimeRef.current < 2000 ? comboRef.current + 1 : 1;
+        const nextCombo =
+          Date.now() - lastFoodTimeRef.current < 2000
+            ? comboRef.current + 1
+            : 1;
         if (nextCombo >= 5) {
-          Vibration.vibrate(VIBRATION_PATTERNS.combo5);
+          vibrate(VIBRATION_PATTERNS.combo5);
         } else if (nextCombo >= 4) {
-          Vibration.vibrate(VIBRATION_PATTERNS.combo4);
+          vibrate(VIBRATION_PATTERNS.combo4);
         } else if (nextCombo >= COMBO_THRESHOLD) {
-          Vibration.vibrate(VIBRATION_PATTERNS.combo3);
+          vibrate(VIBRATION_PATTERNS.combo3);
         } else {
           vibrate(VIBRATION_PATTERNS.foodEaten);
         }
@@ -197,20 +246,20 @@ export const useGameLoop = ({
         }
 
         setScore(
-          (prev) => prev + calculateScore(scoreIncrement, comboRef.current, powerUpTypeRef.current)
+          (prev) =>
+            prev +
+            calculateScore(
+              scoreIncrement,
+              comboRef.current,
+              powerUpTypeRef.current,
+            ),
         );
       }
 
-      // Spawn new food & possible power-ups
-      const random = Math.random();
-      if (random < FOOD_PROBABILITIES.powerUp) {
+      // Spawn possible power-up
+      if (Math.random() < FOOD_PROBABILITIES.powerUp) {
         const powerUps = Object.values(PowerUp);
         activatePowerUp(powerUps[Math.floor(Math.random() * powerUps.length)]);
-      } else if (random < FOOD_PROBABILITIES.special) {
-        const foodTypes = Object.values(FoodType);
-        setFoodType(foodTypes[Math.floor(Math.random() * foodTypes.length)]);
-      } else {
-        setFoodType(FoodType.Normal);
       }
 
       const updatedSnake =
@@ -219,15 +268,48 @@ export const useGameLoop = ({
             ? [newHead, ...currentSnake.slice(0, -2)]
             : [newHead]
           : [newHead, ...currentSnake];
-      setFood(randomFoodPosition(bounds.xMax, bounds.yMax, updatedSnake, obstaclesRef.current));
+
+      const nextFoodType = pickNextFoodType(scoreRef.current);
+      const minDistanceFromHead =
+        nextFoodType === FoodType.Poison
+          ? SPECIAL_FOOD_MIN_DISTANCE.poison
+          : nextFoodType === FoodType.Rainbow
+            ? SPECIAL_FOOD_MIN_DISTANCE.rainbow
+            : nextFoodType === FoodType.Golden
+              ? SPECIAL_FOOD_MIN_DISTANCE.golden
+              : SPECIAL_FOOD_MIN_DISTANCE.normal;
+
+      setFoodType(nextFoodType);
+      setFood(
+        randomFoodPosition(
+          bounds.xMax,
+          bounds.yMax,
+          updatedSnake,
+          obstaclesRef.current,
+          updatedSnake[0],
+          minDistanceFromHead,
+        ),
+      );
     } else {
       setSnake([newHead, ...currentSnake.slice(0, -1)]);
     }
   }, [
-    // Only stable setter functions — never change identity
-    addScore, setIsGameOver, setSnake, setFood, setFoodType,
-    setScore, setPoisonEffect, setCombo, setLastFoodTime,
-    vibrate, resetCombo, updateCombo, calculateScore, activatePowerUp, setObstacles,
+    addScore,
+    setIsGameOver,
+    setSnake,
+    setDirection,
+    setQueuedDirection,
+    setFood,
+    setFoodType,
+    setScore,
+    setPoisonEffect,
+    setCombo,
+    setLastFoodTime,
+    vibrate,
+    resetCombo,
+    updateCombo,
+    calculateScore,
+    activatePowerUp,
   ]);
 
   // ── Ref for current speed — updated without restarting the loop ──
@@ -241,7 +323,10 @@ export const useGameLoop = ({
     if (isGameOver) return;
 
     for (const threshold of OBSTACLE_THRESHOLDS) {
-      if (score >= threshold.score && !spawnedThresholdsRef.current.has(threshold.score)) {
+      if (
+        score >= threshold.score &&
+        !spawnedThresholdsRef.current.has(threshold.score)
+      ) {
         spawnedThresholdsRef.current.add(threshold.score);
 
         // Generate new obstacle positions
@@ -255,15 +340,21 @@ export const useGameLoop = ({
         let attempts = 0;
         while (newObstacles.length < threshold.count && attempts < 200) {
           attempts++;
-          const x = Math.floor(Math.random() * (bounds.xMax - PADDING * 2 + 1)) + PADDING;
-          const y = Math.floor(Math.random() * (bounds.yMax - PADDING * 2 + 1)) + PADDING;
+          const x =
+            Math.floor(Math.random() * (bounds.xMax - PADDING * 2 + 1)) +
+            PADDING;
+          const y =
+            Math.floor(Math.random() * (bounds.yMax - PADDING * 2 + 1)) +
+            PADDING;
 
           // Don't place on snake
           const onSnake = currentSnake.some((s) => s.x === x && s.y === y);
           // Don't place on food
           const onFood = currentFood.x === x && currentFood.y === y;
           // Don't place on existing obstacles
-          const onExisting = currentObstacles.some((o) => o.x === x && o.y === y);
+          const onExisting = currentObstacles.some(
+            (o) => o.x === x && o.y === y,
+          );
           // Don't place on already-chosen new obstacles
           const onNew = newObstacles.some((o) => o.x === x && o.y === y);
           // Don't place adjacent to snake head (give player breathing room)
@@ -311,7 +402,13 @@ export const useGameLoop = ({
       cancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [isGameOver, gameBounds.xMax, gameBounds.yMax, moveSnake, checkPowerUpExpiration]);
+  }, [
+    isGameOver,
+    gameBounds.xMax,
+    gameBounds.yMax,
+    moveSnake,
+    checkPowerUpExpiration,
+  ]);
 
   return { vibrate };
 };

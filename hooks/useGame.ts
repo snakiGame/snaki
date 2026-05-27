@@ -31,7 +31,7 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
   };
 
   // Initialize hooks
-  const gameState = useGameState();
+  const gameState = useGameState(settings.difficultyMode);
   const comboSystem = useComboSystem();
   const gestureHandler = useGestureHandler();
 
@@ -39,6 +39,7 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
   const { vibrate } = useGameLoop({
     snake: gameState.snake,
     direction: gameState.direction,
+    queuedDirection: gameState.queuedDirection,
     food: gameState.food,
     foodType: gameState.foodType,
     score: gameState.score,
@@ -47,11 +48,12 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
     combo: gameState.combo,
     powerUpType: gameState.powerUp.type,
     gameBounds,
-    localHighScore: highScore,
     vibrationEnabled: settings.vibration,
     obstacles: gameState.obstacles,
 
     setSnake: gameState.setSnake,
+    setDirection: gameState.setDirection,
+    setQueuedDirection: gameState.setQueuedDirection,
     setFood: gameState.setFood,
     setFoodType: gameState.setFoodType,
     setScore: gameState.setScore,
@@ -77,10 +79,16 @@ export const useGame = ({ boardWidth, boardHeight }: UseGameOptions) => {
       gestureHandler.handleGesture(
         event,
         gameState.direction,
-        gameState.setDirection
+        gameState.queuedDirection,
+        gameState.setQueuedDirection,
       );
     },
-    [gestureHandler, gameState.direction, gameState.setDirection]
+    [
+      gestureHandler,
+      gameState.direction,
+      gameState.queuedDirection,
+      gameState.setQueuedDirection,
+    ],
   );
 
   // Initialize background music
