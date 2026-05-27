@@ -1,12 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
+import { DifficultyMode } from "@/types/types";
 
-interface Settings {
+export interface Settings {
   theme: string;
   vibration: boolean;
   backgroundMusic: boolean;
   roundEdges: boolean;
   isNotificationSet: boolean;
+  difficultyMode: DifficultyMode;
 }
 
 interface SettingStore {
@@ -25,6 +27,7 @@ const defaultSettings = (): Settings => ({
   backgroundMusic: true,
   roundEdges: false,
   isNotificationSet: false,
+  difficultyMode: "normal",
 });
 
 const useSettingStore = create<SettingStore>((set) => ({
@@ -34,7 +37,8 @@ const useSettingStore = create<SettingStore>((set) => ({
     try {
       const storedSettings = await AsyncStorage.getItem("settings");
       if (storedSettings) {
-        set({ settings: JSON.parse(storedSettings) });
+        const parsed = JSON.parse(storedSettings) as Partial<Settings>;
+        set({ settings: { ...defaultSettings(), ...parsed } });
       } else {
         const defaults = defaultSettings();
         await AsyncStorage.setItem("settings", JSON.stringify(defaults));
@@ -69,6 +73,11 @@ export function settings_isRondedEdges(): boolean {
 export function settings_Vibration(): boolean {
   const { settings } = useSettingStore.getState();
   return settings.vibration;
+}
+
+export function settings_notificationsEnabled(): boolean {
+  const { settings } = useSettingStore.getState();
+  return settings.isNotificationSet;
 }
 
 export default useSettingStore;

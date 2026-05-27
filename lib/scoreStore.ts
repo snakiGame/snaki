@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface Score {
   score: number;
@@ -10,8 +10,10 @@ export interface Score {
 
 interface ScoreState {
   highScore: number;
+  bestCombo: number;
   scores: Score[];
   addScore: (score: number) => void;
+  recordBestCombo: (combo: number) => void;
   clearScores: () => void;
 }
 
@@ -19,6 +21,7 @@ export const useScoreStore = create<ScoreState>()(
   persist(
     (set, get) => ({
       highScore: 0,
+      bestCombo: 0,
       scores: [],
       addScore: (score: number) => {
         const newScore: Score = {
@@ -30,18 +33,23 @@ export const useScoreStore = create<ScoreState>()(
         set((state) => {
           const newScores = [newScore, ...state.scores].slice(0, 50); // Keep last 50 scores
           const newHighScore = Math.max(score, state.highScore);
-          
+
           return {
             scores: newScores,
             highScore: newHighScore,
           };
         });
       },
-      clearScores: () => set({ scores: [], highScore: 0 }),
+      recordBestCombo: (combo: number) => {
+        set((state) => ({
+          bestCombo: Math.max(state.bestCombo, combo),
+        }));
+      },
+      clearScores: () => set({ scores: [], highScore: 0, bestCombo: 0 }),
     }),
     {
-      name: 'score-storage',
+      name: "score-storage",
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
-); 
+    },
+  ),
+);

@@ -4,10 +4,20 @@ export const randomFoodPosition = (
   maxX: number,
   maxY: number,
   snake: Coordinate[] = [],
-  obstacles: Coordinate[] = []
+  obstacles: Coordinate[] = [],
+  avoidFrom: Coordinate | null = null,
+  minDistanceFromAvoid: number = 0,
 ): Coordinate => {
   const PADDING = 1;
-  const maxAttempts = 100;
+  const maxAttempts = 120;
+
+  const isFarEnoughFromAvoid = (x: number, y: number) => {
+    if (!avoidFrom || minDistanceFromAvoid <= 0) return true;
+
+    // Manhattan distance keeps special food a few turns away from the head.
+    const distance = Math.abs(x - avoidFrom.x) + Math.abs(y - avoidFrom.y);
+    return distance >= minDistanceFromAvoid;
+  };
 
   for (let i = 0; i < maxAttempts; i++) {
     const x = Math.floor(Math.random() * (maxX - PADDING * 2 + 1)) + PADDING;
@@ -18,28 +28,39 @@ export const randomFoodPosition = (
 
     // Ensure food doesn't spawn on the snake body
     const isOnSnake = snake.some(
-      (segment) => segment.x === safeX && segment.y === safeY
+      (segment) => segment.x === safeX && segment.y === safeY,
     );
 
     // Ensure food doesn't spawn on an obstacle
     const isOnObstacle = obstacles.some(
-      (obs) => obs.x === safeX && obs.y === safeY
+      (obs) => obs.x === safeX && obs.y === safeY,
     );
 
-    if (!isOnSnake && !isOnObstacle) {
+    if (!isOnSnake && !isOnObstacle && isFarEnoughFromAvoid(safeX, safeY)) {
       return { x: safeX, y: safeY };
     }
   }
 
-  // Fallback: find any free cell
+  // Fallback: find any free cell that satisfies distance first
   for (let x = PADDING; x <= maxX - PADDING; x++) {
     for (let y = PADDING; y <= maxY - PADDING; y++) {
       const isOnSnake = snake.some(
-        (segment) => segment.x === x && segment.y === y
+        (segment) => segment.x === x && segment.y === y,
       );
-      const isOnObstacle = obstacles.some(
-        (obs) => obs.x === x && obs.y === y
+      const isOnObstacle = obstacles.some((obs) => obs.x === x && obs.y === y);
+      if (!isOnSnake && !isOnObstacle && isFarEnoughFromAvoid(x, y)) {
+        return { x, y };
+      }
+    }
+  }
+
+  // Distance constraint fallback: return any free cell
+  for (let x = PADDING; x <= maxX - PADDING; x++) {
+    for (let y = PADDING; y <= maxY - PADDING; y++) {
+      const isOnSnake = snake.some(
+        (segment) => segment.x === x && segment.y === y,
       );
+      const isOnObstacle = obstacles.some((obs) => obs.x === x && obs.y === y);
       if (!isOnSnake && !isOnObstacle) {
         return { x, y };
       }

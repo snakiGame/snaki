@@ -27,6 +27,8 @@ export enum FoodType {
   Poison = "POISON",
 }
 
+export type DifficultyMode = "casual" | "normal" | "hardcore";
+
 export interface ScoreProps {
   score: number;
   combo: number;
@@ -41,4 +43,6 @@ export interface GameoverModalProps {
   reloadGame: () => void;
   score: number;
   highScore: number;
+  runMaxCombo?: number;
+  bestCombo?: number;
 }
