@@ -30,7 +30,9 @@ const Obstacles: React.FC<ObstaclesProps> = React.memo(
               },
             ]}
           >
-            <View style={[styles.obstacleShadow, { width: size, height: size }]} />
+            <View
+              style={[styles.obstacleShadow, { width: size, height: size }]}
+            />
             <View style={[styles.obstacleBlock, { width: size, height: size }]}>
               {/* Cross pattern */}
               <View style={styles.crossH} />

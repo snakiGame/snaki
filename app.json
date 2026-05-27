@@ -19,9 +19,14 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
+        "monochromeImage": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
         "backgroundColor": "#e6e0e0"
       },
       "package": "com.tach.snaki"
+    },
+    "notification": {
+      "icon": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
+      "color": "#889c77"
     },
     "web": {
       "bundler": "metro",
