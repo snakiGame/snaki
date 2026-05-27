@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Platform } from "react-native";
+import { ScrollView, StyleSheet, Platform, Linking } from "react-native";
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useState, useEffect } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -204,6 +204,22 @@ export default function Settings() {
           </TouchableOpacity>
         </View>
 
+        {/* Privacy Policy */}
+        <TouchableOpacity
+          style={styles.privacyLink}
+          onPress={() =>
+            Linking.openURL("https://snaki-game.vercel.app/privacy-policy")
+          }
+          activeOpacity={0.7}
+        >
+          <Ionicons
+            name="shield-checkmark-outline"
+            size={16}
+            color={Colors.textDim}
+          />
+          <Text style={styles.privacyText}>Privacy Policy</Text>
+        </TouchableOpacity>
+
         {/* Footer */}
         <Text style={styles.footer}>
           {"\u00A9"} 2025 Snaki. Slithering into your hearts.
@@ -339,6 +355,21 @@ const styles = StyleSheet.create({
     fontWeight: "900",
     color: Colors.white,
     letterSpacing: 2,
+  },
+
+  // Privacy
+  privacyLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginTop: 24,
+  },
+  privacyText: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: Colors.textDim,
+    textDecorationLine: "underline",
   },
 
   footer: {
