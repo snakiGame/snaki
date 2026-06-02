@@ -7,11 +7,6 @@
     "icon": "./assets/icon/ios/AppIcon~ios-marketing.png",
     "scheme": "snaki",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/icon/ios/AppIcon~ios-marketing.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.tach.snaki"
@@ -24,10 +19,6 @@
       },
       "package": "com.tach.snaki"
     },
-    "notification": {
-      "icon": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
-      "color": "#889c77"
-    },
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -38,10 +29,25 @@
       "expo-font",
       "expo-sqlite",
       "expo-web-browser",
-      "expo-splash-screen",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/icon/ios/AppIcon~ios-marketing.png",
+          "resizeMode": "cover",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
+          "color": "#889c77"
+        }
+      ],
       "expo-audio",
       "expo-sharing",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true
