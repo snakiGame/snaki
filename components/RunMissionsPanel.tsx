@@ -14,6 +14,8 @@ const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
   ({ missions }) => {
     const opacity = useRef(new Animated.Value(1)).current;
     const [hidden, setHidden] = useState(false);
+    // Stable key: only changes when the mission IDs change (i.e. new game)
+    const missionKey = missions.map((m) => m.id).join(",");
 
     useEffect(() => {
       // Reset visibility when missions change (new game)
@@ -29,7 +31,7 @@ const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
       }, VISIBLE_DURATION);
 
       return () => clearTimeout(timer);
-    }, [missions]);
+    }, [missionKey]);
 
     if (!missions.length || hidden) return null;
 

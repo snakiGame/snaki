@@ -26,8 +26,11 @@ export default function SettingsSwitch({
   disabled = false,
   testID,
 }: SettingsSwitchProps) {
-  const thumbX = useRef(new Animated.Value(value ? THUMB_TRAVEL : 0)).current;
-  const trackColor = useRef(new Animated.Value(value ? 1 : 0)).current;
+  const safeValue = !!value;
+  const thumbX = useRef(
+    new Animated.Value(safeValue ? THUMB_TRAVEL : 0),
+  ).current;
+  const trackColor = useRef(new Animated.Value(safeValue ? 1 : 0)).current;
   const pressScale = useRef(new Animated.Value(1)).current;
   const thumbScale = useRef(new Animated.Value(1)).current;
   const shadowOffset = useRef(
@@ -37,18 +40,18 @@ export default function SettingsSwitch({
   useEffect(() => {
     Animated.parallel([
       Animated.spring(thumbX, {
-        toValue: value ? THUMB_TRAVEL : 0,
+        toValue: safeValue ? THUMB_TRAVEL : 0,
         tension: 300,
         friction: 15,
         useNativeDriver: true,
       }),
       Animated.timing(trackColor, {
-        toValue: value ? 1 : 0,
+        toValue: safeValue ? 1 : 0,
         duration: 200,
         useNativeDriver: false,
       }),
     ]).start();
-  }, [value]);
+  }, [safeValue]);
 
   const bgInterpolation = trackColor.interpolate({
     inputRange: [0, 1],
@@ -113,9 +116,9 @@ export default function SettingsSwitch({
   const handlePress = async () => {
     if (disabled) return;
     if (settings_Vibration()) {
-      await HapticFeedback(value ? "light" : "medium");
+      await HapticFeedback(safeValue ? "light" : "medium");
     }
-    await onValueChange(!value);
+    await onValueChange(!safeValue);
   };
 
   return (
