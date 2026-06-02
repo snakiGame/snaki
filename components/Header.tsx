@@ -8,6 +8,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { Colors, BLOCK_RADIUS } from "../styles/colors";
 import { FontAwesome } from "@expo/vector-icons";
+import { JSX } from "react";
 
 interface HeaderProps {
   reloadGame: () => void;
