@@ -47,14 +47,16 @@ const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
             >
               {mission.title}
             </Text>
-            <Text style={[styles.progress, mission.completed && styles.doneText]}>
+            <Text
+              style={[styles.progress, mission.completed && styles.doneText]}
+            >
               {mission.current}
               {mission.suffix ?? ""}/{mission.target}
               {mission.suffix ?? ""}
             </Text>
           </View>
         ))}
-      </View>
+      </Animated.View>
     );
   },
 );
