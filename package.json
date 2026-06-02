@@ -18,7 +18,7 @@
     "@expo/metro-runtime": "~55.0.9",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "^55.0.0",
+    "expo": "^56.0.0",
     "expo-audio": "~55.0.12",
     "expo-blur": "~55.0.12",
     "expo-constants": "~55.0.11",
@@ -26,6 +26,7 @@
     "expo-device": "~55.0.12",
     "expo-font": "~55.0.6",
     "expo-haptics": "~55.0.12",
+    "expo-insights": "~55.0.17",
     "expo-linear-gradient": "~55.0.11",
     "expo-linking": "~55.0.11",
     "expo-modules-core": "~55.0.20",
@@ -35,6 +36,7 @@
     "expo-splash-screen": "~55.0.15",
     "expo-sqlite": "~55.0.13",
     "expo-status-bar": "~55.0.5",
+    "expo-store-review": "~55.0.14",
     "expo-system-ui": "~55.0.13",
     "expo-updates": "~55.0.21",
     "expo-web-browser": "~55.0.12",
@@ -51,7 +53,7 @@
     "react-native-web": "^0.21.0",
     "react-native-webview": "13.16.0",
     "react-native-worklets": "0.7.2",
-    "yooo-native": "^1.0.2",
+    "yooo-native": "^1.1.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
