@@ -9,3 +9,6 @@ build-apk:
 
 prebuild:
 	npx expo prebuild --clean
+
+build-local: prebuild
+	cd android && ./gradlew assembleRelease
