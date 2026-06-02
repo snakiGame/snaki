@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { useState, useCallback, useEffect, useRef, JSX } from "react";
 import { StyleSheet, StatusBar, Animated } from "react-native";
 import { PanGestureHandler } from "react-native-gesture-handler";
 import { Colors } from "../styles/colors";
@@ -17,8 +17,10 @@ import { SNAKE_SKINS } from "@/lib/skinStore";
 import { FoodType } from "@/types/types";
 import NewHighScoreModal from "./NewHighScoreModal";
 import { applyMissionProgress, createRunMissions } from "@/lib/runMissions";
+import { useKeepAwake } from "expo-keep-awake";
 
 export default function Game(): JSX.Element {
+  useKeepAwake();
   // Modal states
   const [isModalVisible, setModalVisible] = useState(false);
   const [isScoreModalVisible, setScoreModalVisible] = useState(false);
