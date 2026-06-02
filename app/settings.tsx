@@ -27,6 +27,7 @@ export default function Settings() {
   const [soundEnabled, setSoundEnabled] = useState(settings.backgroundMusic);
   const [vibrationEnabled, setVibrationEnabled] = useState(settings.vibration);
   const [roundedEdges, setRoundedEdges] = useState(settings.roundEdges);
+  const [tiltControls, setTiltControls] = useState(settings.tiltControls);
   const [reminderEnabled, setReminderEnabled] = useState(
     settings.isNotificationSet,
   );
@@ -38,6 +39,7 @@ export default function Settings() {
     setSoundEnabled(settings.backgroundMusic);
     setVibrationEnabled(settings.vibration);
     setRoundedEdges(settings.roundEdges);
+    setTiltControls(settings.tiltControls);
     setReminderEnabled(settings.isNotificationSet);
     setDifficultyMode(settings.difficultyMode);
   }, [settings]);
@@ -57,10 +59,12 @@ export default function Settings() {
             await updateSetting("roundEdges", false);
             await updateSetting("isNotificationSet", false);
             await updateSetting("difficultyMode", "normal");
+            await updateSetting("tiltControls", false);
 
             setSoundEnabled(true);
             setVibrationEnabled(true);
             setRoundedEdges(false);
+            setTiltControls(false);
             setReminderEnabled(false);
             setDifficultyMode("normal");
 
@@ -169,6 +173,17 @@ export default function Settings() {
               );
             })}
           </View>
+          <View style={styles.divider} />
+          <SettingsSwitch
+            title="Tilt Controls"
+            description="Steer the snake by tilting your device"
+            value={tiltControls}
+            onValueChange={async (newValue) => {
+              await updateSetting("tiltControls", newValue);
+              setTiltControls(newValue);
+            }}
+            testID="tilt-controls-switch"
+          />
         </View>
 
         {/* Appearance */}
