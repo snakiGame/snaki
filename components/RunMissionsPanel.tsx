@@ -1,5 +1,5 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { View, Text, StyleSheet, Animated } from "react-native";
 import { Colors, BLOCK_RADIUS } from "@/styles/colors";
 import { RunMissionProgress } from "@/lib/runMissions";
 
@@ -7,12 +7,34 @@ interface RunMissionsPanelProps {
   missions: RunMissionProgress[];
 }
 
+const VISIBLE_DURATION = 2000;
+const FADE_DURATION = 400;
+
 const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
   ({ missions }) => {
-    if (!missions.length) return null;
+    const opacity = useRef(new Animated.Value(1)).current;
+    const [hidden, setHidden] = useState(false);
+
+    useEffect(() => {
+      // Reset visibility when missions change (new game)
+      opacity.setValue(1);
+      setHidden(false);
+
+      const timer = setTimeout(() => {
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: FADE_DURATION,
+          useNativeDriver: true,
+        }).start(() => setHidden(true));
+      }, VISIBLE_DURATION);
+
+      return () => clearTimeout(timer);
+    }, [missions]);
+
+    if (!missions.length || hidden) return null;
 
     return (
-      <View style={styles.container}>
+      <Animated.View style={[styles.container, { opacity }]}>
         <Text style={styles.title}>RUN MISSIONS</Text>
         {missions.map((mission) => (
           <View key={mission.id} style={styles.row}>
