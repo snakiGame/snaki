@@ -9,6 +9,7 @@ export interface Settings {
   roundEdges: boolean;
   isNotificationSet: boolean;
   difficultyMode: DifficultyMode;
+  tiltControls: boolean;
 }
 
 interface SettingStore {
@@ -28,6 +29,7 @@ const defaultSettings = (): Settings => ({
   roundEdges: false,
   isNotificationSet: false,
   difficultyMode: "normal",
+  tiltControls: false,
 });
 
 const useSettingStore = create<SettingStore>((set) => ({

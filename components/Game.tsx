@@ -18,6 +18,8 @@ import { FoodType } from "@/types/types";
 import NewHighScoreModal from "./NewHighScoreModal";
 import { applyMissionProgress, createRunMissions } from "@/lib/runMissions";
 import { useKeepAwake } from "expo-keep-awake";
+import { useTiltControls } from "@/hooks/useTiltControls";
+import useSettingStore from "@/lib/settings";
 
 export default function Game(): JSX.Element {
   useKeepAwake();
@@ -85,10 +87,24 @@ export default function Game(): JSX.Element {
     localHighScore,
     obstacles,
     comboAnimation,
+    direction,
+    queuedDirection,
+    setQueuedDirection,
     handleGesture,
     resetGame,
     togglePause,
   } = useGame({ boardWidth, boardHeight });
+
+  // ── Tilt controls ──
+  const { settings } = useSettingStore();
+  useTiltControls({
+    enabled: settings.tiltControls,
+    currentDirection: direction,
+    queuedDirection,
+    setQueuedDirection,
+    isPaused,
+    isGameOver,
+  });
 
   // ── Per-game stats tracking for challenges & achievements ──
   const gameStatsRef = useRef({
