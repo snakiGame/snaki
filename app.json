@@ -33,7 +33,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/icon/ios/AppIcon~ios-marketing.png",
-          "resizeMode": "containe",
+          "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ],
