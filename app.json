@@ -33,14 +33,14 @@
         "expo-splash-screen",
         {
           "image": "./assets/icon/ios/AppIcon~ios-marketing.png",
-          "resizeMode": "cover",
+          "resizeMode": "containe",
           "backgroundColor": "#ffffff"
         }
       ],
       [
         "expo-notifications",
         {
-          "icon": "./assets/icon/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png",
+          "icon": "./assets/icon/android/notification/notification_icon.png",
           "color": "#889c77"
         }
       ],
