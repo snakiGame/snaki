@@ -1,7 +1,7 @@
 start:
 	npx expo start
 
-dev: prebuild
+dev:
 	eas build --platform android --profile dev
 
 build-apk:
