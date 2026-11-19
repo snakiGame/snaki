@@ -150,36 +150,45 @@ export default function SettingsSwitch({
           <Animated.View
             style={[styles.track, { backgroundColor: bgInterpolation }]}
           >
-            {/* Thumb shadow */}
+            {/* Thumb shadow — native transform on the outer view, JS color on an inner
+                fill view: RN crashes when one Animated.View mixes native- and JS-driven nodes */}
             <Animated.View
               style={[
                 styles.thumbShadow,
-                {
-                  transform: [{ translateX: thumbX }, { scale: thumbScale }],
-                  backgroundColor: thumbShadowInterpolation,
-                },
+                { transform: [{ translateX: thumbX }, { scale: thumbScale }] },
               ]}
-            />
+            >
+              <Animated.View
+                style={[
+                  styles.thumbFill,
+                  { backgroundColor: thumbShadowInterpolation },
+                ]}
+              />
+            </Animated.View>
             {/* Thumb */}
             <Animated.View
               style={[
                 styles.thumb,
-                {
-                  transform: [{ translateX: thumbX }, { scale: thumbScale }],
-                  backgroundColor: thumbBgInterpolation,
-                },
+                { transform: [{ translateX: thumbX }, { scale: thumbScale }] },
               ]}
             >
-              {/* Inner dot indicator */}
               <Animated.View
                 style={[
-                  styles.thumbDot,
-                  {
-                    opacity: trackColor,
-                    backgroundColor: Colors.background,
-                  },
+                  styles.thumbFill,
+                  { backgroundColor: thumbBgInterpolation },
                 ]}
-              />
+              >
+                {/* Inner dot indicator */}
+                <Animated.View
+                  style={[
+                    styles.thumbDot,
+                    {
+                      opacity: trackColor,
+                      backgroundColor: Colors.background,
+                    },
+                  ]}
+                />
+              </Animated.View>
             </Animated.View>
           </Animated.View>
         </View>
@@ -266,5 +275,15 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  thumbFill: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    borderRadius: THUMB_SIZE / 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
