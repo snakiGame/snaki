@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -25,10 +25,10 @@ const NewHighScoreModal: React.FC<NewHighScoreModalProps> = ({
   score,
   onContinue,
 }) => {
-  const scaleAnim = useRef(new Animated.Value(0)).current;
-  const starRotate = useRef(new Animated.Value(0)).current;
-  const scoreCount = useRef(new Animated.Value(0)).current;
-  const glowPulse = useRef(new Animated.Value(0.4)).current;
+  const [scaleAnim] = useState(() => new Animated.Value(0));
+  const [starRotate] = useState(() => new Animated.Value(0));
+  const [scoreCount] = useState(() => new Animated.Value(0));
+  const [glowPulse] = useState(() => new Animated.Value(0.4));
 
   useEffect(() => {
     if (!visible) return;
@@ -80,7 +80,7 @@ const NewHighScoreModal: React.FC<NewHighScoreModalProps> = ({
         }),
       ]),
     ).start();
-  }, [visible]);
+  }, [glowPulse, scaleAnim, score, scoreCount, starRotate, visible]);
 
   const spin = starRotate.interpolate({
     inputRange: [0, 1],

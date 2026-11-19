@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { Accelerometer } from "expo-sensors";
 import { Direction } from "@/types/types";
 
@@ -41,10 +41,12 @@ export function useTiltControls({
   const pausedRef = useRef(isPaused);
   const gameOverRef = useRef(isGameOver);
 
-  dirRef.current = currentDirection;
-  queueRef.current = queuedDirection;
-  pausedRef.current = isPaused;
-  gameOverRef.current = isGameOver;
+  useEffect(() => {
+    dirRef.current = currentDirection;
+    queueRef.current = queuedDirection;
+    pausedRef.current = isPaused;
+    gameOverRef.current = isGameOver;
+  }, [currentDirection, queuedDirection, isPaused, isGameOver]);
 
   useEffect(() => {
     if (!enabled) {

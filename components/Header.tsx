@@ -3,11 +3,9 @@ import {
   StyleSheet,
   View,
   Platform,
-  useWindowDimensions,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import { Colors, BLOCK_RADIUS } from "../styles/colors";
-import { FontAwesome } from "@expo/vector-icons";
 import { JSX } from "react";
 
 interface HeaderProps {

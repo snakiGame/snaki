@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -37,8 +37,8 @@ Notifications.setNotificationHandler({
 
 // ─── Animated Background ───────────────────────────────────────
 const AnimatedGrid: React.FC = React.memo(() => {
-  const opacity = useRef(new Animated.Value(0.15)).current;
-  const drift = useRef(new Animated.Value(0)).current;
+  const [opacity] = useState(() => new Animated.Value(0.15));
+  const [drift] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     Animated.loop(
@@ -66,7 +66,7 @@ const AnimatedGrid: React.FC = React.memo(() => {
         useNativeDriver: true,
       }),
     ).start();
-  }, []);
+  }, [drift, opacity]);
 
   const lines: React.ReactElement[] = [];
   const spacing = 40;
@@ -101,12 +101,14 @@ const AnimatedGrid: React.FC = React.memo(() => {
   );
 });
 
+AnimatedGrid.displayName = "AnimatedGrid";
+
 // ─── Idle Snake (Bigger, More Alive) ───────────────────────────
 const IdleSnake: React.FC = React.memo(() => {
-  const moveX = useRef(new Animated.Value(0)).current;
-  const moveY = useRef(new Animated.Value(0)).current;
-  const foodScale = useRef(new Animated.Value(1)).current;
-  const foodOpacity = useRef(new Animated.Value(1)).current;
+  const [moveX] = useState(() => new Animated.Value(0));
+  const [moveY] = useState(() => new Animated.Value(0));
+  const [foodScale] = useState(() => new Animated.Value(1));
+  const [foodOpacity] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
     Animated.loop(
@@ -203,7 +205,7 @@ const IdleSnake: React.FC = React.memo(() => {
         ]),
       ]),
     ).start();
-  }, []);
+  }, [foodOpacity, foodScale, moveX, moveY]);
 
   const segments = [
     { dx: 0, dy: 0 },
@@ -260,11 +262,13 @@ const IdleSnake: React.FC = React.memo(() => {
   );
 });
 
+IdleSnake.displayName = "IdleSnake";
+
 // ─── Play Button (Physical Feel) ──────────────────────────────
 const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const shadowAnim = useRef(new Animated.Value(BLOCK_SHADOW_OFFSET)).current;
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const [scaleAnim] = useState(() => new Animated.Value(1));
+  const [shadowAnim] = useState(() => new Animated.Value(BLOCK_SHADOW_OFFSET));
+  const [pulseAnim] = useState(() => new Animated.Value(1));
 
   useEffect(() => {
     Animated.loop(
@@ -283,7 +287,7 @@ const PlayButton: React.FC<{ onPress: () => void }> = ({ onPress }) => {
         }),
       ]),
     ).start();
-  }, []);
+  }, [pulseAnim]);
 
   const handlePressIn = () => {
     Animated.parallel([
@@ -372,14 +376,14 @@ const HomePage: React.FC = () => {
   const { settings, settingsInit } = useSettingStore();
   const { highScore, scores } = useScoreStore();
 
-  const titleJitter = useRef(new Animated.Value(0)).current;
-  const titleScale = useRef(new Animated.Value(0.9)).current;
+  const [titleJitter] = useState(() => new Animated.Value(0));
+  const [titleScale] = useState(() => new Animated.Value(0.9));
 
   const lastScore = scores.length > 0 ? scores[0].score : null;
 
   useEffect(() => {
     settingsInit();
-  }, []);
+  }, [settingsInit]);
 
   useEffect(() => {
     void setDailyReminderEnabled(settings.isNotificationSet);
@@ -436,7 +440,7 @@ const HomePage: React.FC = () => {
         Animated.delay(5000),
       ]),
     ).start();
-  }, []);
+  }, [titleJitter, titleScale]);
 
   const navigateToPlay = useCallback(() => {
     router.push("/play");

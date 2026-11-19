@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
+import { Colors, BLOCK_RADIUS } from "@/styles/colors";
 import { useDailyChallengeStore, xpForLevel } from "@/lib/challengeStore";
 
 export default function Challenges() {
@@ -28,7 +28,7 @@ export default function Challenges() {
 
   useEffect(() => {
     refreshIfNeeded();
-  }, []);
+  }, [refreshIfNeeded]);
 
   const xpNeeded = xpForLevel(level);
   const xpProgress = xpNeeded > 0 ? Math.min(xp / xpNeeded, 1) : 0;
@@ -84,7 +84,7 @@ export default function Challenges() {
         </View>
 
         {/* Challenge cards */}
-        <Text style={styles.sectionLabel}>TODAY'S CHALLENGES</Text>
+        <Text style={styles.sectionLabel}>TODAY&apos;S CHALLENGES</Text>
         {challenges.map((c) => {
           const def = definitions.find((d) => d.id === c.challengeId);
           if (!def) return null;

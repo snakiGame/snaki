@@ -58,7 +58,7 @@ const Food: React.FC<FoodProps> = React.memo(
         pulse.stop();
         glow.stop();
       };
-    }, [isSpecial]);
+    }, [glowAnim, isSpecial, pulseAnim]);
 
     const getFoodColor = () => {
       switch (type) {
@@ -135,6 +135,8 @@ const Food: React.FC<FoodProps> = React.memo(
   (prev, next) =>
     prev.x === next.x && prev.y === next.y && prev.type === next.type,
 );
+
+Food.displayName = "Food";
 
 const styles = StyleSheet.create({
   food: {

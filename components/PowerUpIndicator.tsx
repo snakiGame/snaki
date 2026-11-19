@@ -48,6 +48,8 @@ const PowerUpIndicator: React.FC<PowerUpIndicatorProps> = React.memo(
     Math.ceil(prev.timeLeft / 1000) === Math.ceil(next.timeLeft / 1000),
 );
 
+PowerUpIndicator.displayName = "PowerUpIndicator";
+
 const styles = StyleSheet.create({
   container: {
     position: "absolute",

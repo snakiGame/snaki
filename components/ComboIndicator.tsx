@@ -107,6 +107,8 @@ const ComboIndicator: React.FC<ComboIndicatorProps> = React.memo(
   },
 );
 
+ComboIndicator.displayName = "ComboIndicator";
+
 const styles = StyleSheet.create({
   wrapper: {
     position: "absolute",

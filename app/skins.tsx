@@ -11,7 +11,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
-import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
+import { Colors, BLOCK_RADIUS } from "@/styles/colors";
 import { SNAKE_SKINS, useSkinStore } from "@/lib/skinStore";
 import { useScoreStore } from "@/lib/scoreStore";
 

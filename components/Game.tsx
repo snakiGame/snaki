@@ -38,7 +38,7 @@ export default function Game(): JSX.Element {
   }, []);
 
   // ── Screen shake ──
-  const shakeAnim = useRef(new Animated.Value(0)).current;
+  const [shakeAnim] = useState(() => new Animated.Value(0));
   const triggerShake = useCallback(
     (intensity: number = 6) => {
       Animated.sequence([
@@ -119,6 +119,7 @@ export default function Game(): JSX.Element {
   const prevFoodTypeRef = useRef(foodType);
   const [runMissions, setRunMissions] = useState(() => createRunMissions());
   const [survivalSeconds, setSurvivalSeconds] = useState(0);
+  const [maxCombo, setMaxCombo] = useState(0);
 
   // Track food eating by watching snake length changes
   useEffect(() => {
@@ -151,12 +152,16 @@ export default function Game(): JSX.Element {
     prevFoodTypeRef.current = foodType;
   }, [foodType]);
 
-  // Track max combo
+  // Track max combo + per-run mission progress. These accumulate from
+  // game-loop state and cannot be derived during render.
   useEffect(() => {
     if (combo > gameStatsRef.current.maxCombo) {
       gameStatsRef.current.maxCombo = combo;
     }
+    /* eslint-disable react-hooks/set-state-in-effect -- run progress accumulates across events; deriving during render is not possible */
+    setMaxCombo((prev) => Math.max(prev, combo));
     setRunMissions((prev) => applyMissionProgress(prev, "combo", combo));
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, [combo]);
 
   // ── Fire challenges + achievements on game over ──
@@ -171,7 +176,7 @@ export default function Game(): JSX.Element {
 
   useEffect(() => {
     refreshIfNeeded();
-  }, []);
+  }, [refreshIfNeeded]);
 
   const processedGameOverRef = useRef(false);
 
@@ -301,6 +306,7 @@ export default function Game(): JSX.Element {
   }, [isGameOver, isPaused]);
 
   useEffect(() => {
+    /* eslint-disable-next-line react-hooks/set-state-in-effect -- progress accumulates from survival timer; deriving during render is not possible */
     setRunMissions((prev) =>
       applyMissionProgress(prev, "survive", survivalSeconds),
     );
@@ -311,6 +317,7 @@ export default function Game(): JSX.Element {
     if (isGameOver && !isModalVisible) {
       // Check if it's a new high score
       if (score > 0 && score >= localHighScore) {
+        /* eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot response to game over, guarded so it cannot cascade */
         setShowHighScoreModal(true);
       } else {
         handleGameOver();
@@ -321,11 +328,7 @@ export default function Game(): JSX.Element {
   return (
     <PanGestureHandler onGestureEvent={handleGestureWithTrail}>
       <SafeAreaView style={styles.container} edges={["bottom"]}>
-        <StatusBar
-          barStyle="light-content"
-          translucent
-          backgroundColor="transparent"
-        />
+        <StatusBar barStyle="light-content" />
         <SwipeTrail ref={trailRef} />
         <Header
           reloadGame={handleResetGame}
@@ -360,7 +363,7 @@ export default function Game(): JSX.Element {
           reloadGame={handleResetGame}
           score={score}
           highScore={localHighScore}
-          runMaxCombo={gameStatsRef.current.maxCombo}
+          runMaxCombo={maxCombo}
           bestCombo={bestCombo}
         />
 

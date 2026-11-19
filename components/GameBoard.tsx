@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { View, StyleSheet, Animated, LayoutChangeEvent } from "react-native";
 import { Colors, BLOCK_RADIUS } from "../styles/colors";
-import { Coordinate, FoodType, PowerUp } from "../types/types";
+import { Coordinate, FoodType } from "../types/types";
 import { PowerUpState, GAME_UNIT_SIZE } from "../lib/gameConstants";
 import Snake from "./Snake";
 import Food from "./Food";
@@ -99,11 +99,15 @@ const GameBoard: React.FC<GameBoardProps> = React.memo(
   },
 );
 
+GameBoard.displayName = "GameBoard";
+
 // Subtle grid lines for the board
 const GridLines: React.FC = React.memo(() => {
   // We render a pattern using border-based grid
   return <View style={styles.gridOverlay} />;
 });
+
+GridLines.displayName = "GridLines";
 
 const styles = StyleSheet.create({
   boardOuter: {

@@ -2,14 +2,14 @@ import React, { Fragment } from "react";
 import { StyleSheet, View } from "react-native";
 import { Coordinate } from "../types/types";
 import { GAME_UNIT_SIZE } from "../lib/gameConstants";
-import { Colors, BLOCK_RADIUS } from "../styles/colors";
+import { Colors } from "../styles/colors";
 import { useSkinStore, SNAKE_SKINS } from "../lib/skinStore";
 
 interface SnakeProps {
   snake: Coordinate[];
 }
 
-function Snake({ snake }: SnakeProps): JSX.Element {
+function Snake({ snake }: SnakeProps): React.JSX.Element {
   const selectedSkinId = useSkinStore((s) => s.selectedSkinId);
   const skin =
     SNAKE_SKINS.find((s) => s.id === selectedSkinId) ?? SNAKE_SKINS[0];

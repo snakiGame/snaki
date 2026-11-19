@@ -1,6 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Pressable, Animated } from "react-native";
-import { Colors, BLOCK_RADIUS, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
+import { Colors, BLOCK_SHADOW_OFFSET } from "@/styles/colors";
 import { settings_Vibration } from "@/lib/settings";
 import { HapticFeedback } from "@/lib/haptics";
 
@@ -27,15 +27,17 @@ export default function SettingsSwitch({
   testID,
 }: SettingsSwitchProps) {
   const safeValue = !!value;
-  const thumbX = useRef(
-    new Animated.Value(safeValue ? THUMB_TRAVEL : 0),
-  ).current;
-  const trackColor = useRef(new Animated.Value(safeValue ? 1 : 0)).current;
-  const pressScale = useRef(new Animated.Value(1)).current;
-  const thumbScale = useRef(new Animated.Value(1)).current;
-  const shadowOffset = useRef(
+  // Animated.Values are stable instances that never trigger renders,
+  // so they are held in lazy state initializers instead of refs.
+  const [thumbX] = useState(
+    () => new Animated.Value(safeValue ? THUMB_TRAVEL : 0),
+  );
+  const [trackColor] = useState(() => new Animated.Value(safeValue ? 1 : 0));
+  const [pressScale] = useState(() => new Animated.Value(1));
+  const [thumbScale] = useState(() => new Animated.Value(1));
+  const [shadowOffset] = useState(() =>
     new Animated.Value(BLOCK_SHADOW_OFFSET / 2),
-  ).current;
+  );
 
   useEffect(() => {
     Animated.parallel([
@@ -51,7 +53,7 @@ export default function SettingsSwitch({
         useNativeDriver: false,
       }),
     ]).start();
-  }, [safeValue]);
+  }, [safeValue, thumbX, trackColor]);
 
   const bgInterpolation = trackColor.interpolate({
     inputRange: [0, 1],

@@ -1,6 +1,13 @@
-import { ScrollView, StyleSheet, Platform, Linking } from "react-native";
-import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState, useEffect } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Platform,
+  Linking,
+  View,
+  Text,
+  TouchableOpacity,
+} from "react-native";
+import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import useSettingStore from "@/lib/settings";
@@ -24,25 +31,14 @@ export default function Settings() {
   const router = useRouter();
   const { settings, updateSetting } = useSettingStore();
 
-  const [soundEnabled, setSoundEnabled] = useState(settings.backgroundMusic);
-  const [vibrationEnabled, setVibrationEnabled] = useState(settings.vibration);
-  const [roundedEdges, setRoundedEdges] = useState(settings.roundEdges);
-  const [tiltControls, setTiltControls] = useState(settings.tiltControls);
-  const [reminderEnabled, setReminderEnabled] = useState(
-    settings.isNotificationSet,
-  );
-  const [difficultyMode, setDifficultyMode] = useState<DifficultyMode>(
-    settings.difficultyMode,
-  );
-
-  useEffect(() => {
-    setSoundEnabled(settings.backgroundMusic);
-    setVibrationEnabled(settings.vibration);
-    setRoundedEdges(settings.roundEdges);
-    setTiltControls(settings.tiltControls);
-    setReminderEnabled(settings.isNotificationSet);
-    setDifficultyMode(settings.difficultyMode);
-  }, [settings]);
+  // The settings store is the single source of truth; every toggle handler
+  // persists through updateSetting, so values are derived directly from it.
+  const soundEnabled = settings.backgroundMusic;
+  const vibrationEnabled = settings.vibration;
+  const roundedEdges = settings.roundEdges;
+  const tiltControls = settings.tiltControls;
+  const reminderEnabled = settings.isNotificationSet;
+  const difficultyMode = settings.difficultyMode;
 
   const resetSettings = async () => {
     HapticFeedback("selection");
@@ -60,13 +56,6 @@ export default function Settings() {
             await updateSetting("isNotificationSet", false);
             await updateSetting("difficultyMode", "normal");
             await updateSetting("tiltControls", false);
-
-            setSoundEnabled(true);
-            setVibrationEnabled(true);
-            setRoundedEdges(false);
-            setTiltControls(false);
-            setReminderEnabled(false);
-            setDifficultyMode("normal");
 
             await setDailyReminderEnabled(false);
             await backgroundMusic(true);
@@ -106,7 +95,6 @@ export default function Settings() {
             value={soundEnabled}
             onValueChange={async (newValue) => {
               await updateSetting("backgroundMusic", newValue);
-              setSoundEnabled(newValue);
               if (newValue) {
                 await backgroundMusic(true);
               } else {
@@ -122,7 +110,6 @@ export default function Settings() {
             value={vibrationEnabled}
             onValueChange={async (newValue) => {
               await updateSetting("vibration", newValue);
-              setVibrationEnabled(newValue);
             }}
             testID="vibration-switch"
           />
@@ -133,7 +120,6 @@ export default function Settings() {
             value={reminderEnabled}
             onValueChange={async (newValue) => {
               await updateSetting("isNotificationSet", newValue);
-              setReminderEnabled(newValue);
               await setDailyReminderEnabled(newValue);
             }}
             testID="daily-reminder-switch"
@@ -157,7 +143,6 @@ export default function Settings() {
                   activeOpacity={0.8}
                   onPress={async () => {
                     await updateSetting("difficultyMode", option.key);
-                    setDifficultyMode(option.key);
                     HapticFeedback("selection");
                   }}
                 >
@@ -180,7 +165,6 @@ export default function Settings() {
             value={tiltControls}
             onValueChange={async (newValue) => {
               await updateSetting("tiltControls", newValue);
-              setTiltControls(newValue);
             }}
             testID="tilt-controls-switch"
           />
@@ -195,7 +179,6 @@ export default function Settings() {
             value={roundedEdges}
             onValueChange={async (newValue) => {
               await updateSetting("roundEdges", newValue);
-              setRoundedEdges(newValue);
             }}
             testID="rounded-edges-switch"
           />

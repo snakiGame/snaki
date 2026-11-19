@@ -1,5 +1,6 @@
 import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import { AndroidImportance } from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
@@ -32,7 +33,7 @@ export async function registerForPushNotificationsAsync() {
 async function ensureAndroidChannel() {
   await Notifications.setNotificationChannelAsync("daily-reminders", {
     name: "Daily Reminders",
-    importance: Notifications.AndroidImportance.MAX,
+    importance: AndroidImportance.MAX,
     vibrationPattern: [0, 250, 250, 250],
     lightColor: "#FF231F7C",
   });
