@@ -101,20 +101,20 @@ export default function About() {
         {/* About card */}
         <View style={styles.card}>
           <Text style={styles.cardText}>
-            Hey there! I'm Tachera Sasi {"=>"} you can call me Tach  the
-            troublemaker behind Snaki. It's the classic snake game you know and
+            Hey there! I&apos;m Tachera Sasi {"=>"} you can call me Tach  the
+            troublemaker behind Snaki. It&apos;s the classic snake game you know and
             love, just cooler. Like, sunglasses cool.
           </Text>
           <Text style={styles.cardText}>
-            Snaki's all about dodging walls, eating snacks, and pretending
-            you're more strategic than you actually are. I made it because,
+            Snaki&apos;s all about dodging walls, eating snacks, and pretending
+            you&apos;re more strategic than you actually are. I made it because,
             well, why not?
           </Text>
           <View style={styles.warningBlock}>
             <Text style={styles.warningLabel}>WARNING</Text>
             <Text style={styles.warningText}>
-              Side effects include fun, frustration, and shouting "Just one more
-              game!"
+              Side effects include fun, frustration, and shouting &quot;Just one more
+              game!&quot;
             </Text>
           </View>
         </View>
@@ -124,7 +124,7 @@ export default function About() {
           <View style={styles.quoteLine} />
           <View style={styles.quoteContent}>
             <Text style={styles.quoteText}>
-              "If you're not growing, you're just a snake hitting walls."
+              &quot;If you&apos;re not growing, you&apos;re just a snake hitting walls.&quot;
             </Text>
             <Text style={styles.quoteAuthor}>
               {"->"} Me, probably while procrastinating

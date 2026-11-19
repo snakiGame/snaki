@@ -46,6 +46,8 @@ const Obstacles: React.FC<ObstaclesProps> = React.memo(
   (prev, next) => prev.obstacles === next.obstacles,
 );
 
+Obstacles.displayName = "Obstacles";
+
 const styles = StyleSheet.create({
   obstacle: {
     position: "absolute",

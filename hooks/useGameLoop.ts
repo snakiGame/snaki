@@ -1,11 +1,9 @@
 import { useEffect, useCallback, useRef } from "react";
 import { Vibration } from "react-native";
 import { Direction, Coordinate, FoodType, PowerUp } from "../types/types";
-import { GameBounds, SPECIAL_FOOD_MIN_DISTANCE } from "../lib/gameConstants";
-import { checkEatsFood } from "../utils/checkEatsFood";
-import { checkGameOver } from "../utils/checkGameOver";
-import { randomFoodPosition } from "../utils/randomFoodPosition";
 import {
+  GameBounds,
+  SPECIAL_FOOD_MIN_DISTANCE,
   SCORE_INCREMENT,
   SCORE_MULTIPLIERS,
   FOOD_PROBABILITIES,
@@ -13,6 +11,9 @@ import {
   COMBO_THRESHOLD,
   OBSTACLE_THRESHOLDS,
 } from "../lib/gameConstants";
+import { checkEatsFood } from "../utils/checkEatsFood";
+import { checkGameOver } from "../utils/checkGameOver";
+import { randomFoodPosition } from "../utils/randomFoodPosition";
 
 interface UseGameLoopProps {
   snake: Coordinate[];
@@ -137,19 +138,35 @@ export const useGameLoop = ({
   const obstaclesRef = useRef(obstacles);
 
   // Sync refs on every render (cheap — just assignments)
-  snakeRef.current = snake;
-  directionRef.current = direction;
-  queuedDirectionRef.current = queuedDirection;
-  foodRef.current = food;
-  foodTypeRef.current = foodType;
-  scoreRef.current = score;
-  comboRef.current = combo;
-  powerUpTypeRef.current = powerUpType;
-  gameBoundsRef.current = gameBounds;
-  lastFoodTimeRef.current = lastFoodTime;
-  isPausedRef.current = isPaused;
-  vibrationEnabledRef.current = vibrationEnabled;
-  obstaclesRef.current = obstacles;
+  useEffect(() => {
+    snakeRef.current = snake;
+    directionRef.current = direction;
+    queuedDirectionRef.current = queuedDirection;
+    foodRef.current = food;
+    foodTypeRef.current = foodType;
+    scoreRef.current = score;
+    comboRef.current = combo;
+    powerUpTypeRef.current = powerUpType;
+    gameBoundsRef.current = gameBounds;
+    lastFoodTimeRef.current = lastFoodTime;
+    isPausedRef.current = isPaused;
+    vibrationEnabledRef.current = vibrationEnabled;
+    obstaclesRef.current = obstacles;
+  }, [
+    snake,
+    direction,
+    queuedDirection,
+    food,
+    foodType,
+    score,
+    combo,
+    powerUpType,
+    gameBounds,
+    lastFoodTime,
+    isPaused,
+    vibrationEnabled,
+    obstacles,
+  ]);
 
   const vibrate = useCallback((pattern: number | number[]) => {
     if (!vibrationEnabledRef.current) return;
@@ -314,7 +331,9 @@ export const useGameLoop = ({
 
   // ── Ref for current speed — updated without restarting the loop ──
   const getCurrentMoveIntervalRef = useRef(getCurrentMoveInterval);
-  getCurrentMoveIntervalRef.current = getCurrentMoveInterval;
+  useEffect(() => {
+    getCurrentMoveIntervalRef.current = getCurrentMoveInterval;
+  }, [getCurrentMoveInterval]);
 
   // ── Spawn obstacles when score crosses thresholds ──
   const spawnedThresholdsRef = useRef<Set<number>>(new Set());

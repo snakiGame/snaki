@@ -6,7 +6,6 @@ import {
   Modal,
   TouchableOpacity,
   FlatList,
-  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useScoreStore } from "@/lib/scoreStore";
@@ -17,12 +16,10 @@ interface ScoreModalProps {
   onClose: () => void;
 }
 
-const { width } = Dimensions.get("window");
-
 export default function ScoreModal({
   isVisible,
   onClose,
-}: ScoreModalProps): JSX.Element {
+}: ScoreModalProps): React.JSX.Element {
   const { highScore, scores } = useScoreStore();
 
   const renderScoreItem = ({

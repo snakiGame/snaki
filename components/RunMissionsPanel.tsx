@@ -31,7 +31,7 @@ const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
       }, VISIBLE_DURATION);
 
       return () => clearTimeout(timer);
-    }, [missionKey]);
+    }, [missionKey, opacity]);
 
     if (!missions.length || hidden) return null;
 
@@ -62,6 +62,8 @@ const RunMissionsPanel: React.FC<RunMissionsPanelProps> = React.memo(
     );
   },
 );
+
+RunMissionsPanel.displayName = "RunMissionsPanel";
 
 const styles = StyleSheet.create({
   container: {

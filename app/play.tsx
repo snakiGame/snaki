@@ -1,4 +1,4 @@
-import "react-native-gesture-handler";
+import type { JSX } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import Game from "../components/Game";
 

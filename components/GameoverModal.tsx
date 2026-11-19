@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -42,7 +42,7 @@ const GameOverModal = ({
 }: GameoverModalProps) => {
   const { settings } = useSettingStore();
   const router = useRouter();
-  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const [scaleAnim] = useState(() => new Animated.Value(0));
   const shareCardRef = useRef<any>(null);
   const isNewBest = score > 0 && score >= highScore;
 
@@ -100,7 +100,7 @@ const GameOverModal = ({
       // Mark achievements as seen when modal closes
       if (newlyUnlocked.length > 0) markSeen();
     }
-  }, [isModalVisible]);
+  }, [isModalVisible, markSeen, newlyUnlocked.length, scaleAnim]);
 
   return (
     <Modal
